@@ -1,0 +1,8 @@
+###Files to ignore###
+*.root
+*.png
+*.sublime-workspace
+*.sublime-project
+
+###Keep this file###
+!.gitignore

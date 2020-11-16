@@ -1,0 +1,31 @@
+----------Data Information----------
+OutputFile: /Volumes/LaCie/test_newkine.root
+SaveTree: yes
+SavePlots: yes
+----------Reaction Information----------
+ReactionType: 0
+Z	A (order is target, projectile, ejectile, break1, break3)
+5	9
+0	0
+1	1
+----------Target Information----------
+Name: test_targ
+Layers: 2
+~Layer1
+Thickness(ug/cm^2): 0
+Z	A	Stoich
+6	12	1
+0
+~
+~Layer2
+Thickness(ug/cm^2): 0
+Z	A	Stoich
+5	9	1
+0
+~
+----------Sampling Information----------
+NumberOfSamples: 1000000
+BeamMeanEnergy(MeV): 24 BeamEnergySigma(MeV): 0.001
+EjectileThetaMin(deg): 20.0 EjectileThetaMax(deg): 20.0
+ResidualExMean(MeV): 16.708 ResidualExSigma(MeV): 0.038
+--------------------------------------
