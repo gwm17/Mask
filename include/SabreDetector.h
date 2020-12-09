@@ -1,136 +1,68 @@
-#ifndef __SABREDETECTOR_H
-#define __SABREDETECTOR_H
+#ifndef SABREDETECTOR_H
+#define SABREDETECTOR_H
 
-#include <TRandom3.h>
+#include <vector>
+#include <cmath>
 
-struct CartCoords {
+#include "G3Vec.h"
+#include "GRotation.h"
 
-  double x;
-  double y;
-  double z;
+class SabreDetector {
+public:
 
-  double operator[](int i) { //Overloaded for compatibility with Get_Cart. Only for access
-    switch(i) {
-      case(0): return this->x;
-      case(1): return this->y;
-      case(2): return this->z;
-      default: return 0;
-    }
-  }
+	SabreDetector();
+	SabreDetector(double Rin, double Rout, double deltaPhi_flat, double phiCentral, double tiltFromVert, double zdist, double xdist=0, double ydist=0);
+	~SabreDetector();
+	inline G3Vec GetRingFlatCoords(int ch, int corner) { return CheckRingLocation(ch, corner) ? m_ringCoords_flat[ch][corner] : G3Vec(); };
+	inline G3Vec GetWedgeFlatCoords(int ch, int corner) { return CheckWedgeLocation(ch, corner) ? m_wedgeCoords_flat[ch][corner] : G3Vec(); };
+	inline G3Vec GetRingTiltCoords(int ch, int corner) { return CheckRingLocation(ch, corner) ? m_ringCoords_tilt[ch][corner] : G3Vec(); };
+	inline G3Vec GetWedgeTiltCoords(int ch, int corner) { return CheckWedgeLocation(ch, corner) ? m_wedgeCoords_tilt[ch][corner] : G3Vec(); };
+	G3Vec GetTrajectoryCoordinates(double theta, double phi);
+	G3Vec GetHitCoordinates(int ringch, int wedgech);
 
-  double GetTheta();
-  double GetR();
-  double GetPhi();
-  double GetDetectorPhi();
-};
-
-class SabreDetGeometry {
-
- public:
-
-  SabreDetGeometry(double iRinner_flat,
-		double iRouter_flat,
-		double ideltaPhi_flat,
-		double ibeamPhi_central,
-		double itiltFromVertical,
-    double idistFromTarget,
-    double xoffset=0,
-    double yoffset=0);
-  ~SabreDetGeometry();
-
-  double Get_Ring_Flat_X(int ch, int corner);
-  double Get_Ring_Flat_Y(int ch, int corner);
-  double Get_Ring_Flat_Z(int ch, int corner);
-  double Get_Ring_Flat_R(int ch, int corner);
-  double Get_Ring_Flat_Theta(int ch, int corner);
-  double Get_Ring_Flat_Phi(int ch, int corner);
-
-  double Get_Wedge_Flat_X(int ch, int corner);
-  double Get_Wedge_Flat_Y(int ch, int corner);
-  double Get_Wedge_Flat_Z(int ch, int corner);
-  double Get_Wedge_Flat_R(int ch, int corner);
-  double Get_Wedge_Flat_Theta(int ch, int corner);
-  double Get_Wedge_Flat_Phi(int ch, int corner);
-
-  double Get_Ring_Tilted_X(int ch, int corner);
-  double Get_Ring_Tilted_Y(int ch, int corner);
-  double Get_Ring_Tilted_Z(int ch, int corner);
-  double Get_Ring_Tilted_R(int ch, int corner);
-  double Get_Ring_Tilted_Theta(int ch, int corner);
-  double Get_Ring_Tilted_Phi(int ch, int corner);
-
-  double Get_Wedge_Tilted_X(int ch, int corner);
-  double Get_Wedge_Tilted_Y(int ch, int corner);
-  double Get_Wedge_Tilted_Z(int ch, int corner);
-  double Get_Wedge_Tilted_R(int ch, int corner);
-  double Get_Wedge_Tilted_Theta(int ch, int corner);
-  double Get_Wedge_Tilted_Phi(int ch, int corner);
-
-  bool IsInside(double theta, double phi);
-  CartCoords GetTrajectoryCoordinates(double theta, double phi);
-
-  void Recenter(double x, double y);
+	inline int GetNumberOfWedges() { return m_nWedges; };
+	inline int GetNumberOfRings() { return m_nRings; };
+	inline double GetInnerRadius() { return m_Rinner; };
+	inline double GetOuterRadius() { return m_Router; };
+	inline double GetPhiCentral() { return m_phiCentral; };
+	inline double GetTiltAngle() { return m_tilt; };
+	inline G3Vec GetTranslation() { return m_translation; };
 
 
-  int NumRings();
-  int NumWedges();
+private:
 
-  /*** Determine coordinates of the hit (ringch, wedgech) ***/
-  CartCoords GetCoordinates(int ringch, int wedgech);
-  double GetScatteringAngle(int ringch, int wedgech); //shortcut to Scattering angle
+	static constexpr int m_nRings = 16;
+	static constexpr int m_nWedges = 8;
+	static constexpr double deg2rad = M_PI/180.0;
+	static constexpr double POSITION_TOL = 0.0001;
+	static constexpr double ANGULAR_TOL = M_PI/180.0;
 
- private:
+	void CalculateCorners();
+	inline G3Vec TransformToTiltedFrame(G3Vec& vector) { return (m_ZRot*(m_YRot*vector)) + m_translation; };
 
-  const int NUMRINGS;
-  const int NUMWEDGES;
+	inline bool CheckRingChannel(int ch) { return (ch<m_nRings && ch>=0) ? true : false; };
+	inline bool CheckWedgeChannel(int ch) { return (ch<m_nWedges && ch >=0) ? true : false; };
+	inline bool CheckCorner(int corner) { return (corner < 4 && corner >=0) ? true : false; };
+	inline bool CheckRingLocation(int ch, int corner) { return CheckRingChannel(ch) && CheckCorner(corner); };
+	inline bool CheckWedgeLocation(int ch, int corner) { return CheckWedgeChannel(ch) && CheckCorner(corner); };
 
-  //detector corners
-  int rbc; //ring bottom channel
-  int rtc; //ring top channel
-  int wrc; //wedge right channel
-  int wlc; //wedge left channel
+	inline bool CheckPositionEqual(double val1,double val2) { return fabs(val1-val2) > POSITION_TOL ? false : true; };
+	inline bool CheckAngleEqual(double val1,double val2) { return fabs(val1-val2) > ANGULAR_TOL ? false : true; };
 
-  double Rinner_flat;
-  double Router_flat;
-  double deltaR_flat;
-  double deltaR_flat_ring;
+	inline bool IsInside(double r, double phi) { 
+		double phi_1 = m_deltaPhi_flat/2.0;
+		double phi_2 = M_PI*2.0 - m_deltaPhi_flat/2.0;
+		return (((r > m_Rinner && r < m_Router) || CheckPositionEqual(r, m_Rinner) || CheckPositionEqual(r, m_Router)) && (phi > phi_2 || phi < phi_1 || CheckAngleEqual(phi, phi_1) || CheckAngleEqual(phi, phi_2)));
+	};
 
-  double deltaPhi_flat;
-  double deltaPhi_flat_wedge;
+	double m_Router, m_Rinner, m_deltaPhi_flat, m_phiCentral, m_tilt;
+	G3Vec m_translation;
+	GYRotation m_YRot;
+	GZRotation m_ZRot;
+	double m_deltaR_flat, m_deltaR_flat_ring;
 
-  double beamPhi_central;
-  double tiltFromVertical;
-  double ZdistFromTarget;
-  double XdistFromTarget;
-  double YdistFromTarget;
-
-  TRandom3* random;
-  //default storage is cartesian
-  //0=x, 1=y, 2=z
-  CartCoords **ringch_flat_cart;
-  CartCoords **wedgech_flat_cart;
-
-  CartCoords **ringch_tilted_cart;
-  CartCoords **wedgech_tilted_cart;
-
-  double Get_Cart(int fot, int row, int ch, int corner, int cart);
-  //fot = flat (0) or tilted (1)
-  //row = ring (0) or wedge (1)
-
-  bool CheckRingChannel(int);
-  bool CheckWedgeChannel(int);
-  bool CheckCorner(int);
-
-  bool CheckBothRing(int,int);
-  bool CheckBothWedge(int,int);
-
-  /*** Perform transformation for arbitrary point on plane ***/
-  double **XRotMatrix; //rotation about x-axis
-  double **ZRotMatrix; //rotation about z-axis
-  double **XRotMatrixInv; //inverse of x-rotation
-  double **ZRotMatrixInv; //inverse of z-rotation
-  CartCoords TransformVector(CartCoords vector);
-  CartCoords InverseTransformVector(CartCoords vector);
+	std::vector<std::vector<G3Vec>> m_ringCoords_flat, m_wedgeCoords_flat;
+	std::vector<std::vector<G3Vec>> m_ringCoords_tilt, m_wedgeCoords_tilt;
 
 };
 

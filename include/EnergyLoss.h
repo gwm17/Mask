@@ -17,7 +17,6 @@ Written by G.W. McCann Aug. 2020
 #include <vector>
 #include <fstream>
 #include <cmath>
-#include "Eloss_Tables.h"
 #include "MassLookup.h"
 
 class EnergyLoss {

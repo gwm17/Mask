@@ -1,8 +1,16 @@
 ###Files to ignore###
 *.root
 *.png
+*.jpg
 *.sublime-workspace
 *.sublime-project
+*.C
+*.cxx
+*.pcm
+*.o
+*.swp
+.DS_Store
+
 
 ###Keep this file###
 !.gitignore

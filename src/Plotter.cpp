@@ -1,4 +1,5 @@
 #include "Plotter.h"
+#include <iostream>
 
 Plotter::Plotter() :
 	table(new THashTable())
@@ -25,7 +26,7 @@ void Plotter::FillData(const Nucleus& nuc) {
 	MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetKE(), 2);
 	MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, nuc.GetKE(), 4);
 	MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
-
+	
 }
 
 void Plotter::MyFill(const char* name, const char* title, int bins, float min, float max, double val) {

@@ -1,13 +1,8 @@
 #include <iostream>
 #include "Kinematics.h"
 #include "SabreEfficiency.h"
+#include "SabreDetector.h"
 #include "KinematicsExceptions.h"
-
-#include <TGraph2D.h>
-#include <TGraph.h>
-#include <TFile.h>
-#include <TAxis.h>
-#include <TCanvas.h>
 
 int main(int argc, char** argv) {
 	if(argc<2) {
@@ -15,7 +10,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	
-	/*Kinematics calculator;
+	Kinematics calculator;
 	try {
 		if(!calculator.LoadConfig(argv[1])) {
 			return 1;
@@ -28,19 +23,19 @@ int main(int argc, char** argv) {
 	}
 	SabreEfficiency sabre;
 	sabre.SetReactionType(calculator.GetReactionType());
-	sabre.CalculateEfficiency(calculator.GetOutputName());*/
+	sabre.CalculateEfficiency(calculator.GetOutputName());
 
-	std::vector<SabreDetGeometry> detectors;
+	/*std::vector<SabreDetector> detectors;
 	const double INNER_R = 0.0326;
     const double OUTER_R = 0.1351;
     const double TILT = 40.0;
-    const double DIST_2_TARG = 0.1245;
+    const double DIST_2_TARG = -0.1245;
     const double PHI_COVERAGE = 54.4; //delta phi for each det
-    const double PHI0 = 36.0; //center phi values for each det in array
-    const double PHI1 = 108.0; //# is equal to detID in channel map
-    const double PHI2 = 324.0;
-    const double PHI3 = 252.0;
-    const double PHI4 = 180.0;
+    const double PHI0 = 234.0; //center phi values for each det in array
+    const double PHI1 = 162.0; //# is equal to detID in channel map
+    const double PHI2 = 306.0;
+    const double PHI3 = 18.0;
+    const double PHI4 = 90.0;
     const double DEG2RAD = M_PI/180.0;
 
     detectors.reserve(5);
@@ -50,15 +45,23 @@ int main(int argc, char** argv) {
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI3*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI4*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
 
- 	double theta = 145*M_PI/180.0; double phi = 92.1428*M_PI/180.0;
- 	std::cout<<"theta: "<<theta<<" phi: "<<phi<<std::endl;
- 	for(int i=0; i<5; i++) {
- 		if(detectors[i].IsInside(theta, phi)) {
- 			std::cout<<"Caught it in detector: "<<i<<std::endl;
+ 	double theta, phi, expected_flat_t, expected_flat_p;
+ 	for(int h=0; h<5; h++) {
+ 		for(int j=0; j<16; j++) {
+ 			for(int k=0; k<4; k ++) {
+ 				theta  = detectors[h].GetRingTiltCoords(j, k).GetTheta();
+ 				phi = detectors[h].GetRingTiltCoords(j, k).GetPhi();
+ 				expected_flat_p = detectors[h].GetRingFlatCoords(j, k).GetPhi();  
+ 				for(int i=0; i<5; i++) {
+ 					if(detectors[i].GetTrajectoryCoordinates(theta, phi).GetX() != 0) {
+ 						break;
+ 					} else if(i == 4) {
+ 						std::cout<<" Not found! detector: "<<h<<" ring: "<<j<<" corner: "<<k<<" theta: "<<theta/DEG2RAD<<" phi: "<<phi/DEG2RAD<<" flat_p: "<<expected_flat_p/DEG2RAD<<std::endl;
+ 					}
+ 				}
+ 			}
  		}
- 		break;
- 	}
-
+ 	}*/
 
 	return 0;
 

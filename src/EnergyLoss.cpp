@@ -9,6 +9,7 @@ Written by G.W. McCann Aug. 2020
 
 */
 
+#include "Eloss_Tables.h"
 #include "EnergyLoss.h"
 #include "KinematicsExceptions.h"
 #include <iostream>

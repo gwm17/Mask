@@ -15,13 +15,12 @@ public:
 	inline double GetPy() const {return m_data[1];};
 	inline double GetPz() const {return m_data[2];};
 	inline double GetP() const {return std::sqrt(m_data[0]*m_data[0] + m_data[1]*m_data[1] + m_data[2]*m_data[2]);};
-	inline double GetTheta() const {return GetP() == 0.0 ? 0.0 : acos(GetPz()/GetP());};
+	inline double GetPxy() const {return std::sqrt(m_data[0]*m_data[0] + m_data[1]*m_data[1]); };
+	inline double GetTheta() const {return GetPxy() == 0.0 && GetPz() == 0.0 ? 0.0 : Atan2(GetPxy(), GetPz());};
 	inline double GetPhi() const {
-		if(GetPx() == 0) return M_PI/2.0;
-		double phi = std::atan(GetPy()/GetPx());
-		if(GetPx()<0) phi += M_PI;
-		else if(GetPy()<0) phi += 2.0*M_PI;
-		return phi;
+		double phi = Atan2(GetPy(), GetPx());
+		if(phi<0) phi += 2.0*M_PI;
+		return GetPx() == 0.0 && GetPy() == 0.0 ? 0.0 : phi;
 	};
 	inline double GetInvMass() const {return std::sqrt(GetE()*GetE() - GetP()*GetP());};
 	inline double GetKE() const {return GetE() - GetInvMass();};
@@ -39,6 +38,12 @@ public:
 
 private:
 	void CalcBoostToCM();
+	inline double Atan2(double y, double x) const { 
+		if(x != 0) return std::atan2(y, x);
+		else if( y > 0 ) return M_PI/2.0;
+		else if( y < 0 ) return -M_PI/2.0;
+		else return 0.0;
+	};
 	double m_data[4];
 	double m_boost[3];
 

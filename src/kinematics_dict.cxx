@@ -115,8 +115,8 @@ namespace {
 0
     };
     static const char* includePaths[] = {
-"/usr/local/root/include/",
-"/Users/gordonmccann/Desktop/kinematics/",
+"/home/gordon/cern/root-6.22.02/root-install/include/",
+"/home/gordon/Kinematics/",
 0
     };
     static const char* fwdDeclCode = R"DICTFWDDCLS(

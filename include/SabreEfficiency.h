@@ -16,7 +16,9 @@ private:
 	void RunDecay(const char*);
 
 	int m_rxn_type;
-	std::vector<SabreDetGeometry> detectors;
+	std::vector<SabreDetector> detectors;
+    std::vector<double> ringxs, ringys, ringzs;
+    std::vector<double> wedgexs, wedgeys, wedgezs;
 
 
 	//Sabre constants
@@ -24,13 +26,13 @@ private:
     const double OUTER_R = 0.1351;
     const double TILT = 40.0;
     //const double DIST_2_TARG = 0.14549;
-    const double DIST_2_TARG = 0.1245;
+    const double DIST_2_TARG = -0.1245;
     const double PHI_COVERAGE = 54.4; //delta phi for each det
-    const double PHI0 = 36.0; //center phi values for each det in array
-    const double PHI1 = 108.0; //# is equal to detID in channel map
-    const double PHI2 = 324.0;
-    const double PHI3 = 252.0;
-    const double PHI4 = 180.0;
+    const double PHI0 = 234.0; //center phi values for each det in array
+    const double PHI1 = 162.0; //# is equal to detID in channel map
+    const double PHI2 = 306.0;
+    const double PHI3 = 18.0;
+    const double PHI4 = 90.0;
     const double DEG2RAD = M_PI/180.0;
 
     const double ENERGY_THRESHOLD = 0.1; //in MeV

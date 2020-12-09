@@ -13,25 +13,19 @@ BINDIR=./bin
 SRC=$(wildcard $(SRCDIR)/*.cpp)
 OBJS=$(SRC:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 
-TPOBJ=objs/testplots.o
-TPEXE=tp
-
 DICTOBJ=$(OBJDIR)/kinematics_dict.o
 DICTSRC=$(SRCDIR)/kinematics_dict.cxx
 DICT_PAGES=$(INCLDIR)/Kinematics.h $(INCLDIR)/LinkDef_Kinematics.h
 
 EXE=$(BINDIR)/kinematics 
 
-CLEANUP=$(EXE) $(OBJS) $(DICTOBJ) $(DICTSRC) $(TPOBJ)
+CLEANUP=$(EXE) $(OBJS) $(DICTOBJ) $(DICTSRC)
 
 .PHONY: all clean
 
 all: $(EXE) $(TPEXE)
 
 $(EXE): $(DICTOBJ) $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
-
-$(TPEXE): ./objs/SabreDetector.o $(TPOBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 $(DICTOBJ): $(DICTSRC)

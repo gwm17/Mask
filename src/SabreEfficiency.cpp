@@ -17,6 +17,29 @@ SabreEfficiency::SabreEfficiency() :
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI2*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI3*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI4*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
+
+ 	G3Vec coords;
+ 	for(int i=0; i<5; i++) {
+ 		for(int j=0; j<detectors[i].GetNumberOfRings(); j++) {
+ 			for(int k=0; k<4; k++) {
+ 				coords = detectors[i].GetRingTiltCoords(j, k);
+ 				ringxs.push_back(coords.GetX());
+ 				ringys.push_back(coords.GetY());
+ 				ringzs.push_back(coords.GetZ());
+ 			}
+ 		}
+ 	}
+
+ 	for(int i=0; i<5; i++) {
+ 		for(int j=0; j<detectors[i].GetNumberOfWedges(); j++) {
+ 			for(int k=0; k<4; k++) {
+ 				coords = detectors[i].GetWedgeTiltCoords(j, k);
+ 				wedgexs.push_back(coords.GetX());
+ 				wedgeys.push_back(coords.GetY());
+ 				wedgezs.push_back(coords.GetZ());
+ 			}
+ 		}
+ 	}
 }
 
 SabreEfficiency::~SabreEfficiency() {}
@@ -60,14 +83,16 @@ void SabreEfficiency::RunDecay(const char* file) {
 	tree->SetBranchAddress("residual", &resid);
 
 	double nevents = tree->GetEntries();
-	std::vector<double> resid_thetas, eject_thetas;
-	std::vector<double> resid_phis, eject_phis;
-	std::vector<double> resid_kes, eject_kes;
+	std::vector<double> resid_xs, eject_xs;
+	std::vector<double> resid_ys, eject_ys;
+	std::vector<double> resid_zs, eject_zs;
 
 	//Progress tracking
 	int percent5 = nevents*0.05;
 	int count = 0;
 	int npercent = 0;
+
+	G3Vec coordinates;
 
 	for(int i=0; i<tree->GetEntries(); i++) {
 		if(++count == percent5) {//Show progress every 5%
@@ -80,10 +105,11 @@ void SabreEfficiency::RunDecay(const char* file) {
 
 		if(eject->KE >= ENERGY_THRESHOLD) {
 			for(auto& det : detectors) {
-				if(det.IsInside(eject->theta, eject->phi)) {
-					eject_thetas.push_back(eject->theta);
-					eject_phis.push_back(eject->phi);
-					eject_kes.push_back(eject->KE);
+				coordinates = det.GetTrajectoryCoordinates(eject->theta, eject->phi);
+				if(coordinates.GetX() != 0) {
+					eject_xs.push_back(coordinates.GetX());
+					eject_ys.push_back(coordinates.GetY());
+					eject_zs.push_back(coordinates.GetZ());
 					break;
 				}
 			}
@@ -91,10 +117,10 @@ void SabreEfficiency::RunDecay(const char* file) {
 
 		if(resid->KE > ENERGY_THRESHOLD) {
 			for(auto& det : detectors) {
-				if(det.IsInside(resid->theta, resid->phi)) {
-					resid_thetas.push_back(resid->theta);
-					resid_phis.push_back(resid->phi);
-					resid_kes.push_back(resid->KE);
+				if(det.GetTrajectoryCoordinates(resid->theta, resid->phi).GetX() != 0) {
+					resid_xs.push_back(coordinates.GetX());
+					resid_ys.push_back(coordinates.GetY());
+					resid_zs.push_back(coordinates.GetZ());
 					break;
 				}
 			}
@@ -102,15 +128,42 @@ void SabreEfficiency::RunDecay(const char* file) {
 
 	}
 
-	double ejecteff = ((double) eject_thetas.size())/nevents;
-	double resideff = ((double) resid_thetas.size())/nevents;
+	double ejecteff = ((double) eject_xs.size())/nevents;
+	double resideff = ((double) resid_xs.size())/nevents;
 	TParameter<double> eject_eff("Light Breakup Efficiency", ejecteff);
 	TParameter<double> resid_eff("Heavy Breakup Efficiency", resideff);
+
+	TGraph2D* gde = new TGraph2D(eject_xs.size(), &(eject_xs[0]), &(eject_ys[0]), &(eject_zs[0]));
+	gde->SetName("detected_eject_points");
+	gde->SetMarkerStyle(2);
+	gde->SetMarkerColor(2);
+
+	TGraph2D* gr = new TGraph2D(ringxs.size(), &(ringxs[0]), &(ringys[0]), &(ringzs[0]));
+	gr->SetName("ring_detector_edges");
+	gr->SetTitle("SABRE Detector; x(m); y(m); z(m)");
+	gr->SetMarkerStyle(2);
+
+	TGraph2D* gw = new TGraph2D(wedgexs.size(), &(wedgexs[0]), &(wedgeys[0]), &(wedgezs[0]));
+	gw->SetName("wedge_detector_edges");
+	gw->SetTitle("SABRE Detector Wedges; x(m); y(m); z(m)");
+	gw->SetMarkerStyle(2);
+
+	TCanvas* canvas = new TCanvas();
+	canvas->SetName("detectors_and_particles");
+	canvas->cd();
+	gr->Draw("AP");
+	gw->Draw("same P");
+	gde->Draw("same P");
 
 	input->cd();
 	eject_eff.Write();
 	resid_eff.Write();
+	gr->Write();
+	gw->Write();
+	gde->Write();
+	canvas->Write();
 	input->Close();
+
 }
 
 void SabreEfficiency::Run2Step(const char* file) {
@@ -146,7 +199,7 @@ void SabreEfficiency::Run2Step(const char* file) {
 
 		if(break1->KE >= ENERGY_THRESHOLD) {
 			for(auto& det : detectors) {
-				if(det.IsInside(break1->theta, break1->phi)) {
+				if(det.GetTrajectoryCoordinates(break1->theta, break1->phi).GetX() != 0) {
 					b1_thetas.push_back(break1->theta);
 					b1_phis.push_back(break1->phi);
 					b1_kes.push_back(break1->KE);
@@ -157,7 +210,7 @@ void SabreEfficiency::Run2Step(const char* file) {
 
 		if(break2->KE > ENERGY_THRESHOLD) {
 			for(auto& det : detectors) {
-				if(det.IsInside(break2->theta, break2->phi)) {
+				if(det.GetTrajectoryCoordinates(break2->theta, break2->phi).GetX() != 0) {
 					b2_thetas.push_back(break2->theta);
 					b2_phis.push_back(break2->phi);
 					b2_kes.push_back(break2->KE);
@@ -214,7 +267,7 @@ void SabreEfficiency::Run3Step(const char* file) {
 
 		if(break1->KE > ENERGY_THRESHOLD) {
 			for(auto& det : detectors) {
-				if(det.IsInside(break1->theta, break1->phi)) {
+				if(det.GetTrajectoryCoordinates(break1->theta, break1->phi).GetX() != 0) {
 					b1_thetas.push_back(break1->theta);
 					b1_phis.push_back(break1->phi);
 					b1_kes.push_back(break1->KE);
@@ -226,7 +279,7 @@ void SabreEfficiency::Run3Step(const char* file) {
 
 		if(break3->KE > ENERGY_THRESHOLD) {
 			for(auto& det : detectors) {
-				if(det.IsInside(break3->theta, break3->phi)) {
+				if(det.GetTrajectoryCoordinates(break3->theta, break3->phi).GetX() != 0) {
 					b3_thetas.push_back(break3->theta);
 					b3_phis.push_back(break3->phi);
 					b3_kes.push_back(break3->KE);
@@ -237,7 +290,7 @@ void SabreEfficiency::Run3Step(const char* file) {
 
 		if(break4->KE > ENERGY_THRESHOLD) {
 			for(auto& det : detectors) {
-				if(det.IsInside(break4->theta, break4->phi)) {
+				if(det.GetTrajectoryCoordinates(break4->theta, break4->phi).GetX() != 0) {
 					b4_thetas.push_back(break4->theta);
 					b4_phis.push_back(break4->phi);
 					b4_kes.push_back(break4->KE);
