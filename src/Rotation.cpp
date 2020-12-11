@@ -1,62 +1,71 @@
-#include "GRotation.h"
+/*
+	Classes which define rotations about the x, y, and z axes. Using these,
+	any arbitrary orientation can be described. Methods implemented for vector multiplication
+	as well as generating the inverse of the rotation.
+*/
+#include "Rotation.h"
 
-GXRotation::GXRotation() :
+namespace Mask {
+
+XRotation::XRotation() :
 m_angle(0)
 {
 	GenerateMatrix();
 }
 
-GXRotation::GXRotation(double angle) :
+XRotation::XRotation(double angle) :
 m_angle(angle)
 {
 	GenerateMatrix();
 }
 
-GXRotation::~GXRotation() {}
+XRotation::~XRotation() {}
 
-void GXRotation::GenerateMatrix() {
+void XRotation::GenerateMatrix() {
 	m_matrix[0][0] = 1.0; m_matrix[0][1] = 0.0; m_matrix[0][2] = 0.0;
 	m_matrix[1][0] = 0.0; m_matrix[1][1] = std::cos(m_angle); m_matrix[1][2] = -std::sin(m_angle);
 	m_matrix[2][0] = 0.0; m_matrix[2][1] = std::sin(m_angle); m_matrix[2][2] = std::cos(m_angle);
 }
 
-GYRotation::GYRotation() :
+YRotation::YRotation() :
 m_angle(0)
 {
 	GenerateMatrix();
 }
 
-GYRotation::GYRotation(double angle) :
+YRotation::YRotation(double angle) :
 m_angle(angle)
 {
 	GenerateMatrix();
 }
 
-GYRotation::~GYRotation() {}
+YRotation::~YRotation() {}
 
-void GYRotation::GenerateMatrix() {
+void YRotation::GenerateMatrix() {
 	m_matrix[0][0] = std::cos(m_angle); m_matrix[0][1] = 0.0; m_matrix[0][2] = -std::sin(m_angle);
 	m_matrix[1][0] = 0.0; m_matrix[1][1] = 1.0; m_matrix[1][2] = 0.0;
 	m_matrix[2][0] = std::sin(m_angle); m_matrix[2][1] = 0.0; m_matrix[2][2] = std::cos(m_angle);
 }
 
 
-GZRotation::GZRotation() :
+ZRotation::ZRotation() :
 m_angle(0)
 {
 	GenerateMatrix();
 }
 
-GZRotation::GZRotation(double angle) :
+ZRotation::ZRotation(double angle) :
 m_angle(angle)
 {
 	GenerateMatrix();
 }
 
-GZRotation::~GZRotation() {}
+ZRotation::~ZRotation() {}
 
-void GZRotation::GenerateMatrix() {
+void ZRotation::GenerateMatrix() {
 	m_matrix[0][0] = std::cos(m_angle); m_matrix[0][1] = -std::sin(m_angle); m_matrix[0][2] = 0.0;
 	m_matrix[1][0] = std::sin(m_angle); m_matrix[1][1] = std::cos(m_angle); m_matrix[1][2] = 0.0;
 	m_matrix[2][0] = 0.0; m_matrix[2][1] = 0.0; m_matrix[2][2] = 1.0;
 }
+
+};

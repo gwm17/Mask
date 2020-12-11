@@ -3,6 +3,8 @@
 
 #include "ReactionSystem.h"
 
+namespace Mask {
+
 class TwoStepSystem : public ReactionSystem {
 public:
 	TwoStepSystem();
@@ -19,6 +21,8 @@ private:
 	void SetSystemEquation();
 	
 	Reaction step2;
+
+};
 
 };
 

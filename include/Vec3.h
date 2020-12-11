@@ -1,13 +1,21 @@
-#ifndef G3VEC_H
-#define G3VEC_H
+/*
+	Class to represent a 3-space vector in both cartesian and spherical coordinates. Can perform vector
+	addition, subtraction, and dot product. 
+
+	--GWM Dec 2020
+*/
+#ifndef VEC3_H
+#define VEC3_H
 
 #include <cmath>
 
-class G3Vec {
+namespace Mask {
+
+class Vec3 {
 public:
-	G3Vec();
-	G3Vec(double x, double y, double z);
-	~G3Vec();
+	Vec3();
+	Vec3(double x, double y, double z);
+	~Vec3();
 
 	void SetVectorCartesian(double x, double y, double z);
 	void SetVectorSpherical(double r, double theta, double phi);
@@ -24,18 +32,19 @@ public:
 	};
 
 	inline const double operator[](int index) const { return index>2 || index<0 ? 0.0 : m_data[index]; };
-	inline G3Vec& operator=(const G3Vec& rhs) { SetVectorCartesian(rhs.GetX(), rhs.GetY(), rhs.GetZ()); return *this; };
-	inline G3Vec operator+(const G3Vec& rhs) const { return G3Vec(this->GetX()+rhs.GetX(), this->GetY()+rhs.GetY(), this->GetZ()+rhs.GetZ()); };
-	inline G3Vec operator-(const G3Vec& rhs) const { return G3Vec(this->GetX()-rhs.GetX(), this->GetY()-rhs.GetY(), this->GetZ()-rhs.GetZ()); };
+	inline Vec3& operator=(const Vec3& rhs) { SetVectorCartesian(rhs.GetX(), rhs.GetY(), rhs.GetZ()); return *this; };
+	inline Vec3 operator+(const Vec3& rhs) const { return Vec3(this->GetX()+rhs.GetX(), this->GetY()+rhs.GetY(), this->GetZ()+rhs.GetZ()); };
+	inline Vec3 operator-(const Vec3& rhs) const { return Vec3(this->GetX()-rhs.GetX(), this->GetY()-rhs.GetY(), this->GetZ()-rhs.GetZ()); };
 
 
-	double Dot(const G3Vec& rhs) const;
-	G3Vec Cross(const G3Vec& rhs) const;
+	double Dot(const Vec3& rhs) const;
+	Vec3 Cross(const Vec3& rhs) const;
 
 
 
 private:
 
+	//Use instead of std::atan2. Better control over values close to x=0
 	inline double Atan2(double y, double x) const {
 		if(x != 0.0) return std::atan2(y, x);
 		else if(y > 0.0) return M_PI/2.0;
@@ -44,6 +53,8 @@ private:
 	}
 
 	double m_data[3];
+
+};
 
 };
 

@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	
-	Kinematics calculator;
+	Mask::Kinematics calculator;
 	try {
 		if(!calculator.LoadConfig(argv[1])) {
 			return 1;
@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI3*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI4*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
 
- 	double theta, phi, expected_flat_t, expected_flat_p;
+ 	double theta, phi, expected_flat_p;
  	for(int h=0; h<5; h++) {
  		for(int j=0; j<16; j++) {
  			for(int k=0; k<4; k ++) {
@@ -53,7 +53,11 @@ int main(int argc, char** argv) {
  				phi = detectors[h].GetRingTiltCoords(j, k).GetPhi();
  				expected_flat_p = detectors[h].GetRingFlatCoords(j, k).GetPhi();  
  				for(int i=0; i<5; i++) {
- 					if(detectors[i].GetTrajectoryCoordinates(theta, phi).GetX() != 0) {
+ 					auto channels = detectors[i].GetTrajectoryRingWedge(theta, phi);
+ 					if(channels.first != -1) {
+ 						std::cout<<"Detected in detector"<<i<<" ring: "<<channels.first<<" wedge: "<<channels.second<<" Expected -- detector: "<<h<<" ring: "<<j;
+ 						if(k == 0 || k == 1) std::cout<<" wedge: 0"<<std::endl;
+ 						else std::cout<<" wedge: 7"<<std::endl;
  						break;
  					} else if(i == 4) {
  						std::cout<<" Not found! detector: "<<h<<" ring: "<<j<<" corner: "<<k<<" theta: "<<theta/DEG2RAD<<" phi: "<<phi/DEG2RAD<<" flat_p: "<<expected_flat_p/DEG2RAD<<std::endl;

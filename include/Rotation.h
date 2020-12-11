@@ -1,21 +1,28 @@
-#ifndef GROTATION_H
-#define GROTATION_H
+/*
+	Classes which define rotations about the x, y, and z axes. Using these,
+	any arbitrary orientation can be described. Methods implemented for vector multiplication
+	as well as generating the inverse of the rotation.
+*/
+#ifndef ROTATION_H
+#define ROTATION_H
 
-#include "G3Vec.h"
+#include "Vec3.h"
 
-class GXRotation {
+namespace Mask {
+
+class XRotation {
 public:
-	GXRotation();
-	GXRotation(double ang);
-	~GXRotation();
-	G3Vec Rotate(const G3Vec& vector);
+	XRotation();
+	XRotation(double ang);
+	~XRotation();
+	Vec3 Rotate(const Vec3& vector);
 	inline void SetAngle(double ang) { m_angle = ang; GenerateMatrix(); };
-	inline GXRotation GetInverse() { return GXRotation(-m_angle); };
-	inline G3Vec operator*(const G3Vec& vector) {
+	inline XRotation GetInverse() { return XRotation(-m_angle); };
+	inline Vec3 operator*(const Vec3& vector) {
 		double x = m_matrix[0][0]*vector[0] + m_matrix[0][1]*vector[1] + m_matrix[0][2]*vector[2];
 		double y = m_matrix[1][0]*vector[0] + m_matrix[1][1]*vector[1] + m_matrix[1][2]*vector[2];
 		double z = m_matrix[2][0]*vector[0] + m_matrix[2][1]*vector[1] + m_matrix[2][2]*vector[2];
-		return G3Vec(x, y, z);
+		return Vec3(x, y, z);
 	};
 
 private:
@@ -24,19 +31,19 @@ private:
 	double m_matrix[3][3];
 };
 
-class GYRotation {
+class YRotation {
 public:
-	GYRotation();
-	GYRotation(double ang);
-	~GYRotation();
-	G3Vec Rotate(const G3Vec& vector);
+	YRotation();
+	YRotation(double ang);
+	~YRotation();
+	Vec3 Rotate(const Vec3& vector);
 	inline void SetAngle(double ang) { m_angle = ang; GenerateMatrix(); };
-	inline GYRotation GetInverse() { return GYRotation(-m_angle); };
-	inline G3Vec operator*(const G3Vec& vector) {
+	inline YRotation GetInverse() { return YRotation(-m_angle); };
+	inline Vec3 operator*(const Vec3& vector) {
 		double x = m_matrix[0][0]*vector[0] + m_matrix[0][1]*vector[1] + m_matrix[0][2]*vector[2];
 		double y = m_matrix[1][0]*vector[0] + m_matrix[1][1]*vector[1] + m_matrix[1][2]*vector[2];
 		double z = m_matrix[2][0]*vector[0] + m_matrix[2][1]*vector[1] + m_matrix[2][2]*vector[2];
-		return G3Vec(x, y, z);
+		return Vec3(x, y, z);
 	};
 
 private:
@@ -45,25 +52,27 @@ private:
 	double m_matrix[3][3];
 };
 
-class GZRotation {
+class ZRotation {
 public:
-	GZRotation();
-	GZRotation(double ang);
-	~GZRotation();
-	G3Vec Rotate(const G3Vec& vector);
+	ZRotation();
+	ZRotation(double ang);
+	~ZRotation();
+	Vec3 Rotate(const Vec3& vector);
 	inline void SetAngle(double ang) { m_angle = ang; GenerateMatrix();};
-	inline GZRotation GetInverse() { return GZRotation(-m_angle); };
-	inline G3Vec operator*(const G3Vec& vector) {
+	inline ZRotation GetInverse() { return ZRotation(-m_angle); };
+	inline Vec3 operator*(const Vec3& vector) {
 		double x = m_matrix[0][0]*vector[0] + m_matrix[0][1]*vector[1] + m_matrix[0][2]*vector[2];
 		double y = m_matrix[1][0]*vector[0] + m_matrix[1][1]*vector[1] + m_matrix[1][2]*vector[2];
 		double z = m_matrix[2][0]*vector[0] + m_matrix[2][1]*vector[1] + m_matrix[2][2]*vector[2];
-		return G3Vec(x, y, z);
+		return Vec3(x, y, z);
 	};
 
 private:
 	void GenerateMatrix();
 	double m_angle;
 	double m_matrix[3][3];
+};
+
 };
 
 #endif

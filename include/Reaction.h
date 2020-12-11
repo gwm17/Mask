@@ -4,6 +4,8 @@
 #include "Nucleus.h"
 #include "LayeredTarget.h"
 
+namespace Mask {
+
 class Reaction {
 public:
 	Reaction();
@@ -48,6 +50,8 @@ private:
 	int  rxnLayer;
 
 	bool decayFlag, nuc_initFlag, resid_elossFlag;
+
+};
 
 };
 

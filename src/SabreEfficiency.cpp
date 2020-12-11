@@ -18,7 +18,7 @@ SabreEfficiency::SabreEfficiency() :
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI3*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI4*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
 
- 	G3Vec coords;
+ 	Mask::Vec3 coords;
  	for(int i=0; i<5; i++) {
  		for(int j=0; j<detectors[i].GetNumberOfRings(); j++) {
  			for(int k=0; k<4; k++) {
@@ -50,17 +50,17 @@ void SabreEfficiency::CalculateEfficiency(const char* file) {
 	std::cout<<"Running efficiency calculation..."<<std::endl;
 
 	switch(m_rxn_type) {
-		case Kinematics::ONESTEP_DECAY:
+		case Mask::Kinematics::ONESTEP_DECAY:
 		{
 			RunDecay(file);
 			break;
 		}
-		case Kinematics::TWOSTEP:
+		case Mask::Kinematics::TWOSTEP:
 		{
 			Run2Step(file);
 			break;
 		}
-		case Kinematics::THREESTEP:
+		case Mask::Kinematics::THREESTEP:
 		{
 			Run3Step(file);
 			break;
@@ -75,8 +75,8 @@ void SabreEfficiency::RunDecay(const char* file) {
 	TFile* input = TFile::Open(file, "UPDATE");
 	TTree* tree = (TTree*) input->Get("DataTree");
 
-	NucData* eject = new NucData();
-	NucData* resid = new NucData();
+	Mask::NucData* eject = new Mask::NucData();
+	Mask::NucData* resid = new Mask::NucData();
 
 
 	tree->SetBranchAddress("ejectile", &eject);
@@ -92,7 +92,7 @@ void SabreEfficiency::RunDecay(const char* file) {
 	int count = 0;
 	int npercent = 0;
 
-	G3Vec coordinates;
+	Mask::Vec3 coordinates;
 
 	for(int i=0; i<tree->GetEntries(); i++) {
 		if(++count == percent5) {//Show progress every 5%
@@ -105,8 +105,9 @@ void SabreEfficiency::RunDecay(const char* file) {
 
 		if(eject->KE >= ENERGY_THRESHOLD) {
 			for(auto& det : detectors) {
-				coordinates = det.GetTrajectoryCoordinates(eject->theta, eject->phi);
-				if(coordinates.GetX() != 0) {
+				auto chan = det.GetTrajectoryRingWedge(eject->theta, eject->phi);
+				if(chan.first != -1 && chan.second != -1) {
+					coordinates = det.GetTrajectoryCoordinates(eject->theta, eject->phi);
 					eject_xs.push_back(coordinates.GetX());
 					eject_ys.push_back(coordinates.GetY());
 					eject_zs.push_back(coordinates.GetZ());
@@ -135,18 +136,18 @@ void SabreEfficiency::RunDecay(const char* file) {
 
 	TGraph2D* gde = new TGraph2D(eject_xs.size(), &(eject_xs[0]), &(eject_ys[0]), &(eject_zs[0]));
 	gde->SetName("detected_eject_points");
-	gde->SetMarkerStyle(2);
+	gde->SetMarkerStyle(1);
 	gde->SetMarkerColor(2);
 
 	TGraph2D* gr = new TGraph2D(ringxs.size(), &(ringxs[0]), &(ringys[0]), &(ringzs[0]));
 	gr->SetName("ring_detector_edges");
 	gr->SetTitle("SABRE Detector; x(m); y(m); z(m)");
-	gr->SetMarkerStyle(2);
+	gr->SetMarkerStyle(1);
 
 	TGraph2D* gw = new TGraph2D(wedgexs.size(), &(wedgexs[0]), &(wedgeys[0]), &(wedgezs[0]));
 	gw->SetName("wedge_detector_edges");
 	gw->SetTitle("SABRE Detector Wedges; x(m); y(m); z(m)");
-	gw->SetMarkerStyle(2);
+	gw->SetMarkerStyle(1);
 
 	TCanvas* canvas = new TCanvas();
 	canvas->SetName("detectors_and_particles");
@@ -171,8 +172,8 @@ void SabreEfficiency::Run2Step(const char* file) {
 	TFile* input = TFile::Open(file, "UPDATE");
 	TTree* tree = (TTree*) input->Get("DataTree");
 
-	NucData* break1 = new NucData();
-	NucData* break2 = new NucData();
+	Mask::NucData* break1 = new Mask::NucData();
+	Mask::NucData* break2 = new Mask::NucData();
 
 
 	tree->SetBranchAddress("breakup1", &break1);
@@ -237,9 +238,9 @@ void SabreEfficiency::Run3Step(const char* file) {
 	TFile* input = TFile::Open(file, "UPDATE");
 	TTree* tree = (TTree*) input->Get("DataTree");
 
-	NucData* break1 = new NucData();
-	NucData* break3 = new NucData();
-	NucData* break4 = new NucData();
+	Mask::NucData* break1 = new Mask::NucData();
+	Mask::NucData* break3 = new Mask::NucData();
+	Mask::NucData* break4 = new Mask::NucData();
 
 
 	tree->SetBranchAddress("breakup1", &break1);

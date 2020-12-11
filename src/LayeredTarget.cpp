@@ -30,7 +30,7 @@ void LayeredTarget::AddLayer(std::vector<int>& Z, std::vector<int>& A, std::vect
 */
 double LayeredTarget::GetProjectileEnergyLoss(int zp, int ap, double startEnergy, int rxnLayer, double angle) {
 
-  if(rxnLayer < 0 || rxnLayer > layers.size()) {
+  if(rxnLayer < 0 || ((unsigned int) rxnLayer) > layers.size()) {
     std::cerr<<"Reaction layer in eloss calculation is not in range! Returning 0"<<std::endl;
     return 0.0;
   }
@@ -57,7 +57,7 @@ double LayeredTarget::GetProjectileEnergyLoss(int zp, int ap, double startEnergy
 */
 double LayeredTarget::GetEjectileEnergyLoss(int ze, int ae, double startEnergy, int rxnLayer, double angle) {
 
-  if(rxnLayer < 0 || rxnLayer > layers.size()) {
+  if(rxnLayer < 0 || ((unsigned int) rxnLayer) > layers.size()) {
     std::cerr<<"Reaction layer in eloss calculation is not in range! Returning 0"<<std::endl;
     return 0.0;
   }
@@ -65,7 +65,7 @@ double LayeredTarget::GetEjectileEnergyLoss(int ze, int ae, double startEnergy, 
   double eloss = 0.0;
   double newEnergy = startEnergy;
   for(unsigned int i=rxnLayer; i<layers.size(); i++) {
-    if(i == rxnLayer) {
+    if(i == ((unsigned int)rxnLayer)) {
       eloss += layers[i].getEnergyLossHalf(ze, ae, newEnergy, angle);
       newEnergy = startEnergy - eloss;
     } else {
@@ -80,7 +80,7 @@ double LayeredTarget::GetEjectileEnergyLoss(int ze, int ae, double startEnergy, 
 /*ReverseEnergyLoss version of GetEjectileEnergyLoss*/
 double LayeredTarget::GetEjectileReverseEnergyLoss(int ze, int ae, double startEnergy, int rxnLayer, double angle) {
 
-  if(rxnLayer < 0 || rxnLayer > layers.size()) {
+  if(rxnLayer < 0 || ((unsigned int) rxnLayer) > layers.size()) {
     std::cerr<<"Reaction layer in eloss calculation is not in range! Returning 0"<<std::endl;
     return 0.0;
   }

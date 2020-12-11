@@ -1,6 +1,8 @@
 #include "Plotter.h"
 #include <iostream>
 
+namespace Mask {
+
 Plotter::Plotter() :
 	table(new THashTable())
 {
@@ -80,3 +82,5 @@ void Plotter::GenerateGraphs() {
 		garbage_collection.push_back(graph);
 	}
 }
+
+};

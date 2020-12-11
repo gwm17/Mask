@@ -1,13 +1,15 @@
 #include "Nucleus.h"
 #include "MassLookup.h"
 
+namespace Mask {
+
 Nucleus::Nucleus () :
-	G4Vec(), m_z(0), m_a(0), m_gs_mass(0), m_symbol("")
+	Vec4(), m_z(0), m_a(0), m_gs_mass(0), m_symbol("")
 {
 }
 
 Nucleus::Nucleus(int Z, int A) :
-	G4Vec(), m_z(Z), m_a(A)
+	Vec4(), m_z(Z), m_a(A)
 {
 	m_gs_mass = MASS.FindMass(Z, A);
 	m_symbol = MASS.FindSymbol(Z, A);
@@ -15,7 +17,7 @@ Nucleus::Nucleus(int Z, int A) :
 }
 
 Nucleus::Nucleus(int Z, int A, double px, double py, double pz, double E) :
-	G4Vec(px, py, pz, E), m_z(Z), m_a(A)
+	Vec4(px, py, pz, E), m_z(Z), m_a(A)
 {
 	m_gs_mass = MASS.FindMass(Z, A);
 	m_symbol = MASS.FindSymbol(Z, A);
@@ -33,3 +35,5 @@ bool Nucleus::SetIsotope(int Z, int A) {
 	SetVectorCartesian(0,0,0,m_gs_mass);
 	return true;
 }
+
+};

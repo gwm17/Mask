@@ -3,6 +3,8 @@
 
 #include "ReactionSystem.h"
 
+namespace Mask {
+
 class ThreeStepSystem : public ReactionSystem {
 public:
 	ThreeStepSystem();
@@ -21,6 +23,8 @@ protected:
 	void SetSystemEquation();
 
 	Reaction step2, step3;
+
+};
 
 };
 

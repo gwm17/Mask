@@ -1,6 +1,8 @@
 #include "Reaction.h"
 #include "KinematicsExceptions.h"
 
+namespace Mask {
+
 Reaction::Reaction() :
 	target(nullptr), m_bke(0), m_theta(0), m_phi(0), m_ex(0), rxnLayer(0), nuc_initFlag(false), resid_elossFlag(false)
 {
@@ -153,7 +155,7 @@ void Reaction::CalculateDecay() {
 	}
 }
 
-
+};
 
 
 

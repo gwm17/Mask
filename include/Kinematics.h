@@ -9,6 +9,7 @@
 #include <TFile.h>
 #include <TTree.h>
 
+namespace Mask {
 //For tree
 struct NucData {
 	double KE = -1;
@@ -58,6 +59,8 @@ private:
 	int m_rxn_type, m_nsamples;
 
 	TRandom3* global_generator;
+};
+
 };
 
 #endif

@@ -8,6 +8,8 @@
 #include <THashTable.h>
 #include "Nucleus.h"
 
+namespace Mask {
+
 struct GraphData {
 	std::string name;
 	std::string title;
@@ -39,6 +41,8 @@ private:
 	std::vector<GraphData> graphs;
 
 	static constexpr double rad2deg = 180.0/M_PI;
+
+};
 
 };
 

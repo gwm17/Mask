@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 
+namespace Mask {
+
 Kinematics::Kinematics() :
 	sys(nullptr), save_tree_flag(false), do_plotter_flag(false), global_generator(new TRandom3(0))
 {
@@ -392,3 +394,5 @@ void Kinematics::RunThreeStep() {
 	}
 	output->Close();
 }
+
+};

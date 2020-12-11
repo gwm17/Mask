@@ -5,6 +5,8 @@
 #include <vector>
 #include <TRandom3.h>
 
+namespace Mask {
+
 class ReactionSystem {
 public:
 	ReactionSystem();
@@ -22,7 +24,7 @@ public:
 	inline const Nucleus& GetProjectile() const { return step1.GetProjectile(); };
 	inline const Nucleus& GetEjectile() const { return step1.GetEjectile(); };
 	inline const Nucleus& GetResidual() const { return step1.GetResidual(); };
-	inline const char* GetSystemEquation() { return m_sys_equation.c_str(); };
+	inline const char* GetSystemEquation() const { return m_sys_equation.c_str(); };
 
 protected:
 	virtual void LinkTarget();
@@ -37,6 +39,8 @@ protected:
 	int rxnLayer;
 	std::string m_sys_equation;
 	static constexpr double deg2rad = M_PI/180.0;
+};
+
 };
 
 #endif

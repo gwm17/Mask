@@ -1,10 +1,12 @@
 #ifndef NUCLEUS_H
 #define NUCLEUS_H
 
-#include "G4Vec.h"
+#include "Vec4.h"
 #include <string>
 
-class Nucleus : public G4Vec {
+namespace Mask {
+
+class Nucleus : public Vec4 {
 public:
 	Nucleus();
 	Nucleus(int Z, int A);
@@ -36,6 +38,8 @@ private:
 	int m_z, m_a;
 	double m_gs_mass;
 	std::string m_symbol;
+
+};
 
 };
 

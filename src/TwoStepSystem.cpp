@@ -1,6 +1,8 @@
 #include "TwoStepSystem.h"
 #include "KinematicsExceptions.h"
 
+namespace Mask {
+
 TwoStepSystem::TwoStepSystem() :
 	ReactionSystem()
 {
@@ -89,3 +91,5 @@ void TwoStepSystem::RunSystem() {
 
 
 }
+
+};

@@ -1,14 +1,23 @@
-#include "G4Vec.h"
-//NOTE: uses (-,-,-,+) metric (same as ROOT convention)
+/*
+	Class which represents a 4-momentum vector. Can perform vector addition, subtraction, dot product
+	and generate a boost vector to its rest frame as well as apply a boost to itself.
 
-G4Vec::G4Vec() {
+	--GWM Dec 2020.
+	NOTE: uses (-,-,-,+) metric (same as ROOT convention)
+*/
+#include "Vec4.h"
+
+
+namespace Mask {
+
+Vec4::Vec4() {
 	for(auto& val: m_data)
 		val = 0.0;
 	for(auto& val: m_boost)
 		val = 0.0;
 }
 
-G4Vec::G4Vec(double px, double py, double pz, double E) {
+Vec4::Vec4(double px, double py, double pz, double E) {
 	m_data[0] = px;
 	m_data[1] = py;
 	m_data[2] = pz;
@@ -16,9 +25,9 @@ G4Vec::G4Vec(double px, double py, double pz, double E) {
 	CalcBoostToCM();
 }
 
-G4Vec::~G4Vec() {}
+Vec4::~Vec4() {}
 
-void G4Vec::SetVectorCartesian(double px, double py, double pz, double E) {
+void Vec4::SetVectorCartesian(double px, double py, double pz, double E) {
 	m_data[0] = px;
 	m_data[1] = py;
 	m_data[2] = pz;
@@ -27,7 +36,7 @@ void G4Vec::SetVectorCartesian(double px, double py, double pz, double E) {
 	CalcBoostToCM();
 }
 
-void G4Vec::SetVectorSpherical(double theta, double phi, double p, double E) {
+void Vec4::SetVectorSpherical(double theta, double phi, double p, double E) {
 	m_data[0] = p*cos(phi)*sin(theta);
 	m_data[1] = p*sin(phi)*sin(theta);
 	m_data[2] = p*cos(theta);
@@ -35,13 +44,13 @@ void G4Vec::SetVectorSpherical(double theta, double phi, double p, double E) {
 	CalcBoostToCM();
 }
 
-void G4Vec::CalcBoostToCM() {
+void Vec4::CalcBoostToCM() {
 	m_boost[0] = m_data[0]/m_data[3];
 	m_boost[1] = m_data[1]/m_data[3];
 	m_boost[2] = m_data[2]/m_data[3];
 }
 
-void G4Vec::ApplyBoost(const double* beta) {
+void Vec4::ApplyBoost(const double* beta) {
 	double beta2 = beta[0]*beta[0] + beta[1]*beta[1] + beta[2]*beta[2];
 	double gamma  = 1.0/std::sqrt(1.0 - beta2);
 	double bdotp = beta[0]*m_data[0] + beta[1]*m_data[1] + beta[2]*m_data[2];
@@ -53,10 +62,12 @@ void G4Vec::ApplyBoost(const double* beta) {
 		      		   gamma*(GetE() + bdotp));
 }
 
-double G4Vec::Dot(const G4Vec& rhs) const {
+double Vec4::Dot(const Vec4& rhs) const {
 	return GetE()*rhs.GetE() - GetPx()*rhs.GetPx() - GetPy()*rhs.GetPy() - GetPz()*rhs.GetPz();
 }
 
-G4Vec G4Vec::Cross(const G4Vec& rhs) const {
-	return G4Vec();
+Vec4 Vec4::Cross(const Vec4& rhs) const {
+	return Vec4();
 }
+
+};

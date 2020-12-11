@@ -3,29 +3,28 @@ OutputFile: /media/gordon/b6414c35-ec1f-4fc1-83bc-a6b68ca4325a/gwm17/test_newkin
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------
-ReactionType: 2
+ReactionType: 0
 Z	A (order is target, projectile, ejectile, break1, break3)
-5	10
-2	3
-2	4
-1	2
+5	9
+0	0
+1	1
 ----------Target Information----------
 Name: test_targ
 Layers: 2
 ~Layer1
-Thickness(ug/cm^2): 10
+Thickness(ug/cm^2): 0
 Z	A	Stoich
 6	12	1
 0
 ~
 ~Layer2
-Thickness(ug/cm^2): 80
+Thickness(ug/cm^2): 0
 Z	A	Stoich
-5	10	1
+5	9	1
 0
 ~
 ----------Sampling Information----------
-NumberOfSamples: 10000
+NumberOfSamples: 1000000
 BeamMeanEnergy(MeV): 24 BeamEnergySigma(MeV): 0.001
 EjectileThetaMin(deg): 20.0 EjectileThetaMax(deg): 20.0
 ResidualExMean(MeV): 16.8 ResidualExSigma(MeV): 0.038

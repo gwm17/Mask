@@ -1,6 +1,8 @@
 #include "ThreeStepSystem.h"
 #include "KinematicsExceptions.h"
 
+namespace Mask {
+
 ThreeStepSystem::ThreeStepSystem() :
 	ReactionSystem()
 {
@@ -105,3 +107,5 @@ void ThreeStepSystem::RunSystem() {
 	step3.Calculate();
 
 }
+
+};

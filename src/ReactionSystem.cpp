@@ -1,6 +1,7 @@
 #include "ReactionSystem.h"
 #include "KinematicsExceptions.h"
-#include <iostream>
+
+namespace Mask {
 
 ReactionSystem::ReactionSystem() :
 	m_beamDist(0,0), m_theta1Range(0,0), m_exDist(0,0), generator(nullptr), target_set_flag(false), gen_set_flag(false), rxnLayer(0), m_sys_equation("")
@@ -86,3 +87,5 @@ void ReactionSystem::RunSystem() {
 	}
 
 }
+
+};
