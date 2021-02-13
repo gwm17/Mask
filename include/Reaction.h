@@ -1,3 +1,11 @@
+/*
+	Reaction.h
+	Reaction is a class which implements either a decay or scattering reaction. As such it requires either
+	3 (decay) or 4 (scattering) nuclei to perform any calcualtions. I also links together the target, which provides
+	energy loss calculations, with the kinematics. Note that Reaction does not own the LayeredTarget.
+
+	--GWM Jan. 2021
+*/
 #ifndef REACTION_H
 #define REACTION_H
 
@@ -15,6 +23,8 @@ public:
 	void SetNuclei(int zt, int at, int zp, int ap, int ze, int ae);
 	void SetNuclei(const Nucleus* nucs);
 	void SetBeamKE(double bke);
+
+	/*Setters and getters*/
 	inline void SetLayeredTarget(LayeredTarget* targ) { target = targ; };
 	inline void SetPolarRxnAngle(double theta) { m_theta = theta; };
 	inline void SetAzimRxnAngle(double phi) { m_phi = phi; };

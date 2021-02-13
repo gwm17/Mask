@@ -1,3 +1,11 @@
+/*
+	Nucleus.h
+	Nucleus is a derived class of Vec4. A nucleus is the kinematics is essentially a 4 vector with the
+	additional properties of the number of total nucleons (A), the number of protons (Z), a ground state mass,
+	an exctitation energy, and an isotopic symbol.
+
+	--GWM Jan 2021
+*/
 #ifndef NUCLEUS_H
 #define NUCLEUS_H
 
@@ -25,7 +33,8 @@ public:
 		return *this;
 	};
 
-	inline Nucleus operator+(const Nucleus& daughter) { 
+	//Conservation of nucleons and momentum
+	inline Nucleus operator+(const Nucleus& daughter) {
 		return Nucleus(GetZ()+daughter.GetZ(), GetA()+daughter.GetA(), GetPx()+daughter.GetPx(), GetPy()+daughter.GetPy(), GetPz()+daughter.GetPz(), GetE()+daughter.GetE()); 
 	};
 	inline Nucleus operator-(const Nucleus& daughter) {

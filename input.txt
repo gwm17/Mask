@@ -3,24 +3,25 @@ OutputFile: /media/gordon/b6414c35-ec1f-4fc1-83bc-a6b68ca4325a/gwm17/test_newkin
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------
-ReactionType: 0
+ReactionType: 2
 Z	A (order is target, projectile, ejectile, break1, break3)
-5	9
-0	0
-1	1
+5	10
+2	3
+2	4
+1	2
 ----------Target Information----------
 Name: test_targ
 Layers: 2
 ~Layer1
-Thickness(ug/cm^2): 0
+Thickness(ug/cm^2): 10
 Z	A	Stoich
 6	12	1
 0
 ~
 ~Layer2
-Thickness(ug/cm^2): 0
+Thickness(ug/cm^2): 80
 Z	A	Stoich
-5	9	1
+5	10	1
 0
 ~
 ----------Sampling Information----------

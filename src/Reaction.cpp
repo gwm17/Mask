@@ -1,3 +1,11 @@
+/*
+	Reaction.cpp
+	Reaction is a class which implements either a decay or scattering reaction. As such it requires either
+	3 (decay) or 4 (scattering) nuclei to perform any calcualtions. I also links together the target, which provides
+	energy loss calculations, with the kinematics. Note that Reaction does not own the LayeredTarget.
+
+	--GWM Jan. 2021
+*/
 #include "Reaction.h"
 #include "KinematicsExceptions.h"
 
@@ -69,6 +77,7 @@ void Reaction::SetBeamKE(double bke) {
 	m_bke = bke - target->GetProjectileEnergyLoss(reactants[1].GetZ(), reactants[1].GetA(), bke, rxnLayer, 0);
 };
 
+//Methods given by Iliadis in Nuclear Physics of Stars, Appendix C
 void Reaction::CalculateReaction() {
 	//Target assumed at rest, with 0 excitation energy
 	reactants[0].SetVectorCartesian(0.,0.,0.,reactants[0].GetGroundStateMass());
@@ -112,6 +121,7 @@ void Reaction::CalculateReaction() {
 
 }
 
+//Calculate in CM, where decay is isotropic
 void Reaction::CalculateDecay() {
 
 	double Q = reactants[0].GetInvMass() - reactants[2].GetGroundStateMass() - reactants[3].GetGroundStateMass();
