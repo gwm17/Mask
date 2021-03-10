@@ -38,9 +38,11 @@ double Vec3::Dot(const Vec3& rhs) const {
 	return GetX()*rhs.GetX() + GetY()*rhs.GetY() + GetZ()*rhs.GetZ();
 }
 
-//Unimplemented
 Vec3 Vec3::Cross(const Vec3& rhs) const {
-	return Vec3(0.,0.,0.);
+	double x = GetY()*rhs.GetZ() - GetZ()*rhs.GetY();
+	double y = GetZ()*rhs.GetX() - GetX()*rhs.GetZ();
+	double z = GetX()*rhs.GetY() - GetY()*rhs.GetX();
+	return Vec3(x,y,z);
 }
 
 };

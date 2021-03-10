@@ -2,6 +2,7 @@
 #define SABREEFFICIENCY_H
 
 #include "SabreDetector.h"
+#include "Target.h"
 
 class SabreEfficiency {
 public:
@@ -19,6 +20,7 @@ private:
 	std::vector<SabreDetector> detectors;
     std::vector<double> ringxs, ringys, ringzs;
     std::vector<double> wedgexs, wedgeys, wedgezs;
+	Target deadlayer;
 
 
 	//Sabre constants
@@ -34,8 +36,9 @@ private:
     const double PHI3 = 18.0;
     const double PHI4 = 90.0;
     const double DEG2RAD = M_PI/180.0;
+    static constexpr double DEADLAYER_THIN = 50 * 1e-7 * 2.3296 * 1e6; // ug/cm^2 (50 nm thick * density)
 
-    const double ENERGY_THRESHOLD = 0.1; //in MeV
+    const double ENERGY_THRESHOLD = 0.2; //in MeV
 
 };
 

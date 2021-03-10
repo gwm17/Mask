@@ -138,6 +138,8 @@ NucData Kinematics::ConvertNucleus(const Nucleus& nuc) {
 	datum.theta = nuc.GetTheta();
 	datum.phi = nuc.GetPhi();
 	datum.Ex = nuc.GetExcitationEnergy();
+	datum.Z = nuc.GetZ();
+	datum.A = nuc.GetA();
 	return datum;
 }
 

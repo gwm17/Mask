@@ -1,5 +1,6 @@
 #include "SabreEfficiency.h"
 #include "Kinematics.h"
+#include <fstream>
 #include <iostream>
 #include <TFile.h>
 #include <TTree.h>
@@ -9,7 +10,7 @@
 #include <TCanvas.h>
 
 SabreEfficiency::SabreEfficiency() : 
-	m_rxn_type(-1)
+	m_rxn_type(-1), deadlayer(DEADLAYER_THIN)
 {
 	detectors.reserve(5);
 	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI0*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
@@ -40,6 +41,10 @@ SabreEfficiency::SabreEfficiency() :
  			}
  		}
  	}
+	std::vector<int> dead_z = {14};
+	std::vector<int> dead_a = {28};
+	std::vector<int> dead_stoich = {1};
+	deadlayer.SetElements(dead_z, dead_a, dead_stoich);
 }
 
 SabreEfficiency::~SabreEfficiency() {}
@@ -184,11 +189,15 @@ void SabreEfficiency::Run2Step(const char* file) {
 	std::vector<double> b1_phis, b2_phis;
 	std::vector<double> b1_kes, b2_kes;
 
+	double avg_ke_per_pixel[640] = {0};
+	int hits_per_pixel[640] = {0};
+
 	//Progress tracking
 	int percent5 = nevents*0.05;
 	int count = 0;
 	int npercent = 0;
 
+	Mask::Vec3 coords;
 	for(int i=0; i<tree->GetEntries(); i++) {
 		if(++count == percent5) {//Show progress every 5%
 			npercent++;
@@ -199,8 +208,19 @@ void SabreEfficiency::Run2Step(const char* file) {
 		tree->GetEntry(i);
 
 		if(break1->KE >= ENERGY_THRESHOLD) {
-			for(auto& det : detectors) {
-				if(det.GetTrajectoryCoordinates(break1->theta, break1->phi).GetX() != 0) {
+			for(int j=0; j<5; j++) {
+				auto& det = detectors[j];
+				auto chan = det.GetTrajectoryRingWedge(break1->theta, break1->phi);
+				if(chan.first != -1 && chan.second != -1) {
+					coords = det.GetTrajectoryCoordinates(break1->theta, break1->phi);
+					double thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
+					double eloss = deadlayer.getEnergyLossTotal(break1->Z, break1->A, break1->KE, M_PI - thetaIncident);
+					if((break1->KE - eloss) <= ENERGY_THRESHOLD) break;
+					
+					int pixel = (chan.first + 16*chan.second) + 128*j; //calc pixel
+					avg_ke_per_pixel[pixel] += (break1->KE - eloss);
+					hits_per_pixel[pixel]++;
+
 					b1_thetas.push_back(break1->theta);
 					b1_phis.push_back(break1->phi);
 					b1_kes.push_back(break1->KE);
@@ -226,6 +246,14 @@ void SabreEfficiency::Run2Step(const char* file) {
 	double b2eff = ((double) b2_thetas.size())/nevents;
 	TParameter<double> break1_eff("Light Breakup Efficiency", b1eff);
 	TParameter<double> break2_eff("Heavy Breakup Efficiency", b2eff);
+
+	std::ofstream output("/data1/gwm17/test_dead_pixels.txt");
+	output<<"Average particle kinetic energy (MeV) per pixel (pixel = (ringch + wedgech*16) + 128*detID)"<<std::endl;
+	for(int i=0; i<640; i++) {
+		if(hits_per_pixel[i] == 0) output<<i<<" "<<0.0<<std::endl;
+		else output<<i<<" "<<((double) (avg_ke_per_pixel[i]/hits_per_pixel[i]))<<std::endl;
+	}
+	output.close();
 
 	input->cd();
 	break1_eff.Write();

@@ -18,6 +18,8 @@ struct NucData {
 	double p = -1;
 	double theta = -1;
 	double phi = -1;
+	int Z = -1;
+	int A = -1;
 };
 
 class Kinematics {
