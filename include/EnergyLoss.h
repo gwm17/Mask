@@ -46,6 +46,7 @@ class EnergyLoss {
 
     //constants for calculations
     static constexpr double MAX_FRACTIONAL_STEP = 0.001;
+    static constexpr double MAX_DEPTH = 50;
     static constexpr double MAX_H_E_PER_U = 100000.0;
     static constexpr double AVOGADRO = 0.60221367; //N_A times 10^(-24) for converting
     static constexpr double MEV2U = 1.0/931.4940954;

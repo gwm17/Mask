@@ -55,6 +55,8 @@ double EnergyLoss::GetEnergyLoss(int zp, int ap, double e_initial, double thickn
   double e_step = GetTotalStoppingPower(e_final)*x_step/1000.0; //initial step in e
   double e_threshold = 0.05*e_initial;
 
+  int depth=0;
+
   
   if(thickness == 0.0) return 0;
   else if(e_initial == 0.0) return 0;
@@ -62,16 +64,20 @@ double EnergyLoss::GetEnergyLoss(int zp, int ap, double e_initial, double thickn
   bool go = true;
   while(go) {
     //If intial guess of step size is too large, shrink until in range
-    if(e_step/e_final > MAX_FRACTIONAL_STEP /*&& e_step >= E_PRECISION_LIMIT*/) {
+    if(e_step/e_final > MAX_FRACTIONAL_STEP && depth < MAX_DEPTH) {
+      depth++;
       x_step *= 0.5;
       e_step = GetTotalStoppingPower(e_final)*x_step/1000.0;
     } else if((x_step + x_traversed) >= thickness) { //last chunk
       go = false;
       x_step = thickness - x_traversed; //get valid portion of last chunk
       e_final -= GetTotalStoppingPower(e_final)*x_step/1000.0;
+      if(depth > 20)std::cout<<"depth: "<<depth<<std::endl;
       if(e_final <= e_threshold) {
         return e_initial;
       }
+    } else if(depth == MAX_DEPTH) {
+      return e_initial;
     } else {
       x_traversed += x_step;
       e_step = GetTotalStoppingPower(e_final)*x_step/1000.0;

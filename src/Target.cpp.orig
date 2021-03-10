@@ -40,28 +40,44 @@ bool Target::ContainsElement(int z, int a) {
 /*Calculates energy loss for travelling all the way through the target*/
 double Target::getEnergyLossTotal(int zp, int ap, double startEnergy, double theta) {
   if(theta == PI/2.) return startEnergy;
-  else if (theta > PI/2.) theta = PI - theta;
+<<<<<<< HEAD
+  else if(theta > PI/2.) theta = PI - theta;
+=======
+  else if (theta > PI/2.)  theta = PI - theta;
+>>>>>>> 4ccaabb534f35f2cf36d375b74ac4ebf99fe7bb7
   return eloss.GetEnergyLoss(zp, ap, startEnergy, thickness/fabs(cos(theta)));
 }
 
 /*Calculates energy loss for travelling halfway through the target*/
 double Target::getEnergyLossHalf(int zp, int ap, double startEnergy, double theta) {
   if(theta == PI/2.) return startEnergy;
-  else if (theta > PI/2.) theta = PI - theta;
+<<<<<<< HEAD
+  else if(theta > PI/2.) theta = PI - theta;
+=======
+  else if (theta > PI/2.)  theta = PI - theta;
+>>>>>>> 4ccaabb534f35f2cf36d375b74ac4ebf99fe7bb7
   return eloss.GetEnergyLoss(zp, ap, startEnergy, thickness/(2.0*fabs(cos(theta))));
 }
 
 /*Calculates reverse energy loss for travelling all the way through the target*/
 double Target::getReverseEnergyLossTotal(int zp, int ap, double finalEnergy, double theta) {
   if(theta == PI/2.) return finalEnergy;
-  else if (theta > PI/2.) theta = PI - theta;
+<<<<<<< HEAD
+  else if(theta > PI/2.) theta = PI - theta;
+=======
+  else if (theta > PI/2.)  theta = PI - theta;
+>>>>>>> 4ccaabb534f35f2cf36d375b74ac4ebf99fe7bb7
   return eloss.GetReverseEnergyLoss(zp, ap, finalEnergy, thickness/fabs(cos(theta)));
 }
 
 /*Calculates reverse energy loss for travelling half way through the target*/
 double Target::getReverseEnergyLossHalf(int zp, int ap, double finalEnergy, double theta) {
   if(theta == PI/2.) return finalEnergy;
-  else if (theta > PI/2.) theta = PI - theta;
+<<<<<<< HEAD
+  else if(theta > PI/2.) theta = PI - theta;
+=======
+  else if (theta > PI/2.)  theta = PI - theta;
+>>>>>>> 4ccaabb534f35f2cf36d375b74ac4ebf99fe7bb7
   return eloss.GetReverseEnergyLoss(zp, ap, finalEnergy, thickness/(2.0*fabs(cos(theta))));
 }
 

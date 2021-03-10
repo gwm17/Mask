@@ -1,32 +1,46 @@
 ----------Data Information----------
-OutputFile: /media/gordon/b6414c35-ec1f-4fc1-83bc-a6b68ca4325a/gwm17/test_newkine.root
+OutputFile: /data1/gwm17/test_dead.root
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------
 ReactionType: 2
 Z	A (order is target, projectile, ejectile, break1, break3)
+<<<<<<< HEAD
+6	12
+2	3
+1	2
+1	1
+=======
 5	10
 2	3
 2	4
 1	2
+>>>>>>> 4ccaabb534f35f2cf36d375b74ac4ebf99fe7bb7
 ----------Target Information----------
 Name: test_targ
-Layers: 2
+Layers: 1
 ~Layer1
+<<<<<<< HEAD
+Thickness(ug/cm^2): 40
+=======
 Thickness(ug/cm^2): 10
+>>>>>>> 4ccaabb534f35f2cf36d375b74ac4ebf99fe7bb7
 Z	A	Stoich
 6	12	1
 0
 ~
+<<<<<<< HEAD
+=======
 ~Layer2
 Thickness(ug/cm^2): 80
 Z	A	Stoich
 5	10	1
 0
 ~
+>>>>>>> 4ccaabb534f35f2cf36d375b74ac4ebf99fe7bb7
 ----------Sampling Information----------
 NumberOfSamples: 1000000
 BeamMeanEnergy(MeV): 24 BeamEnergySigma(MeV): 0.001
-EjectileThetaMin(deg): 20.0 EjectileThetaMax(deg): 20.0
-ResidualExMean(MeV): 16.8 ResidualExSigma(MeV): 0.038
+EjectileThetaMin(deg): 3.0 EjectileThetaMax(deg): 3.0
+ResidualExMean(MeV): 2.364 ResidualExSigma(MeV): 0.0317
 --------------------------------------
