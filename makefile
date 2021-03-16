@@ -17,7 +17,7 @@ DICTOBJ=$(OBJDIR)/kinematics_dict.o
 DICTSRC=$(SRCDIR)/kinematics_dict.cxx
 DICT_PAGES=$(INCLDIR)/Kinematics.h $(INCLDIR)/LinkDef_Kinematics.h
 
-EXE=$(BINDIR)/kinematics 
+EXE=$(BINDIR)/mask 
 
 CLEANUP=$(EXE) $(OBJS) $(DICTOBJ) $(DICTSRC)
 
