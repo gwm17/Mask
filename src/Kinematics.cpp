@@ -109,7 +109,7 @@ bool Kinematics::LoadConfig(const char* filename) {
 		input>>junk;
 	}
 
-	double par1, par2;
+	double par1, par2, L1, L2;
 	getline(input, junk);
 	getline(input, junk);
 
@@ -120,9 +120,14 @@ bool Kinematics::LoadConfig(const char* filename) {
 	sys->SetTheta1Range(par1, par2);
 	input>>junk>>par1>>junk>>par2;
 	sys->SetExcitationDistro(par1, par2);
+	input>>junk>>L1;
+	input>>junk>>L2;
+	sys->SetDecay1AngularMomentum(L1);
+	sys->SetDecay2AngularMomentum(L2);
 	sys->SetRandomGenerator(global_generator);
 
 	std::cout<<"Reaction equation: "<<GetSystemName()<<std::endl;
+	std::cout<<"Decay1 angular momentum: "<<L1<<" Decay2 angular momentum: "<<L2<<std::endl;
 	std::cout<<"Number of samples: "<<GetNumberOfSamples()<<std::endl;
 
 	return true;
@@ -136,6 +141,7 @@ NucData Kinematics::ConvertNucleus(const Nucleus& nuc) {
 	datum.KE = nuc.GetKE();
 	datum.p = nuc.GetP();
 	datum.theta = nuc.GetTheta();
+	datum.theta_cm = nuc.GetThetaCM();
 	datum.phi = nuc.GetPhi();
 	datum.Ex = nuc.GetExcitationEnergy();
 	datum.Z = nuc.GetZ();

@@ -21,15 +21,18 @@ public:
 	Nucleus(int Z, int A, double px, double py, double pz, double E);
 	~Nucleus();
 	bool SetIsotope(int Z, int A);
+	inline void SetThetaCM(double tcm) { m_theta_cm = tcm; }; //save theta in rxn CM frame
 	inline int GetZ() const { return m_z; };
 	inline int GetA() const { return m_a; };
 	inline double GetExcitationEnergy() const { return GetInvMass() - m_gs_mass; };
 	inline double GetGroundStateMass() const { return m_gs_mass; };
 	inline const char* GetIsotopicSymbol() const { return m_symbol.c_str(); };
+	inline double GetThetaCM() const { return m_theta_cm; };
 
 	inline Nucleus& operator=(const Nucleus& rhs) {
 		SetIsotope(rhs.GetZ(), rhs.GetA());
 		SetVectorCartesian(rhs.GetPx(), rhs.GetPy(), rhs.GetPz(), rhs.GetE());
+		SetThetaCM(rhs.GetThetaCM());
 		return *this;
 	};
 
@@ -46,6 +49,7 @@ public:
 private:
 	int m_z, m_a;
 	double m_gs_mass;
+	double m_theta_cm;
 	std::string m_symbol;
 
 };

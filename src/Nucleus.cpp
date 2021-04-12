@@ -12,12 +12,12 @@
 namespace Mask {
 
 Nucleus::Nucleus () :
-	Vec4(), m_z(0), m_a(0), m_gs_mass(0), m_symbol("")
+	Vec4(), m_z(0), m_a(0), m_gs_mass(0), m_theta_cm(0), m_symbol("")
 {
 }
 
 Nucleus::Nucleus(int Z, int A) :
-	Vec4(), m_z(Z), m_a(A)
+	Vec4(), m_z(Z), m_a(A), m_theta_cm(0)
 {
 	m_gs_mass = MASS.FindMass(Z, A);
 	m_symbol = MASS.FindSymbol(Z, A);

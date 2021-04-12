@@ -1,8 +1,8 @@
 CC=g++
 ROOTGEN=rootcint
-CFLAGS=-std=c++11 -g -Wall `root-config --cflags`
+CFLAGS=-g -Wall `root-config --cflags`
 CPPFLAGS=-I ./include
-LDFLAGS=`root-config --glibs`
+LDFLAGS=`root-config --glibs` -lgsl
 
 ROOTINCLDIR=./
 INCLDIR=./include

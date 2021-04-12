@@ -8,6 +8,8 @@
 #include <TGraph.h>
 #include <TGraph2D.h>
 #include <TCanvas.h>
+#include <TH2.h>
+#include <TH1.h>
 
 SabreEfficiency::SabreEfficiency() : 
 	m_rxn_type(-1), deadlayer(DEADLAYER_THIN)
@@ -54,6 +56,13 @@ void SabreEfficiency::CalculateEfficiency(const char* file) {
 	std::cout<<"Loading in output from kinematics simulation: "<<file<<std::endl;
 	std::cout<<"Running efficiency calculation..."<<std::endl;
 
+	if(!dmap.IsValid()) {
+		std::cerr<<"Unable to run SABRE Efficiency without a dead channel map."<<std::endl;
+		std::cerr<<"If you have no dead channels, simply make a file that's empty"<<std::endl;
+		std::cerr<<"Exiting."<<std::endl;
+		std::cout<<"---------------------------------------------"<<std::endl;
+	}
+
 	switch(m_rxn_type) {
 		case Mask::Kinematics::ONESTEP_DECAY:
 		{
@@ -97,7 +106,8 @@ void SabreEfficiency::RunDecay(const char* file) {
 	int count = 0;
 	int npercent = 0;
 
-	Mask::Vec3 coordinates;
+	Mask::Vec3 coords;
+	double thetaIncident, eloss;
 
 	for(int i=0; i<tree->GetEntries(); i++) {
 		if(++count == percent5) {//Show progress every 5%
@@ -109,24 +119,38 @@ void SabreEfficiency::RunDecay(const char* file) {
 		tree->GetEntry(i);
 
 		if(eject->KE >= ENERGY_THRESHOLD) {
-			for(auto& det : detectors) {
+			for(int j=0; j<5; j++) {
+				auto& det = detectors[j];
 				auto chan = det.GetTrajectoryRingWedge(eject->theta, eject->phi);
 				if(chan.first != -1 && chan.second != -1) {
-					coordinates = det.GetTrajectoryCoordinates(eject->theta, eject->phi);
-					eject_xs.push_back(coordinates.GetX());
-					eject_ys.push_back(coordinates.GetY());
-					eject_zs.push_back(coordinates.GetZ());
+					if(dmap.IsDead(j, chan.first, 0) || dmap.IsDead(j, chan.second, 1)) break; //dead channel check
+					coords = det.GetTrajectoryCoordinates(eject->theta, eject->phi);
+					thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
+					eloss = deadlayer.getEnergyLossTotal(eject->Z, eject->A, eject->KE, M_PI - thetaIncident);
+					if((eject->KE - eloss) <= ENERGY_THRESHOLD) break; //deadlayer check
+
+					eject_xs.push_back(coords.GetX());
+					eject_ys.push_back(coords.GetY());
+					eject_zs.push_back(coords.GetZ());
 					break;
 				}
 			}
 		}
 
 		if(resid->KE > ENERGY_THRESHOLD) {
-			for(auto& det : detectors) {
-				if(det.GetTrajectoryCoordinates(resid->theta, resid->phi).GetX() != 0) {
-					resid_xs.push_back(coordinates.GetX());
-					resid_ys.push_back(coordinates.GetY());
-					resid_zs.push_back(coordinates.GetZ());
+			for(int j=0; j<5; j++) {
+				auto& det = detectors[j];
+				auto chan = det.GetTrajectoryRingWedge(resid->theta, resid->phi);
+				if(chan.first != -1 && chan.second != -1) {
+					if(dmap.IsDead(j, chan.first, 0) || dmap.IsDead(j, chan.second, 1)) break;
+					coords = det.GetTrajectoryCoordinates(resid->theta, resid->phi);
+					thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
+					eloss = deadlayer.getEnergyLossTotal(resid->Z, resid->A, resid->KE, M_PI - thetaIncident);
+					if((resid->KE - eloss) <= ENERGY_THRESHOLD) break;
+
+					resid_xs.push_back(coords.GetX());
+					resid_ys.push_back(coords.GetY());
+					resid_zs.push_back(coords.GetZ());
 					break;
 				}
 			}
@@ -189,15 +213,16 @@ void SabreEfficiency::Run2Step(const char* file) {
 	std::vector<double> b1_phis, b2_phis;
 	std::vector<double> b1_kes, b2_kes;
 
-	double avg_ke_per_pixel[640] = {0};
-	int hits_per_pixel[640] = {0};
-
 	//Progress tracking
 	int percent5 = nevents*0.05;
 	int count = 0;
 	int npercent = 0;
 
+	int cnt_03=0, cnt_47=0, cnt_811=0, cnt_1215=0;
+	double avg_theta03=0, avg_theta47=0, avg_theta811=0, avg_theta1215=0;
+
 	Mask::Vec3 coords;
+	double thetaIncident, eloss;
 	for(int i=0; i<tree->GetEntries(); i++) {
 		if(++count == percent5) {//Show progress every 5%
 			npercent++;
@@ -212,14 +237,27 @@ void SabreEfficiency::Run2Step(const char* file) {
 				auto& det = detectors[j];
 				auto chan = det.GetTrajectoryRingWedge(break1->theta, break1->phi);
 				if(chan.first != -1 && chan.second != -1) {
+					if(dmap.IsDead(j, chan.first, 0) || dmap.IsDead(j, chan.second, 1)) break;
+
+					if(chan.first >= 0 && chan.first <4) {
+						cnt_03++;
+						avg_theta03 += break1->theta_cm;
+					} else if(chan.first >= 4 && chan.first <8) {
+						cnt_47++;
+						avg_theta47 += break1->theta_cm;
+					} else if(chan.first >= 8 && chan.first <12) {
+						cnt_811++;
+						avg_theta811 += break1->theta_cm;
+					} else if(chan.first >= 12 && chan.first <16) {
+						cnt_1215++;
+						avg_theta1215 += break1->theta_cm;
+					}
+
 					coords = det.GetTrajectoryCoordinates(break1->theta, break1->phi);
-					double thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
-					double eloss = deadlayer.getEnergyLossTotal(break1->Z, break1->A, break1->KE, M_PI - thetaIncident);
+					thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
+					eloss = deadlayer.getEnergyLossTotal(break1->Z, break1->A, break1->KE, M_PI - thetaIncident);
 					if((break1->KE - eloss) <= ENERGY_THRESHOLD) break;
 					
-					int pixel = (chan.first + 16*chan.second) + 128*j; //calc pixel
-					avg_ke_per_pixel[pixel] += (break1->KE - eloss);
-					hits_per_pixel[pixel]++;
 
 					b1_thetas.push_back(break1->theta);
 					b1_phis.push_back(break1->phi);
@@ -230,8 +268,16 @@ void SabreEfficiency::Run2Step(const char* file) {
 		}
 
 		if(break2->KE > ENERGY_THRESHOLD) {
-			for(auto& det : detectors) {
-				if(det.GetTrajectoryCoordinates(break2->theta, break2->phi).GetX() != 0) {
+			for(int j=0; j<5; j++) {
+				auto& det = detectors[j];
+				auto chan = det.GetTrajectoryRingWedge(break2->theta, break2->phi);
+				if(chan.first != -1 && chan.second != -1) {
+					if(dmap.IsDead(j, chan.first, 0) || dmap.IsDead(j, chan.second, 1)) break;
+					coords = det.GetTrajectoryCoordinates(break2->theta, break2->phi);
+					thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
+					eloss = deadlayer.getEnergyLossTotal(break2->Z, break2->A, break2->KE, M_PI - thetaIncident);
+					if((break2->KE - eloss) <= ENERGY_THRESHOLD) break;
+
 					b2_thetas.push_back(break2->theta);
 					b2_phis.push_back(break2->phi);
 					b2_kes.push_back(break2->KE);
@@ -239,24 +285,39 @@ void SabreEfficiency::Run2Step(const char* file) {
 				}
 			}
 		}
-
 	}
 
 	double b1eff = ((double) b1_thetas.size())/nevents;
 	double b2eff = ((double) b2_thetas.size())/nevents;
+	double b1eff_ring03 = cnt_03/nevents;
+	double b1eff_ring47 = cnt_47/nevents;
+	double b1eff_ring811 = cnt_811/nevents;
+	double b1eff_ring1215 = cnt_1215/nevents;
+	avg_theta03 /= cnt_03;
+	avg_theta47 /= cnt_47;
+	avg_theta811 /= cnt_811;
+	avg_theta1215 /= cnt_1215;
 	TParameter<double> break1_eff("Light Breakup Efficiency", b1eff);
+	TParameter<double> break1_eff_ring03("Light Breakup Efficiency Rings03", b1eff_ring03);
+	TParameter<double> break1_eff_ring47("Light Breakup Efficiency Rings47", b1eff_ring47);
+	TParameter<double> break1_eff_ring811("Light Breakup Efficiency Rings811", b1eff_ring811);
+	TParameter<double> break1_eff_ring1215("Light Breakup Efficiency Rings1215", b1eff_ring1215);
+	TParameter<double> avg_theta_cm_ring03("Avg. ThetaCM Rings03", avg_theta03);
+	TParameter<double> avg_theta_cm_ring47("Avg. ThetaCM Rings47", avg_theta47);
+	TParameter<double> avg_theta_cm_ring811("Avg. ThetaCM Rings811", avg_theta811);
+	TParameter<double> avg_theta_cm_ring1215("Avg. ThetaCM Rings1215", avg_theta1215);
 	TParameter<double> break2_eff("Heavy Breakup Efficiency", b2eff);
-
-	std::ofstream output("/data1/gwm17/test_dead_pixels.txt");
-	output<<"Average particle kinetic energy (MeV) per pixel (pixel = (ringch + wedgech*16) + 128*detID)"<<std::endl;
-	for(int i=0; i<640; i++) {
-		if(hits_per_pixel[i] == 0) output<<i<<" "<<0.0<<std::endl;
-		else output<<i<<" "<<((double) (avg_ke_per_pixel[i]/hits_per_pixel[i]))<<std::endl;
-	}
-	output.close();
 
 	input->cd();
 	break1_eff.Write();
+	break1_eff_ring03.Write();
+	break1_eff_ring47.Write();
+	break1_eff_ring811.Write();
+	break1_eff_ring1215.Write();
+	avg_theta_cm_ring03.Write();
+	avg_theta_cm_ring47.Write();
+	avg_theta_cm_ring811.Write();
+	avg_theta_cm_ring1215.Write();
 	break2_eff.Write();
 	input->Close();
 
@@ -285,6 +346,15 @@ void SabreEfficiency::Run3Step(const char* file) {
 	int count = 0;
 	int npercent = 0;
 
+	bool break1_flag, break3_flag, break4_flag;
+	int b1b3_count=0, b1b4_count=0, b3b4_count=0, b1b3b4_count=0;
+
+	TH2F* b3b4_thetas = new TH2F("b3b4_theta_theta","b3b4_theta_theta;#theta_{3};#theta_{4}",180,0,180,180,0,180);
+	TH2F* b3b4_kes = new TH2F("b3b4_ke_ke","b3b4_ke_ke;KE_{3};KE_{4}",150,0,15,150,0,15);
+	TH2F* b3b4_phis = new TH2F("b3b4_phi_phi","b3b4_phi_phi;#phi_{3};#phi_{4}",360,0,360,360,0,360);
+	Mask::Vec3 coords;
+	double thetaIncident, eloss;
+
 	for(int i=0; i<tree->GetEntries(); i++) {
 		if(++count == percent5) {//Show progress every 5%
 			npercent++;
@@ -292,14 +362,26 @@ void SabreEfficiency::Run3Step(const char* file) {
 			std::cout<<"\rPercent completed: "<<npercent*5<<"%"<<std::flush;
 		}
 
+		break1_flag = false;
+		break3_flag = false;
+		break4_flag = false;
+
 		tree->GetEntry(i);
 
 		if(break1->KE > ENERGY_THRESHOLD) {
-			for(auto& det : detectors) {
-				if(det.GetTrajectoryCoordinates(break1->theta, break1->phi).GetX() != 0) {
+			for(int j=0; j<5; j++) {
+				auto& det = detectors[j];
+				auto chan = det.GetTrajectoryRingWedge(break1->theta, break1->phi);
+				if(chan.first != -1 && chan.second != -1) {
+					coords = det.GetTrajectoryCoordinates(break1->theta, break1->phi);
+					thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
+					eloss = deadlayer.getEnergyLossTotal(break1->Z, break1->A, break1->KE, M_PI - thetaIncident);
+					if((break1->KE - eloss) <= ENERGY_THRESHOLD) break;
+
 					b1_thetas.push_back(break1->theta);
 					b1_phis.push_back(break1->phi);
 					b1_kes.push_back(break1->KE);
+					break1_flag = true;
 					break;
 				}
 			}
@@ -307,38 +389,88 @@ void SabreEfficiency::Run3Step(const char* file) {
 
 
 		if(break3->KE > ENERGY_THRESHOLD) {
-			for(auto& det : detectors) {
-				if(det.GetTrajectoryCoordinates(break3->theta, break3->phi).GetX() != 0) {
+			for(int j=0; j<5; j++) {
+				auto& det = detectors[j];
+				auto chan = det.GetTrajectoryRingWedge(break3->theta, break3->phi);
+				if(chan.first != -1 && chan.second != -1) {
+					coords = det.GetTrajectoryCoordinates(break3->theta, break3->phi);
+					thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
+					eloss = deadlayer.getEnergyLossTotal(break3->Z, break3->A, break3->KE, M_PI - thetaIncident);
+					if((break3->KE - eloss) <= ENERGY_THRESHOLD) break;
+
 					b3_thetas.push_back(break3->theta);
 					b3_phis.push_back(break3->phi);
 					b3_kes.push_back(break3->KE);
+					break3_flag = true;
 					break;
 				}
 			}
 		}
 
 		if(break4->KE > ENERGY_THRESHOLD) {
-			for(auto& det : detectors) {
-				if(det.GetTrajectoryCoordinates(break4->theta, break4->phi).GetX() != 0) {
+			for(int j=0; j<5; j++) {
+				auto& det = detectors[j];
+				auto chan = det.GetTrajectoryRingWedge(break4->theta, break4->phi);
+				if(chan.first != -1 && chan.second != -1) {
+					coords = det.GetTrajectoryCoordinates(break4->theta, break4->phi);
+					thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
+					eloss = deadlayer.getEnergyLossTotal(break4->Z, break4->A, break4->KE, M_PI - thetaIncident);
+					if((break4->KE - eloss) <= ENERGY_THRESHOLD) break;
+
 					b4_thetas.push_back(break4->theta);
 					b4_phis.push_back(break4->phi);
 					b4_kes.push_back(break4->KE);
+					break4_flag = true;
 					break;
 				}
 			}
+		}
+
+		if(break1_flag && break3_flag && break4_flag) {
+			b1b3b4_count++;
+			b1b3_count++;
+			b1b4_count++;
+			b3b4_count++;
+			b3b4_thetas->Fill(b3_thetas[b3_thetas.size()-1]/DEG2RAD, b4_thetas[b4_thetas.size()-1]/DEG2RAD);
+			b3b4_kes->Fill(b3_kes[b3_kes.size()-1], b4_kes[b4_kes.size()-1]);
+			b3b4_phis->Fill(b3_phis[b3_phis.size()-1]/DEG2RAD, b4_phis[b4_phis.size()-1]/DEG2RAD);
+		} else if(break1_flag && break3_flag) {
+			b1b3_count++;
+		} else if(break1_flag && break4_flag) {
+			b1b4_count++;
+		} else if(break3_flag && break4_flag) {
+			b3b4_count++;
+			b3b4_thetas->Fill(b3_thetas[b3_thetas.size()-1]/DEG2RAD, b4_thetas[b4_thetas.size()-1]/DEG2RAD);
+			b3b4_kes->Fill(b3_kes[b3_kes.size()-1], b4_kes[b4_kes.size()-1]);
+			b3b4_phis->Fill(b3_phis[b3_phis.size()-1]/DEG2RAD, b4_phis[b4_phis.size()-1]/DEG2RAD);
 		}
 	}
 
 	double b1eff = ((double) b1_thetas.size())/nevents;
 	double b3eff = ((double) b3_thetas.size())/nevents;
 	double b4eff = ((double) b4_thetas.size())/nevents;
+	double b1b3eff = b1b3_count/nevents;
+	double b1b4eff = b1b4_count/nevents;
+	double b3b4eff = b3b4_count/nevents;
+	double b1b3b4eff = b1b3b4_count/nevents;
 	TParameter<double> break1_eff("Light Initial Breakup Efficiency", b1eff);
 	TParameter<double> break3_eff("Light Final Breakup Efficiency", b3eff);
 	TParameter<double> break4_eff("Heavy Final Breakup Efficiency", b4eff);
+	TParameter<double> b1b3_eff("Break1 Coincident with Break3", b1b3eff);
+	TParameter<double> b1b4_eff("Break1 Coincident with Break4", b1b4eff);
+	TParameter<double> b3b4_eff("Break3 Coincident with Break4", b3b4eff);
+	TParameter<double> b1b3b4_eff("All Breakups Coincident", b1b3b4eff);
 
 	input->cd();
 	break1_eff.Write();
 	break3_eff.Write();
 	break4_eff.Write();
+	b1b3_eff.Write();
+	b1b4_eff.Write();
+	b3b4_eff.Write();
+	b1b3b4_eff.Write();
+	b3b4_thetas->Write();
+	b3b4_phis->Write();
+	b3b4_kes->Write();
 	input->Close();
 }

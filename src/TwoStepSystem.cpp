@@ -71,7 +71,7 @@ void TwoStepSystem::RunSystem() {
 	double bke = generator->Gaus(m_beamDist.first, m_beamDist.second);
 	double rxnTheta = acos(generator->Uniform(cos(m_theta1Range.first), cos(m_theta1Range.second)));
 	double rxnPhi = 0;
-	double decay1Theta = acos(generator->Uniform(-1, 1));
+	double decay1Theta = GetDecayTheta(L1);
 	double decay1Phi = generator->Uniform(0, M_PI*2.0);
 	double residEx = generator->Gaus(m_exDist.first, m_exDist.second);
 

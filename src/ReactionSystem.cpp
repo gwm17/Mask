@@ -1,5 +1,6 @@
 #include "ReactionSystem.h"
 #include "KinematicsExceptions.h"
+#include <gsl/gsl_sf_legendre.h>
 
 namespace Mask {
 
@@ -54,6 +55,22 @@ void ReactionSystem::SetSystemEquation()  {
 	m_sys_equation += step1.GetResidual().GetIsotopicSymbol();
 }
 
+double ReactionSystem::GetDecayTheta(int L) {
+	if(!gen_set_flag) return 0.0;
+
+	double probability = 0.0;
+	double costheta = 0.0;
+	double check = 0.0;
+
+	do {
+		costheta = generator->Uniform(-1.0, 1.0);
+		check = generator->Uniform(0.0, 1.0);
+		probability = std::pow(gsl_sf_legendre_Pl(L, costheta), 2.0);
+	} while(check > probability);
+
+	return std::acos(costheta);
+}
+
 void ReactionSystem::RunSystem() {
 	if(!gen_set_flag) return;
 	
@@ -63,7 +80,7 @@ void ReactionSystem::RunSystem() {
 	}
 
 	if(step1.IsDecay()) {
-		double rxnTheta = acos(generator->Uniform(-1, 1));
+		double rxnTheta = GetDecayTheta(L1);
 		double rxnPhi = generator->Uniform(0, 2.0*M_PI);
 		step1.SetPolarRxnAngle(rxnTheta);
 		step1.SetAzimRxnAngle(rxnPhi);

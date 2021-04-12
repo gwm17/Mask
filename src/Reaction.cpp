@@ -143,6 +143,7 @@ void Reaction::CalculateDecay() {
 	double ejectP_cm = std::sqrt(ejectE_cm*ejectE_cm - reactants[2].GetGroundStateMass()*reactants[2].GetGroundStateMass());
 
 	reactants[2].SetVectorSpherical(m_theta, m_phi, ejectP_cm, ejectE_cm);
+	reactants[2].SetThetaCM(m_theta);
 
 	reactants[0].ApplyBoost(boost2lab);
 	reactants[2].ApplyBoost(boost2lab);

@@ -17,6 +17,7 @@ struct NucData {
 	double Ex = -1;
 	double p = -1;
 	double theta = -1;
+	double theta_cm = -1;
 	double phi = -1;
 	int Z = -1;
 	int A = -1;

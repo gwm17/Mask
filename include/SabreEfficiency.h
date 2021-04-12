@@ -3,12 +3,14 @@
 
 #include "SabreDetector.h"
 #include "Target.h"
+#include "DeadChannelMap.h"
 
 class SabreEfficiency {
 public:
 	SabreEfficiency();
 	~SabreEfficiency();
 	inline void SetReactionType(int t) { m_rxn_type = t; };
+    void SetDeadChannelMap(std::string& filename) { dmap.LoadMapfile(filename); };
 	void CalculateEfficiency(const char* file);
 
 private:
@@ -21,13 +23,13 @@ private:
     std::vector<double> ringxs, ringys, ringzs;
     std::vector<double> wedgexs, wedgeys, wedgezs;
 	Target deadlayer;
+    DeadChannelMap dmap;
 
 
 	//Sabre constants
 	const double INNER_R = 0.0326;
     const double OUTER_R = 0.1351;
     const double TILT = 40.0;
-    //const double DIST_2_TARG = 0.14549;
     const double DIST_2_TARG = -0.1245;
     const double PHI_COVERAGE = 54.4; //delta phi for each det
     const double PHI0 = 234.0; //center phi values for each det in array

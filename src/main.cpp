@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "Kinematics.h"
 #include "SabreEfficiency.h"
 #include "SabreDetector.h"
@@ -22,7 +23,9 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	SabreEfficiency sabre;
+	std::string mapfile = "./etc/DeadChannels.txt";
 	sabre.SetReactionType(calculator.GetReactionType());
+	sabre.SetDeadChannelMap(mapfile);
 	sabre.CalculateEfficiency(calculator.GetOutputName());
 
 	/*std::vector<SabreDetector> detectors;

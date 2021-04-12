@@ -29,6 +29,11 @@ public:
 	inline void SetBeamDistro(double mean, double sigma) { m_beamDist = std::make_pair(mean, sigma); };
 	inline void SetTheta1Range(double min, double max) { m_theta1Range = std::make_pair(min*deg2rad, max*deg2rad); };
 	inline void SetExcitationDistro(double mean, double sigma) { m_exDist = std::make_pair(mean, sigma); };
+	inline void SetDecay1AngularMomentum(double l) { L1 = l; };
+	inline void SetDecay2AngularMomentum(double l) { L2 = l; };
+
+	/*Sampling over angular distribution*/
+	double GetDecayTheta(int L);
 
 	virtual void RunSystem();
 
@@ -51,6 +56,7 @@ protected:
 
 	bool target_set_flag, gen_set_flag;
 	int rxnLayer;
+	int L1, L2;
 	std::string m_sys_equation;
 	static constexpr double deg2rad = M_PI/180.0;
 };
