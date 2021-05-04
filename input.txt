@@ -1,5 +1,5 @@
 ----------Data Information----------
-OutputFile: /media/gordon/b6414c35-ec1f-4fc1-83bc-a6b68ca4325a/gwm17/12C3Hed_13N2364keV_ps_testAngMom.root
+OutputFile: /media/gordon/b6414c35-ec1f-4fc1-83bc-a6b68ca4325a/gwm17/12C3Hed_13N3546keV_ps_fixedThetaBins_test.root
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------
@@ -23,6 +23,6 @@ NumberOfSamples: 100000
 BeamMeanEnergy(MeV): 24 BeamEnergySigma(MeV): 0.001
 EjectileThetaMin(deg): 3.0 EjectileThetaMax(deg): 3.0
 ResidualExMean(MeV): 3.546 ResidualExSigma(MeV): 0.02
-Decay1_AngularMomentum: 2
+Decay1_AngularMomentum: 0
 Decay2_AngularMomentum: 0
 --------------------------------------

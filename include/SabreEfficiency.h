@@ -4,6 +4,7 @@
 #include "SabreDetector.h"
 #include "Target.h"
 #include "DeadChannelMap.h"
+#include <THashTable.h>
 
 class SabreEfficiency {
 public:
@@ -14,6 +15,8 @@ public:
 	void CalculateEfficiency(const char* file);
 
 private:
+    void MyFill(THashTable* table, const char* name, const char* title, int bins, float min, float max, double val);
+    void MyFill(THashTable* table, const char* name, const char* title, int binsx, float minx, float maxx, int binsy, float miny, float maxy, double valx, double valy);
 	void Run2Step(const char*);
 	void Run3Step(const char*);
 	void RunDecay(const char*);

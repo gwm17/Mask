@@ -51,6 +51,28 @@ SabreEfficiency::SabreEfficiency() :
 
 SabreEfficiency::~SabreEfficiency() {}
 
+void SabreEfficiency::MyFill(THashTable* table, const char* name, const char* title, int bins, float min, float max, double val) {
+	TH1F* h = (TH1F*) table->FindObject(name);
+	if(h) {
+		h->Fill(val);
+	} else {
+		h = new TH1F(name, title, bins, min, max);
+		h->Fill(val);
+		table->Add(h);
+	}
+}
+
+void SabreEfficiency::MyFill(THashTable* table, const char* name, const char* title, int binsx, float minx, float maxx, int binsy, float miny, float maxy, double valx, double valy) {
+	TH2F* h = (TH2F*) table->FindObject(name);
+	if(h) {
+		h->Fill(valx, valy);
+	} else {
+		h = new TH2F(name, title, binsx, minx, maxx, binsy, miny, maxy);
+		h->Fill(valx, valy);
+		table->Add(h);
+	}
+}
+
 void SabreEfficiency::CalculateEfficiency(const char* file) {
 	std::cout<<"----------SABRE Efficiency Calculation----------"<<std::endl;
 	std::cout<<"Loading in output from kinematics simulation: "<<file<<std::endl;
@@ -204,6 +226,7 @@ void SabreEfficiency::Run2Step(const char* file) {
 	Mask::NucData* break1 = new Mask::NucData();
 	Mask::NucData* break2 = new Mask::NucData();
 
+	THashTable* table = new THashTable();
 
 	tree->SetBranchAddress("breakup1", &break1);
 	tree->SetBranchAddress("breakup2", &break2);
@@ -218,8 +241,8 @@ void SabreEfficiency::Run2Step(const char* file) {
 	int count = 0;
 	int npercent = 0;
 
-	int cnt_03=0, cnt_47=0, cnt_811=0, cnt_1215=0;
-	double avg_theta03=0, avg_theta47=0, avg_theta811=0, avg_theta1215=0;
+	int cnt_09=0, cnt_08=0, cnt_07=0, cnt_06=0;
+	double costheta_cm =0;
 
 	Mask::Vec3 coords;
 	double thetaIncident, eloss;
@@ -238,21 +261,28 @@ void SabreEfficiency::Run2Step(const char* file) {
 				auto chan = det.GetTrajectoryRingWedge(break1->theta, break1->phi);
 				if(chan.first != -1 && chan.second != -1) {
 					if(dmap.IsDead(j, chan.first, 0) || dmap.IsDead(j, chan.second, 1)) break;
-
-					if(chan.first >= 0 && chan.first <4) {
-						cnt_03++;
-						avg_theta03 += break1->theta_cm;
-					} else if(chan.first >= 4 && chan.first <8) {
-						cnt_47++;
-						avg_theta47 += break1->theta_cm;
-					} else if(chan.first >= 8 && chan.first <12) {
-						cnt_811++;
-						avg_theta811 += break1->theta_cm;
-					} else if(chan.first >= 12 && chan.first <16) {
-						cnt_1215++;
-						avg_theta1215 += break1->theta_cm;
+					costheta_cm = std::cos(break1->theta_cm);
+					double this_bin;
+					std::string this_name;
+					for(int k=-9; k<=10; k++) {
+						this_bin = 0.1*k;
+						this_name = "counter_histo_bin"+std::to_string(k);
+						if(costheta_cm > this_bin-0.05 && costheta_cm < this_bin+0.05) {
+							MyFill(table, this_name.c_str(), "ctheta",20,-1.0,1.0,costheta_cm);
+							break;
+						} 
 					}
-
+					/*
+					if(costheta_cm > -0.95 && costheta_cm < -0.85) {
+						cnt_09++;
+					} else if(costheta_cm > -0.85 && costheta_cm < -0.75) {
+						cnt_08++;
+					} else if(costheta_cm > -0.75 && costheta_cm < -0.65) {
+						cnt_07++;
+					} else if(costheta_cm > -0.65 && costheta_cm < -0.55) {
+						cnt_06++;
+					}
+					*/
 					coords = det.GetTrajectoryCoordinates(break1->theta, break1->phi);
 					thetaIncident = std::acos(coords.Dot(det.GetNormTilted())/(coords.GetR()));
 					eloss = deadlayer.getEnergyLossTotal(break1->Z, break1->A, break1->KE, M_PI - thetaIncident);
@@ -289,35 +319,24 @@ void SabreEfficiency::Run2Step(const char* file) {
 
 	double b1eff = ((double) b1_thetas.size())/nevents;
 	double b2eff = ((double) b2_thetas.size())/nevents;
-	double b1eff_ring03 = cnt_03/nevents;
-	double b1eff_ring47 = cnt_47/nevents;
-	double b1eff_ring811 = cnt_811/nevents;
-	double b1eff_ring1215 = cnt_1215/nevents;
-	avg_theta03 /= cnt_03;
-	avg_theta47 /= cnt_47;
-	avg_theta811 /= cnt_811;
-	avg_theta1215 /= cnt_1215;
+	double b1eff_09 = cnt_09/nevents;
+	double b1eff_08 = cnt_08/nevents;
+	double b1eff_07 = cnt_07/nevents;
+	double b1eff_06 = cnt_06/nevents;
 	TParameter<double> break1_eff("Light Breakup Efficiency", b1eff);
-	TParameter<double> break1_eff_ring03("Light Breakup Efficiency Rings03", b1eff_ring03);
-	TParameter<double> break1_eff_ring47("Light Breakup Efficiency Rings47", b1eff_ring47);
-	TParameter<double> break1_eff_ring811("Light Breakup Efficiency Rings811", b1eff_ring811);
-	TParameter<double> break1_eff_ring1215("Light Breakup Efficiency Rings1215", b1eff_ring1215);
-	TParameter<double> avg_theta_cm_ring03("Avg. ThetaCM Rings03", avg_theta03);
-	TParameter<double> avg_theta_cm_ring47("Avg. ThetaCM Rings47", avg_theta47);
-	TParameter<double> avg_theta_cm_ring811("Avg. ThetaCM Rings811", avg_theta811);
-	TParameter<double> avg_theta_cm_ring1215("Avg. ThetaCM Rings1215", avg_theta1215);
+	TParameter<double> break1_eff_09("Light Breakup Efficiency CosTheta -0.9", b1eff_09);
+	TParameter<double> break1_eff_08("Light Breakup Efficiency CosTheta -0.8", b1eff_08);
+	TParameter<double> break1_eff_07("Light Breakup Efficiency CosTheta -0.7", b1eff_07);
+	TParameter<double> break1_eff_06("Light Breakup Efficiency CosTheta -0.6", b1eff_06);
 	TParameter<double> break2_eff("Heavy Breakup Efficiency", b2eff);
 
 	input->cd();
+	table->Write();
 	break1_eff.Write();
-	break1_eff_ring03.Write();
-	break1_eff_ring47.Write();
-	break1_eff_ring811.Write();
-	break1_eff_ring1215.Write();
-	avg_theta_cm_ring03.Write();
-	avg_theta_cm_ring47.Write();
-	avg_theta_cm_ring811.Write();
-	avg_theta_cm_ring1215.Write();
+	break1_eff_09.Write();
+	break1_eff_08.Write();
+	break1_eff_07.Write();
+	break1_eff_06.Write();
 	break2_eff.Write();
 	input->Close();
 
