@@ -1,5 +1,5 @@
 ----------Data Information----------
-OutputFile: /media/gordon/b6414c35-ec1f-4fc1-83bc-a6b68ca4325a/gwm17/12C3Hed_13N3546keV_ps_fixedThetaBins_test.root
+OutputFile: /data1/gwm17/10B3He/Feb2021/12C3Hed_13N3546keV_ps_fixedThetaBins_test.root
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------

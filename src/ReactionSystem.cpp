@@ -1,6 +1,6 @@
 #include "ReactionSystem.h"
 #include "KinematicsExceptions.h"
-#include <gsl/gsl_sf_legendre.h>
+#include "LegendrePoly.h"
 
 namespace Mask {
 
@@ -65,7 +65,7 @@ double ReactionSystem::GetDecayTheta(int L) {
 	do {
 		costheta = generator->Uniform(-1.0, 1.0);
 		check = generator->Uniform(0.0, 1.0);
-		probability = std::pow(gsl_sf_legendre_Pl(L, costheta), 2.0);
+		probability = std::pow(P_l(L, costheta), 2.0);
 	} while(check > probability);
 
 	return std::acos(costheta);

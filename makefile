@@ -2,7 +2,7 @@ CC=g++
 ROOTGEN=rootcint
 CFLAGS=-g -Wall `root-config --cflags`
 CPPFLAGS=-I ./include
-LDFLAGS=`root-config --glibs` -lgsl
+LDFLAGS=`root-config --glibs`
 
 ROOTINCLDIR=./
 INCLDIR=./include

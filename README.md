@@ -33,4 +33,4 @@ To run MASK simply do the following from the MASK directory:
 Input.txt can be replaced by any text file with the correct format.
 
 ## Requirements
-MASK requires that ROOT is installed for data writting and visualization, as well as for random number generation. It also requires gsl to calculate Legendre Polynomials. Testing has been done only on ROOT 6. Mileage on all other ROOT versions will vary.
+MASK requires that ROOT is installed for data writting and visualization, as well as for random number generation. Testing has been done only on ROOT 6. Mileage on all other ROOT versions will vary.
