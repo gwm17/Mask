@@ -79,10 +79,12 @@ void ThreeStepSystem::RunSystem() {
 	//Sample parameters
 	double bke = generator->Gaus(m_beamDist.first, m_beamDist.second);
 	double rxnTheta = acos(generator->Uniform(cos(m_theta1Range.first), cos(m_theta1Range.second)));
-	double rxnPhi = 0;
-	double decay1Theta = GetDecayTheta(L1);
+	double rxnPhi = generator->Uniform(m_phi1Range.first, m_phi1Range.second);
+	double decay1costheta = decay1dist.GetRandomCosTheta();
+	double decay1Theta = std::acos(decay1costheta);
 	double decay1Phi = generator->Uniform(0, M_PI*2.0);
-	double decay2Theta = GetDecayTheta(L2);
+	double decay2costheta = decay2dist.GetRandomCosTheta();
+	double decay2Theta = std::acos(decay2costheta);
 	double decay2Phi = generator->Uniform(0, M_PI*2.0);
 	double residEx = generator->Gaus(m_exDist.first, m_exDist.second);
 
@@ -100,9 +102,22 @@ void ThreeStepSystem::RunSystem() {
 	step1.Calculate();
 
 	step2.SetTarget(step1.GetResidual());
+	if(decay1costheta == -10) {
+		step2.ResetEjectile();
+		step2.ResetResidual();
+		step3.ResetTarget();
+		step3.ResetEjectile();
+		step3.ResetResidual();
+		return;
+	}
 	step2.Calculate();
 
 	step3.SetTarget(step2.GetResidual());
+	if(decay2costheta == -10) {
+		step3.ResetEjectile();
+		step3.ResetResidual();
+		return;
+	}
 	step3.TurnOnResidualEloss();
 	step3.Calculate();
 

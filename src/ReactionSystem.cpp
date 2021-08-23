@@ -5,12 +5,12 @@
 namespace Mask {
 
 ReactionSystem::ReactionSystem() :
-	m_beamDist(0,0), m_theta1Range(0,0), m_exDist(0,0), generator(nullptr), target_set_flag(false), gen_set_flag(false), rxnLayer(0), m_sys_equation("")
+	m_beamDist(0,0), m_theta1Range(0,0), m_phi1Range(0,0), m_exDist(0,0), generator(nullptr), target_set_flag(false), gen_set_flag(false), rxnLayer(0), m_sys_equation("")
 {
 }
 
 ReactionSystem::ReactionSystem(std::vector<int>& z, std::vector<int>& a) :
-	m_beamDist(0,0), m_theta1Range(0,0), m_exDist(0,0), generator(nullptr), target_set_flag(false), gen_set_flag(false), rxnLayer(0), m_sys_equation("")
+	m_beamDist(0,0), m_theta1Range(0,0), m_phi1Range(0,0), m_exDist(0,0), generator(nullptr), target_set_flag(false), gen_set_flag(false), rxnLayer(0), m_sys_equation("")
 {
 	SetNuclei(z, a);
 }
@@ -27,6 +27,13 @@ bool ReactionSystem::SetNuclei(std::vector<int>&z, std::vector<int>& a) {
 	step1.SetNuclei(z[0], a[0], z[1], a[1], z[2], a[2]);
 	SetSystemEquation();
 	return true;
+}
+
+void ReactionSystem::SetRandomGenerator(TRandom3* gen) {
+	generator = gen;
+	decay1dist.AttachRandomNumberGenerator(gen);
+	decay2dist.AttachRandomNumberGenerator(gen);
+	gen_set_flag = true;
 }
 
 void ReactionSystem::AddTargetLayer(std::vector<int>& zt, std::vector<int>& at, std::vector<int>& stoich, double thickness) {
@@ -55,22 +62,6 @@ void ReactionSystem::SetSystemEquation()  {
 	m_sys_equation += step1.GetResidual().GetIsotopicSymbol();
 }
 
-double ReactionSystem::GetDecayTheta(int L) {
-	if(!gen_set_flag) return 0.0;
-
-	double probability = 0.0;
-	double costheta = 0.0;
-	double check = 0.0;
-
-	do {
-		costheta = generator->Uniform(-1.0, 1.0);
-		check = generator->Uniform(0.0, 1.0);
-		probability = std::pow(P_l(L, costheta), 2.0);
-	} while(check > probability);
-
-	return std::acos(costheta);
-}
-
 void ReactionSystem::RunSystem() {
 	if(!gen_set_flag) return;
 	
@@ -80,7 +71,13 @@ void ReactionSystem::RunSystem() {
 	}
 
 	if(step1.IsDecay()) {
-		double rxnTheta = GetDecayTheta(L1);
+		double decaycostheta = decay1dist.GetRandomCosTheta();
+		if(decaycostheta == -10.0) {
+			step1.ResetEjectile();
+			step1.ResetResidual();
+			return;
+		}
+		double rxnTheta = std::acos(decay1dist.GetRandomCosTheta());
 		double rxnPhi = generator->Uniform(0, 2.0*M_PI);
 		step1.SetPolarRxnAngle(rxnTheta);
 		step1.SetAzimRxnAngle(rxnPhi);
@@ -91,7 +88,7 @@ void ReactionSystem::RunSystem() {
 		//Sample parameters
 		double bke = generator->Gaus(m_beamDist.first, m_beamDist.second);
 		double rxnTheta = acos(generator->Uniform(cos(m_theta1Range.first), cos(m_theta1Range.second)));
-		double rxnPhi = 0;
+		double rxnPhi = generator->Uniform(m_phi1Range.first, m_phi1Range.second);
 		double residEx = generator->Gaus(m_exDist.first, m_exDist.second);
 	
 		step1.SetBeamKE(bke);

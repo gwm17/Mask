@@ -23,6 +23,7 @@ public:
 	void SetNuclei(int zt, int at, int zp, int ap, int ze, int ae);
 	void SetNuclei(const Nucleus* nucs);
 	void SetBeamKE(double bke);
+	void SetEjectileThetaType(int type);
 
 	/*Setters and getters*/
 	inline void SetLayeredTarget(LayeredTarget* targ) { target = targ; };
@@ -46,10 +47,16 @@ public:
 	inline const Nucleus& GetTarget() const { return reactants[0]; };
 	inline const Nucleus& GetEjectile() const { return reactants[2]; };
 	inline const Nucleus& GetResidual() const { return reactants[3]; };
+	inline void ResetTarget() { reactants[0].SetVectorCartesian(0,0,0,0); };
+	inline void ResetProjectile() { reactants[1].SetVectorCartesian(0,0,0,0); };
+	inline void ResetEjectile() { reactants[2].SetVectorCartesian(0,0,0,0); };
+	inline void ResetResidual() { reactants[3].SetVectorCartesian(0,0,0,0); };
 	inline int GetRxnLayer() { return rxnLayer; };
 
 private:
 	void CalculateReaction(); //target + project -> eject + resid
+	void CalculateReactionThetaLab();
+	void CalculateReactionThetaCM();
 	void CalculateDecay(); //target -> light_decay (eject) + heavy_decay(resid)
 
 	Nucleus reactants[4]; //0=target, 1=projectile, 2=ejectile, 3=residual
@@ -57,9 +64,13 @@ private:
 
 	double m_bke, m_theta, m_phi, m_ex;
 
-	int  rxnLayer;
+	int rxnLayer;
+	int m_eject_theta_type; 
 
 	bool decayFlag, nuc_initFlag, resid_elossFlag;
+
+	static constexpr int lab = 0;
+	static constexpr int center_of_mass = 1;
 
 };
 

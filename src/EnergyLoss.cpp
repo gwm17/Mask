@@ -29,7 +29,7 @@ void EnergyLoss::SetTargetComponents(std::vector<int>& Zt, std::vector<int>& At,
   for(unsigned int i=0; i<Stoich.size(); i++) {
     comp_denom += Stoich[i];
     if(ZT[i] > MAX_Z) {
-      throw ELossException();
+      throw ELossException("Maximum allowed target Z exceeded");
     }
   }
   targ_composition.resize(Stoich.size());
@@ -136,7 +136,7 @@ double EnergyLoss::GetElectronicStoppingPower(double energy) {
   double e_per_u = energy/MP;
   std::vector<double> values;
   if(e_per_u > MAX_H_E_PER_U) {
-    throw ELossException();
+    throw ELossException("Exceeded maximum allowed energy per nucleon");
   } else if (e_per_u > 1000.0) {
     for(auto& z: ZT) {
       values.push_back(Hydrogen_dEdx_High(e_per_u, energy, z));
@@ -150,11 +150,11 @@ double EnergyLoss::GetElectronicStoppingPower(double energy) {
       values.push_back(Hydrogen_dEdx_Low(e_per_u, z));
     }
   } else {
-    throw ELossException();
+    throw ELossException("Negative energy per nucleon");
   }
 
   if(values.size() == 0) {
-    throw ELossException();
+    throw ELossException("Size of value array is 0. Unable to iterate over target components");
   }
 
   if(ZP > 1) { //not hydrogen, need to account for effective charge
@@ -192,6 +192,9 @@ double EnergyLoss::GetNuclearStoppingPower(double energy) {
 
 /*Wrapper function for aquiring total stopping (elec + nuc)*/
 double EnergyLoss::GetTotalStoppingPower(double energy) {
+  if(ZP == 0) {
+    return GetNuclearStoppingPower(energy);
+  }
   return GetElectronicStoppingPower(energy)+GetNuclearStoppingPower(energy);
 }
 

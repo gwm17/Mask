@@ -25,12 +25,12 @@ void Plotter::FillData(const Nucleus& nuc) {
 	std::string ex_name = sym + "_ex";
 	std::string ex_title = ex_name + ";E_{ex} (MeV);counts";
 	std::string angdist_name = sym+"_angDist";
-	std::string angdist_title = angdist_name+";#theta_{CM};counts";
+	std::string angdist_title = angdist_name+";cos#right(#theta_{CM}#left);counts";
 	
 	MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetKE(), 2);
 	MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, nuc.GetKE(), 4);
 	MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
-	MyFill(angdist_name.c_str(), angdist_title.c_str(),180,0,180,nuc.GetThetaCM()*rad2deg);
+	MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
 	
 }
 

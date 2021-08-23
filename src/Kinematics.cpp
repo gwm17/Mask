@@ -1,4 +1,5 @@
 #include "Kinematics.h"
+#include "MaskFile.h"
 #include <fstream>
 #include <iostream>
 
@@ -109,25 +110,31 @@ bool Kinematics::LoadConfig(const char* filename) {
 		input>>junk;
 	}
 
-	double par1, par2, L1, L2;
+	double par1, par2;
+	std::string dfile1, dfile2;
 	getline(input, junk);
 	getline(input, junk);
 
 	input>>junk>>m_nsamples;
 	input>>junk>>par1>>junk>>par2;
 	sys->SetBeamDistro(par1, par2);
+	input>>junk>>par1;
+	sys->SetReactionThetaType(par1);
 	input>>junk>>par1>>junk>>par2;
 	sys->SetTheta1Range(par1, par2);
 	input>>junk>>par1>>junk>>par2;
+	sys->SetPhi1Range(par1, par2);
+	input>>junk>>par1>>junk>>par2;
 	sys->SetExcitationDistro(par1, par2);
-	input>>junk>>L1;
-	input>>junk>>L2;
-	sys->SetDecay1AngularMomentum(L1);
-	sys->SetDecay2AngularMomentum(L2);
+	input>>junk>>dfile1;
+	input>>junk>>dfile2;
+	sys->SetDecay1Distribution(dfile1);
+	sys->SetDecay2Distribution(dfile2);
 	sys->SetRandomGenerator(global_generator);
 
 	std::cout<<"Reaction equation: "<<GetSystemName()<<std::endl;
-	std::cout<<"Decay1 angular momentum: "<<L1<<" Decay2 angular momentum: "<<L2<<std::endl;
+	std::cout<<"Decay1 angular momentum: "<<sys->GetDecay1AngularMomentum()<<" Decay2 angular momentum: "<<sys->GetDecay2AngularMomentum()<<std::endl;
+	std::cout<<"Decay1 total branching ratio: "<<sys->GetDecay1BranchingRatio()<<" Decay2 total branching ratio: "<<sys->GetDecay2BranchingRatio()<<std::endl;
 	std::cout<<"Number of samples: "<<GetNumberOfSamples()<<std::endl;
 
 	return true;
@@ -180,6 +187,7 @@ void Kinematics::Run() {
 
 void Kinematics::RunOneStepRxn() {
 
+	
 	TFile* output = TFile::Open(m_outfile_name.c_str(), "RECREATE");
 	TTree* tree;
 	NucData targ, proj, eject, residual;
@@ -190,12 +198,15 @@ void Kinematics::RunOneStepRxn() {
 		tree->Branch("ejectile", &eject);
 		tree->Branch("residual", &residual);
 	}
+	
 
 	//For progress tracking
 	int percent5 = 0.05*m_nsamples;
 	int count = 0;
 	int npercent = 0;
 
+	std::vector<Nucleus> data;
+	data.resize(4);
 	for(int i=0; i<m_nsamples; i++) {
 		if(++count == percent5) {//Show update every 5 percent
 			npercent++;
@@ -204,6 +215,7 @@ void Kinematics::RunOneStepRxn() {
 		}
 
 		sys->RunSystem();
+		
 		if(save_tree_flag) {
 			targ = ConvertNucleus(sys->GetTarget());
 			proj = ConvertNucleus(sys->GetProjectile());
@@ -217,8 +229,10 @@ void Kinematics::RunOneStepRxn() {
 			plotman.FillData(sys->GetEjectile());
 			plotman.FillData(sys->GetResidual());
 		}
+
 	}
 
+	
 	output->cd();
 	if(save_tree_flag) tree->Write(tree->GetName(), TObject::kOverwrite);
 	if(do_plotter_flag) {
@@ -226,6 +240,7 @@ void Kinematics::RunOneStepRxn() {
 		plotman.ClearTable();
 	}
 	output->Close();
+	
 }
 
 void Kinematics::RunOneStepDecay() {
@@ -264,6 +279,7 @@ void Kinematics::RunOneStepDecay() {
 			plotman.FillData(sys->GetEjectile());
 			plotman.FillData(sys->GetResidual());
 		}
+
 	}
 
 	output->cd();
@@ -282,6 +298,7 @@ void Kinematics::RunTwoStep() {
 		return;
 	}
 
+	
 	TFile* output = TFile::Open(m_outfile_name.c_str(), "RECREATE");
 	TTree* tree;
 	NucData targ, proj, eject, residual, break1, break2;
@@ -294,6 +311,8 @@ void Kinematics::RunTwoStep() {
 		tree->Branch("breakup1", &break1);
 		tree->Branch("breakup2", &break2);
 	}
+	
+
 
 	//For progress tracking
 	int percent5 = 0.05*m_nsamples;
@@ -325,8 +344,10 @@ void Kinematics::RunTwoStep() {
 			plotman.FillData(this_sys->GetBreakup1());
 			plotman.FillData(this_sys->GetBreakup2());
 		}
+		
 	}
 
+	
 	output->cd();
 	if(save_tree_flag) tree->Write(tree->GetName(), TObject::kOverwrite);
 	if(do_plotter_flag) {
@@ -334,6 +355,7 @@ void Kinematics::RunTwoStep() {
 		plotman.ClearTable();
 	}
 	output->Close();
+	
 }
 
 void Kinematics::RunThreeStep() {

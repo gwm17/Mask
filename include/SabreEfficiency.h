@@ -4,6 +4,7 @@
 #include "SabreDetector.h"
 #include "Target.h"
 #include "DeadChannelMap.h"
+#include "Kinematics.h"
 #include <THashTable.h>
 
 class SabreEfficiency {
@@ -12,20 +13,23 @@ public:
 	~SabreEfficiency();
 	inline void SetReactionType(int t) { m_rxn_type = t; };
     void SetDeadChannelMap(std::string& filename) { dmap.LoadMapfile(filename); };
-	void CalculateEfficiency(const char* file);
+	void CalculateEfficiency(const std::string& file);
+    void DrawDetectorSystem(const std::string& filename);
+    double RunConsistencyCheck();
 
 private:
-    void MyFill(THashTable* table, const char* name, const char* title, int bins, float min, float max, double val);
-    void MyFill(THashTable* table, const char* name, const char* title, int binsx, float minx, float maxx, int binsy, float miny, float maxy, double valx, double valy);
-	void Run2Step(const char*);
-	void Run3Step(const char*);
-	void RunDecay(const char*);
+    void MyFill(THashTable* table, const std::string& name, const std::string& title, int bins, float min, float max, double val);
+    void MyFill(THashTable* table, const std::string& name, const std::string& title, int binsx, float minx, float maxx, double valx, int binsy, float miny, float maxy, double valy);
+	std::pair<bool,double> IsSabre(Mask::NucData* nucleus);
+    void Run2Step(const std::string& filename);
+	void Run3Step(const std::string& filename);
+	void RunDecay(const std::string& filename);
 
 	int m_rxn_type;
 	std::vector<SabreDetector> detectors;
-    std::vector<double> ringxs, ringys, ringzs;
-    std::vector<double> wedgexs, wedgeys, wedgezs;
+    
 	Target deadlayer;
+    Target sabre_eloss;
     DeadChannelMap dmap;
 
 
@@ -42,6 +46,7 @@ private:
     const double PHI4 = 90.0;
     const double DEG2RAD = M_PI/180.0;
     static constexpr double DEADLAYER_THIN = 50 * 1e-7 * 2.3296 * 1e6; // ug/cm^2 (50 nm thick * density)
+    static constexpr double SABRE_THICKNESS = 500 * 1e-4 * 2.3926 * 1e6; // ug/cm^2 (500 um thick * density)
 
     const double ENERGY_THRESHOLD = 0.2; //in MeV
 

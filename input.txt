@@ -1,28 +1,31 @@
 ----------Data Information----------
-OutputFile: /data1/gwm17/10B3He/Feb2021/12C3Hed_13N3546keV_ps_fixedThetaBins_test.root
+OutputFile: /data1/gwm17/TRIUMF_7Bed/simulation/7Bedp_600keV_beam_centered_target_targetgap_BackQQQ_rndmCM_test.root
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------
 ReactionType: 2
 Z	A (order is target, projectile, ejectile, break1, break3)
-6	12
-2	3
 1	2
+4	7
 1	1
+2	4
 ----------Target Information----------
 Name: test_targ
 Layers: 1
 ~Layer1
-Thickness(ug/cm^2): 41
+Thickness(ug/cm^2): 50
 Z	A	Stoich
+1	2	2
 6	12	1
 0
 ~
 ----------Sampling Information----------
 NumberOfSamples: 100000
-BeamMeanEnergy(MeV): 24 BeamEnergySigma(MeV): 0.001
-EjectileThetaMin(deg): 3.0 EjectileThetaMax(deg): 3.0
-ResidualExMean(MeV): 3.546 ResidualExSigma(MeV): 0.02
-Decay1_AngularMomentum: 0
-Decay2_AngularMomentum: 0
+BeamMeanEnergy(MeV): 0.6 BeamEnergySigma(MeV): 0.001
+EjectileThetaType(0=Lab,1=CM): 1
+EjectileThetaMin(deg): 0.0 EjectileThetaMax(deg): 180.0
+EjectilePhiMin(deg): 0.0 EjectilePhiMax(deg): 360.0
+ResidualExMean(MeV): 0.0 ResidualExSigma(MeV): 0.0
+Decay1_DistributionFile: ./etc/isotropic_dist.txt
+Decay2_DistributionFile: ./etc/isotropic_dist.txt
 --------------------------------------

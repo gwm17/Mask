@@ -2,6 +2,7 @@
 #define KINEMATICSEXCEPTIONS_H
 
 #include <exception>
+#include <string>
 #include <stdexcept>
 /*
 	ELossException
@@ -12,8 +13,16 @@
 	for locations where this could be thrown
 */
 struct ELossException : public std::exception {
+	ELossException(const std::string& error) {
+		m_error = error;
+	}
+
+	std::string m_error;
+
 	const char* what() const noexcept {
-		return "Failure to calculate particle energy loss. See KinematicsExceptions.h for documentation.";
+		std::string err_str = "Failure to calculate particle energy loss. Reason: ";
+		err_str += m_error + " See KinematicsExceptions.h for documentation.";
+		return err_str.c_str();
 	};
 };
 
@@ -58,6 +67,17 @@ struct ReactionLayerException : public std::exception {
 struct QValueException : public std::exception {
 	const char* what() const noexcept {
 		return "Q-value is negative for decay calculation. See KinematicsExceptions.h for documentation.";
+	};
+};
+
+/*
+	EnergyThresholdException
+	This is an exception thrown when the Reaction attempts to calculate a reaction which does not have enough incoming (read: beam kinetic energy) energy
+	to occur even for the 0 degree case. The reaction is kinematically forbidden.
+*/
+struct EnergyThresholdException : public std::exception {
+	const char* what() const noexcept {
+		return "Reaction does not have enough energy to proceed. See KinematicsExceptions.h for documentation.";
 	};
 };
 

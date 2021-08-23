@@ -1,0 +1,2 @@
+AngularMomentum: 0
+A0: 0.5
