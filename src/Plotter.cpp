@@ -16,15 +16,15 @@ Plotter::~Plotter() {
 	delete table;
 }
 
-void Plotter::FillData(const Nucleus& nuc) {
+void Plotter::FillData(const Nucleus& nuc, const std::string& modifier) {
 	std::string sym = nuc.GetIsotopicSymbol();
-	std::string ke_vs_th_name = sym + "_ke_vs_theta";
+	std::string ke_vs_th_name = sym + modifier + "_ke_vs_theta";
 	std::string ke_vs_th_title = ke_vs_th_name + ";#theta_{lab} (degrees);Kinetic Energy (MeV)";
-	std::string ke_vs_ph_name = sym + "_ke_vs_phi";
+	std::string ke_vs_ph_name = sym + modifier + "_ke_vs_phi";
 	std::string ke_vs_ph_title = ke_vs_ph_name + ";#phi_{lab} (degrees);Kinetic Energy (MeV)";
-	std::string ex_name = sym + "_ex";
+	std::string ex_name = sym + modifier + "_ex";
 	std::string ex_title = ex_name + ";E_{ex} (MeV);counts";
-	std::string angdist_name = sym+"_angDist";
+	std::string angdist_name = sym + modifier +"_angDist";
 	std::string angdist_title = angdist_name+";cos#right(#theta_{CM}#left);counts";
 	
 	MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetKE(), 2);

@@ -267,10 +267,10 @@ void Kinematics::RunOneStepRxn() {
 			tree->Fill();
 		}
 		if(do_plotter_flag) {
-			plotman.FillData(this_sys->GetTarget());
-			plotman.FillData(this_sys->GetProjectile());
-			plotman.FillData(this_sys->GetEjectile());
-			plotman.FillData(this_sys->GetResidual());
+			plotman.FillData(this_sys->GetTarget(), "targ");
+			plotman.FillData(this_sys->GetProjectile(), "proj");
+			plotman.FillData(this_sys->GetEjectile(), "eject");
+			plotman.FillData(this_sys->GetResidual(), "resid");
 		}
 
 	}
@@ -322,9 +322,9 @@ void Kinematics::RunOneStepDecay() {
 			tree->Fill();
 		}
 		if(do_plotter_flag) {
-			plotman.FillData(this_sys->GetTarget());
-			plotman.FillData(this_sys->GetEjectile());
-			plotman.FillData(this_sys->GetResidual());
+			plotman.FillData(this_sys->GetTarget(), "targ");
+			plotman.FillData(this_sys->GetEjectile(), "eject");
+			plotman.FillData(this_sys->GetResidual(), "resid");
 		}
 
 	}
@@ -384,12 +384,12 @@ void Kinematics::RunTwoStep() {
 			tree->Fill();
 		}
 		if(do_plotter_flag) {
-			plotman.FillData(this_sys->GetTarget());
-			plotman.FillData(this_sys->GetProjectile());
-			plotman.FillData(this_sys->GetEjectile());
-			plotman.FillData(this_sys->GetResidual());
-			plotman.FillData(this_sys->GetBreakup1());
-			plotman.FillData(this_sys->GetBreakup2());
+			plotman.FillData(this_sys->GetTarget(), "targ");
+			plotman.FillData(this_sys->GetProjectile(), "proj");
+			plotman.FillData(this_sys->GetEjectile(), "eject");
+			plotman.FillData(this_sys->GetResidual(), "resid");
+			plotman.FillData(this_sys->GetBreakup1(), "break1");
+			plotman.FillData(this_sys->GetBreakup2(), "break2");
 		}
 		
 	}
@@ -452,14 +452,14 @@ void Kinematics::RunThreeStep() {
 			tree->Fill();
 		}
 		if(do_plotter_flag) {
-			plotman.FillData(this_sys->GetTarget());
-			plotman.FillData(this_sys->GetProjectile());
-			plotman.FillData(this_sys->GetEjectile());
-			plotman.FillData(this_sys->GetResidual());
-			plotman.FillData(this_sys->GetBreakup1());
-			plotman.FillData(this_sys->GetBreakup2());
-			plotman.FillData(this_sys->GetBreakup3());
-			plotman.FillData(this_sys->GetBreakup4());
+			plotman.FillData(this_sys->GetTarget(), "targ");
+			plotman.FillData(this_sys->GetProjectile(), "proj");
+			plotman.FillData(this_sys->GetEjectile(), "eject");
+			plotman.FillData(this_sys->GetResidual(), "resid");
+			plotman.FillData(this_sys->GetBreakup1(), "break1");
+			plotman.FillData(this_sys->GetBreakup2(), "break2");
+			plotman.FillData(this_sys->GetBreakup3(), "break3");
+			plotman.FillData(this_sys->GetBreakup4(), "break4");
 		}
 	}
 

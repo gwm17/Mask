@@ -27,7 +27,7 @@ public:
 		GenerateGraphs(); 
 		return table; 
 	};
-	void FillData(const Nucleus& nuc);
+	void FillData(const Nucleus& nuc, const std::string& modifier = "");
 
 private:
 	THashTable* table;
