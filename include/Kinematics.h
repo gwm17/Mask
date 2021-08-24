@@ -2,6 +2,8 @@
 #define KINEMATICS_H
 
 #include "ReactionSystem.h"
+#include "DecaySystem.h"
+#include "OneStepSystem.h"
 #include "TwoStepSystem.h"
 #include "ThreeStepSystem.h"
 #include "Plotter.h"
@@ -32,7 +34,7 @@ public:
 	inline void SetTreeFlag() { save_tree_flag = true; };
 	inline void SetPlotterFlag() { do_plotter_flag = true; };
 	inline int GetNumberOfSamples() { return m_nsamples; };
-	inline const char* GetSystemName() { return sys == nullptr ? "" : sys->GetSystemEquation(); };
+	inline const char* GetSystemName() { return sys == nullptr ? "" : sys->GetSystemEquation().c_str(); };
 	inline const char* GetOutputName() { return m_outfile_name.c_str(); };
 	inline int GetReactionType() { return m_rxn_type; };
 	void Run();

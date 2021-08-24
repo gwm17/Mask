@@ -1,10 +1,10 @@
 ----------Data Information----------
-OutputFile: /data1/gwm17/TRIUMF_7Bed/simulation/7Bedp_600keV_beam_centered_target_targetgap_BackQQQ_rndmCM_test.root
+OutputFile: /data1/gwm17/mask_tests/7Bedp_600keV_beam_centered_target_targetgap_BackQQQ_rndmCM_test.root
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------
 ReactionType: 2
-Z	A (order is target, projectile, ejectile, break1, break3)
+Z	A (order is target, projectile, ejectile, break1, break3(if pure decay is target, ejectile))
 1	2
 4	7
 1	1

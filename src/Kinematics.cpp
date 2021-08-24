@@ -43,9 +43,9 @@ bool Kinematics::LoadConfig(const char* filename) {
 	switch(m_rxn_type) {
 		case 0:
 		{
-			sys = new ReactionSystem();
+			sys = new DecaySystem();
 			m_rxn_type = ONESTEP_DECAY;
-			for(int i=0; i<3; i++) {
+			for(int i=0; i<2; i++) {
 				input>>z>>a;
 				avec.push_back(a);
 				zvec.push_back(z);
@@ -54,7 +54,7 @@ bool Kinematics::LoadConfig(const char* filename) {
 		}
 		case 1:
 		{
-			sys = new ReactionSystem();
+			sys = new OneStepSystem();
 			m_rxn_type = ONESTEP_RXN;
 			for(int i=0; i<3; i++) {
 				input>>z>>a;
@@ -109,6 +109,7 @@ bool Kinematics::LoadConfig(const char* filename) {
 		sys->AddTargetLayer(zvec, avec, svec, thickness);
 		input>>junk;
 	}
+	std::cout<<"Reaction equation: "<<GetSystemName()<<std::endl;
 
 	double par1, par2;
 	std::string dfile1, dfile2;
@@ -119,7 +120,23 @@ bool Kinematics::LoadConfig(const char* filename) {
 	input>>junk>>par1>>junk>>par2;
 	sys->SetBeamDistro(par1, par2);
 	input>>junk>>par1;
-	sys->SetReactionThetaType(par1);
+	switch(m_rxn_type) {
+		case ONESTEP_RXN :
+		{
+			dynamic_cast<OneStepSystem*>(sys)->SetReactionThetaType(par1);
+			break;
+		}
+		case TWOSTEP:
+		{
+			dynamic_cast<TwoStepSystem*>(sys)->SetReactionThetaType(par1);
+			break;
+		}
+		case THREESTEP:
+		{
+			dynamic_cast<ThreeStepSystem*>(sys)->SetReactionThetaType(par1);
+			break;
+		}
+	}
 	input>>junk>>par1>>junk>>par2;
 	sys->SetTheta1Range(par1, par2);
 	input>>junk>>par1>>junk>>par2;
@@ -128,13 +145,35 @@ bool Kinematics::LoadConfig(const char* filename) {
 	sys->SetExcitationDistro(par1, par2);
 	input>>junk>>dfile1;
 	input>>junk>>dfile2;
-	sys->SetDecay1Distribution(dfile1);
-	sys->SetDecay2Distribution(dfile2);
+	switch(m_rxn_type) {
+		case ONESTEP_DECAY:
+		{
+			DecaySystem* this_sys = dynamic_cast<DecaySystem*>(sys);
+			this_sys->SetDecay1Distribution(dfile1);
+			std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<std::endl;
+			std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
+			break;
+		}
+		case TWOSTEP:
+		{
+			TwoStepSystem* this_sys = dynamic_cast<TwoStepSystem*>(sys);
+			this_sys->SetDecay1Distribution(dfile1);
+			std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<std::endl;
+			std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
+			break;
+		}
+		case THREESTEP:
+		{
+			ThreeStepSystem* this_sys = dynamic_cast<ThreeStepSystem*>(sys);
+			this_sys->SetDecay1Distribution(dfile1);
+			this_sys->SetDecay2Distribution(dfile2);
+			std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<" Decay2 angular momentum: "<<this_sys->GetDecay2AngularMomentum()<<std::endl;
+			std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<" Decay2 total branching ratio: "<<this_sys->GetDecay2BranchingRatio()<<std::endl;
+			break;
+		}
+	}
 	sys->SetRandomGenerator(global_generator);
 
-	std::cout<<"Reaction equation: "<<GetSystemName()<<std::endl;
-	std::cout<<"Decay1 angular momentum: "<<sys->GetDecay1AngularMomentum()<<" Decay2 angular momentum: "<<sys->GetDecay2AngularMomentum()<<std::endl;
-	std::cout<<"Decay1 total branching ratio: "<<sys->GetDecay1BranchingRatio()<<" Decay2 total branching ratio: "<<sys->GetDecay2BranchingRatio()<<std::endl;
 	std::cout<<"Number of samples: "<<GetNumberOfSamples()<<std::endl;
 
 	return true;
@@ -186,6 +225,10 @@ void Kinematics::Run() {
 }
 
 void Kinematics::RunOneStepRxn() {
+	OneStepSystem* this_sys = dynamic_cast<OneStepSystem*>(sys);
+	if(this_sys == nullptr) {
+		return;
+	}
 
 	
 	TFile* output = TFile::Open(m_outfile_name.c_str(), "RECREATE");
@@ -214,20 +257,20 @@ void Kinematics::RunOneStepRxn() {
 			std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
 		}
 
-		sys->RunSystem();
+		this_sys->RunSystem();
 		
 		if(save_tree_flag) {
-			targ = ConvertNucleus(sys->GetTarget());
-			proj = ConvertNucleus(sys->GetProjectile());
-			eject = ConvertNucleus(sys->GetEjectile());
-			residual = ConvertNucleus(sys->GetResidual());
+			targ = ConvertNucleus(this_sys->GetTarget());
+			proj = ConvertNucleus(this_sys->GetProjectile());
+			eject = ConvertNucleus(this_sys->GetEjectile());
+			residual = ConvertNucleus(this_sys->GetResidual());
 			tree->Fill();
 		}
 		if(do_plotter_flag) {
-			plotman.FillData(sys->GetTarget());
-			plotman.FillData(sys->GetProjectile());
-			plotman.FillData(sys->GetEjectile());
-			plotman.FillData(sys->GetResidual());
+			plotman.FillData(this_sys->GetTarget());
+			plotman.FillData(this_sys->GetProjectile());
+			plotman.FillData(this_sys->GetEjectile());
+			plotman.FillData(this_sys->GetResidual());
 		}
 
 	}
@@ -244,6 +287,10 @@ void Kinematics::RunOneStepRxn() {
 }
 
 void Kinematics::RunOneStepDecay() {
+	DecaySystem* this_sys = dynamic_cast<DecaySystem*>(sys);
+	if(this_sys == nullptr) {
+		return;
+	}
 
 	TFile* output = TFile::Open(m_outfile_name.c_str(), "RECREATE");
 	TTree* tree;
@@ -267,17 +314,17 @@ void Kinematics::RunOneStepDecay() {
 			std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
 		}
 
-		sys->RunSystem();
+		this_sys->RunSystem();
 		if(save_tree_flag) {
-			targ = ConvertNucleus(sys->GetTarget());
-			eject = ConvertNucleus(sys->GetEjectile());
-			residual = ConvertNucleus(sys->GetResidual());
+			targ = ConvertNucleus(this_sys->GetTarget());
+			eject = ConvertNucleus(this_sys->GetEjectile());
+			residual = ConvertNucleus(this_sys->GetResidual());
 			tree->Fill();
 		}
 		if(do_plotter_flag) {
-			plotman.FillData(sys->GetTarget());
-			plotman.FillData(sys->GetEjectile());
-			plotman.FillData(sys->GetResidual());
+			plotman.FillData(this_sys->GetTarget());
+			plotman.FillData(this_sys->GetEjectile());
+			plotman.FillData(this_sys->GetResidual());
 		}
 
 	}

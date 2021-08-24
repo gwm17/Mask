@@ -18,8 +18,14 @@ TwoStepSystem::~TwoStepSystem() {
 
 }
 
+void TwoStepSystem::SetRandomGenerator(TRandom3* gen) {
+	generator = gen;
+	decay1dist.AttachRandomNumberGenerator(gen);
+	gen_set_flag = true;
+}
+
 bool TwoStepSystem::SetNuclei(std::vector<int>&z, std::vector<int>& a) {
-	if(z.size() != a.size() || z.size() < 4) {
+	if(z.size() != a.size() || z.size() != 4) {
 		return false;
 	}
 	int zr = z[0] + z[1] - z[2];

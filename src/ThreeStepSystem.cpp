@@ -18,6 +18,13 @@ ThreeStepSystem::~ThreeStepSystem() {
 
 }
 
+void ThreeStepSystem::SetRandomGenerator(TRandom3* gen) {
+	generator = gen;
+	decay1dist.AttachRandomNumberGenerator(gen);
+	decay2dist.AttachRandomNumberGenerator(gen);
+	gen_set_flag = true;
+}
+
 bool ThreeStepSystem::SetNuclei(std::vector<int>&z, std::vector<int>& a) {
 	if(z.size() != a.size() || z.size() < 5) {
 		return false;
