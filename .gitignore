@@ -10,6 +10,8 @@
 *.o
 *.swp
 .DS_Store
+Makefile
+*.make
 
 
 ###Keep this file###
