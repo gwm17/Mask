@@ -4,32 +4,28 @@
 #include <string>
 #include <THashTable.h>
 
+#include "DetectorEfficiency.h"
 #include "StripDetector.h"
 #include "QQQDetector.h"
 
-class AnasenEfficiency {
+class AnasenEfficiency : public DetectorEfficiency {
 public:
 	AnasenEfficiency();
 	~AnasenEfficiency();
-	void CalculateEfficiency(const std::string& filename);
-	inline void SetReactionType(int type) { m_rxn_type = type; };
-	void DrawDetectorSystem(const std::string& filename);
-	double RunConsistencyCheck();
+	void CalculateEfficiency(const std::string& filename) override;
+	void DrawDetectorSystem(const std::string& filename) override;
+	double RunConsistencyCheck() override;
 
 private:
-	void MyFill(THashTable* table, const std::string& name, const std::string& title, int bins, float min, float max, double val);
-    void MyFill(THashTable* table, const std::string& name, const std::string& title, int binsx, float minx, float maxx, double valx, int binsy, float miny, float maxy, double valy);
-	void RunDecay(const std::string& filename);
-	void RunTwoStep(const std::string& filename);
-	void RunThreeStep(const std::string& filename);
+	void RunDecay(const std::string& filename) override;
+	void Run2Step(const std::string& filename) override;
+	void Run3Step(const std::string& filename) override;
+	void Run1Step(const std::string& filename) override;
 
 	bool IsRing1(double theta, double phi);
 	bool IsRing2(double theta, double phi);
 	bool IsQQQ(double theta, double phi);
 
-	inline bool IsDoubleEqual(double x, double y) { return std::fabs(x-y) < epsilon ? true : false; };
-
-	int m_rxn_type;
 	std::vector<StripDetector> m_Ring1, m_Ring2;
 	std::vector<QQQDetector> m_forwardQQQs;
 	std::vector<QQQDetector> m_backwardQQQs;
@@ -53,7 +49,6 @@ private:
 	/*************************/
 
 	static constexpr double threshold = 0.2; //MeV
-	static constexpr double epsilon = 1.0e-6;
 	static constexpr double deg2rad = M_PI/180.0;
 };
 

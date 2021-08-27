@@ -7,7 +7,9 @@
 #include <TCanvas.h>
 #include <TParameter.h>
 
-AnasenEfficiency::AnasenEfficiency() {
+AnasenEfficiency::AnasenEfficiency() :
+	DetectorEfficiency()
+{
 	for(int i=0; i<n_sx3_per_ring; i++) {
 		m_Ring1.emplace_back(4, sx3_length, sx3_width, ring_phi[i], ring1_z, ring_rho[i]);
 		m_Ring2.emplace_back(4, sx3_length, sx3_width, ring_phi[i], -1.0*ring1_z, ring_rho[i]);
@@ -20,27 +22,6 @@ AnasenEfficiency::AnasenEfficiency() {
 
 AnasenEfficiency::~AnasenEfficiency() {}
 
-void AnasenEfficiency::MyFill(THashTable* table, const std::string& name, const std::string& title, int bins, float min, float max, double val) {
-	TH1F* h = (TH1F*) table->FindObject(name.c_str());
-	if(h) {
-		h->Fill(val);
-	} else {
-		h = new TH1F(name.c_str(), title.c_str(), bins, min, max);
-		h->Fill(val);
-		table->Add(h);
-	}
-}
-
-void AnasenEfficiency::MyFill(THashTable* table, const std::string& name, const std::string& title, int binsx, float minx, float maxx, double valx, int binsy, float miny, float maxy, double valy) {
-	TH2F* h = (TH2F*) table->FindObject(name.c_str());
-	if(h) {
-		h->Fill(valx, valy);
-	} else {
-		h = new TH2F(name.c_str(), title.c_str(), binsx, minx, maxx, binsy, miny, maxy);
-		h->Fill(valx, valy);
-		table->Add(h);
-	}
-}
 
 void AnasenEfficiency::DrawDetectorSystem(const std::string& filename) {
 	TFile* file = TFile::Open(filename.c_str(), "RECREATE");
@@ -278,14 +259,18 @@ void AnasenEfficiency::CalculateEfficiency(const std::string& file) {
 			RunDecay(file);
 			break;
 		}
+		case Mask::Kinematics::ONESTEP_RXN:
+		{
+			Run1Step(file);
+		}
 		case Mask::Kinematics::TWOSTEP:
 		{
-			RunTwoStep(file);
+			Run2Step(file);
 			break;
 		}
 		case Mask::Kinematics::THREESTEP:
 		{
-			RunThreeStep(file);
+			Run3Step(file);
 			break;
 		}
 	}
@@ -347,7 +332,12 @@ void AnasenEfficiency::RunDecay(const std::string& filename) {
 	input->Close();
 }
 
-void AnasenEfficiency::RunTwoStep(const std::string& filename) {
+void AnasenEfficiency::Run1Step(const std::string& filename) {
+	std::cout<<"SabreEfficiency::Run1Step Not Implemented!"<<std::endl;
+	return;
+}
+
+void AnasenEfficiency::Run2Step(const std::string& filename) {
 
 	TFile* input = TFile::Open(filename.c_str(), "UPDATE");
 	TTree* tree = (TTree*) input->Get("DataTree");
@@ -456,7 +446,7 @@ void AnasenEfficiency::RunTwoStep(const std::string& filename) {
 	input->Close();
 }
 
-void AnasenEfficiency::RunThreeStep(const std::string& filename) {
+void AnasenEfficiency::Run3Step(const std::string& filename) {
 	TFile* input = TFile::Open(filename.c_str(), "UPDATE");
 	TTree* tree = (TTree*) input->Get("DataTree");
 

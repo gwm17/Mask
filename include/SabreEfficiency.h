@@ -1,37 +1,34 @@
 #ifndef SABREEFFICIENCY_H
 #define SABREEFFICIENCY_H
 
+#include "DetectorEfficiency.h"
 #include "SabreDetector.h"
 #include "Target.h"
 #include "DeadChannelMap.h"
 #include "Kinematics.h"
 #include <THashTable.h>
 
-class SabreEfficiency {
+class SabreEfficiency : public DetectorEfficiency {
 public:
 	SabreEfficiency();
 	~SabreEfficiency();
-	inline void SetReactionType(int t) { m_rxn_type = t; };
     void SetDeadChannelMap(std::string& filename) { dmap.LoadMapfile(filename); };
-	void CalculateEfficiency(const std::string& file);
-    void DrawDetectorSystem(const std::string& filename);
-    double RunConsistencyCheck();
+	void CalculateEfficiency(const std::string& file) override;
+    void DrawDetectorSystem(const std::string& filename) override;
+    double RunConsistencyCheck() override;
 
 private:
-    void MyFill(THashTable* table, const std::string& name, const std::string& title, int bins, float min, float max, double val);
-    void MyFill(THashTable* table, const std::string& name, const std::string& title, int binsx, float minx, float maxx, double valx, int binsy, float miny, float maxy, double valy);
 	std::pair<bool,double> IsSabre(Mask::NucData* nucleus);
-    void Run2Step(const std::string& filename);
-	void Run3Step(const std::string& filename);
-	void RunDecay(const std::string& filename);
+    void Run2Step(const std::string& filename) override;
+	void Run3Step(const std::string& filename) override;
+    void RunDecay(const std::string& filename) override;
+	void Run1Step(const std::string& filename) override;
 
-	int m_rxn_type;
 	std::vector<SabreDetector> detectors;
     
 	Target deadlayer;
     Target sabre_eloss;
     DeadChannelMap dmap;
-
 
 	//Sabre constants
 	const double INNER_R = 0.0326;

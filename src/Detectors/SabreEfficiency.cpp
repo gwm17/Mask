@@ -7,12 +7,9 @@
 #include <TGraph.h>
 #include <TGraph2D.h>
 #include <TCanvas.h>
-#include <TH2.h>
-#include <TH1.h>
-#include <TCutG.h>
 
 SabreEfficiency::SabreEfficiency() : 
-	m_rxn_type(-1), deadlayer(DEADLAYER_THIN), sabre_eloss(SABRE_THICKNESS)
+	DetectorEfficiency(), deadlayer(DEADLAYER_THIN), sabre_eloss(SABRE_THICKNESS)
 {
 	detectors.reserve(5);
 	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI0*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
@@ -31,28 +28,6 @@ SabreEfficiency::SabreEfficiency() :
 
 SabreEfficiency::~SabreEfficiency() {}
 
-void SabreEfficiency::MyFill(THashTable* table, const std::string& name, const std::string& title, int bins, float min, float max, double val) {
-	TH1F* h = (TH1F*) table->FindObject(name.c_str());
-	if(h) {
-		h->Fill(val);
-	} else {
-		h = new TH1F(name.c_str(), title.c_str(), bins, min, max);
-		h->Fill(val);
-		table->Add(h);
-	}
-}
-
-void SabreEfficiency::MyFill(THashTable* table, const std::string& name, const std::string& title, int binsx, float minx, float maxx, double valx, int binsy, float miny, float maxy, double valy) {
-	TH2F* h = (TH2F*) table->FindObject(name.c_str());
-	if(h) {
-		h->Fill(valx, valy);
-	} else {
-		h = new TH2F(name.c_str(), title.c_str(), binsx, minx, maxx, binsy, miny, maxy);
-		h->Fill(valx, valy);
-		table->Add(h);
-	}
-}
-
 void SabreEfficiency::CalculateEfficiency(const std::string& file) {
 	std::cout<<"----------SABRE Efficiency Calculation----------"<<std::endl;
 	std::cout<<"Loading in output from kinematics simulation: "<<file<<std::endl;
@@ -69,6 +44,11 @@ void SabreEfficiency::CalculateEfficiency(const std::string& file) {
 		case Mask::Kinematics::ONESTEP_DECAY:
 		{
 			RunDecay(file);
+			break;
+		}
+		case Mask::Kinematics::ONESTEP_RXN:
+		{
+			Run1Step(file);
 			break;
 		}
 		case Mask::Kinematics::TWOSTEP:
@@ -242,6 +222,11 @@ void SabreEfficiency::RunDecay(const std::string& filename) {
 	table->Write();
 	input->Close();
 
+}
+
+void SabreEfficiency::Run1Step(const std::string& filename) {
+	std::cout<<"SabreEfficiency::Run1Step Not Implemented!"<<std::endl;
+	return;
 }
 
 void SabreEfficiency::Run2Step(const std::string& filename) {
