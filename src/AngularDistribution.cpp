@@ -5,7 +5,7 @@
 #include "LegendrePoly.h"
 
 AngularDistribution::AngularDistribution() :
-	generator(nullptr), branchingRatio(1.0), L(0), isoFlag(true)
+	generator(nullptr), uniform_cosine_dist(-1.0, 1.0), uniform_prob_dist(0.0, 1.0), branchingRatio(1.0), L(0), isoFlag(true)
 {
 }
 
@@ -84,18 +84,18 @@ double AngularDistribution::GetRandomCosTheta() {
 		return 0.0;
 	}
 
-	if(isoFlag) return generator->Uniform(-1.0, 1.0);
+	if(isoFlag) return uniform_cosine_dist(*generator);
 
 	double test, probability;
 	double costheta;
 
-	test = generator->Uniform(0.0, 1.0);
+	test = uniform_prob_dist(*generator);
 	if(test > branchingRatio) return -10;
 
 	do {
 		probability = 0.0;
-		costheta = generator->Uniform(-1.0, 1.0);
-		test = generator->Uniform(0.0, 1.0);
+		costheta = uniform_cosine_dist(*generator);
+		test = uniform_prob_dist(*generator);
 		for(unsigned int i=0; i<constants.size(); i++)
 			probability += constants[i]*P_l(i*2, costheta);
 	} while(test > probability);

@@ -8,8 +8,8 @@
 #ifndef QQQDETECTOR_H
 #define QQQDETECTOR_H
 
-#include <TRandom3.h>
 #include <cmath>
+#include <vector>
 
 #include "Vec3.h"
 #include "Rotation.h"

@@ -28,6 +28,9 @@ public:
 	inline double GetGroundStateMass() const { return m_gs_mass; };
 	inline const char* GetIsotopicSymbol() const { return m_symbol.c_str(); };
 	inline double GetThetaCM() const { return m_theta_cm; };
+	inline void SetDetected() { m_detectFlag = true; };
+	inline void SetNotDetected() { m_detectFlag = false; };
+	inline bool IsDetected() { return m_detectFlag; };
 
 	inline Nucleus& operator=(const Nucleus& rhs) {
 		SetIsotope(rhs.GetZ(), rhs.GetA());
@@ -51,6 +54,8 @@ private:
 	double m_gs_mass;
 	double m_theta_cm;
 	std::string m_symbol;
+
+	bool m_detectFlag;
 
 };
 

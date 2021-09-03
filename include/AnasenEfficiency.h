@@ -2,7 +2,6 @@
 #define ANASEN_EFFICIENCY_H
 
 #include <string>
-#include <THashTable.h>
 
 #include "DetectorEfficiency.h"
 #include "StripDetector.h"
@@ -12,16 +11,11 @@ class AnasenEfficiency : public DetectorEfficiency {
 public:
 	AnasenEfficiency();
 	~AnasenEfficiency();
-	void CalculateEfficiency(const std::string& filename) override;
+	void CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) override;
 	void DrawDetectorSystem(const std::string& filename) override;
 	double RunConsistencyCheck() override;
 
 private:
-	void RunDecay(const std::string& filename) override;
-	void Run2Step(const std::string& filename) override;
-	void Run3Step(const std::string& filename) override;
-	void Run1Step(const std::string& filename) override;
-
 	bool IsRing1(double theta, double phi);
 	bool IsRing2(double theta, double phi);
 	bool IsQQQ(double theta, double phi);

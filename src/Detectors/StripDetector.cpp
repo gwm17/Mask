@@ -13,7 +13,7 @@
 */
 
 StripDetector::StripDetector(int ns, double len, double wid, double cphi, double cz, double crho) :
-	m_random(nullptr)
+	m_random(nullptr), m_uniform_fraction(0.0, 1.0)
 {
 
 	num_strips = ns;
@@ -88,7 +88,7 @@ Mask::Vec3 StripDetector::GetHitCoordinates(int front_stripch, double front_stri
 	double y;
 	//If we have a random number generator, randomize y position within pixel. Otherwise take halfway.
 	if(m_random) {
-		y = -total_width/2.0 + (front_stripch + m_random->Uniform(0.0, 1.0))*front_strip_width;
+		y = -total_width/2.0 + (front_stripch + m_uniform_fraction(*m_random))*front_strip_width;
 	} else {
 		y = -total_width/2.0 + (front_stripch+0.5)*front_strip_width;
 	}

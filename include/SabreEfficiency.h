@@ -5,24 +5,19 @@
 #include "SabreDetector.h"
 #include "Target.h"
 #include "DeadChannelMap.h"
-#include "Kinematics.h"
-#include <THashTable.h>
+#include "Nucleus.h"
 
 class SabreEfficiency : public DetectorEfficiency {
 public:
 	SabreEfficiency();
 	~SabreEfficiency();
     void SetDeadChannelMap(std::string& filename) { dmap.LoadMapfile(filename); };
-	void CalculateEfficiency(const std::string& file) override;
+	void CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) override;
     void DrawDetectorSystem(const std::string& filename) override;
     double RunConsistencyCheck() override;
 
 private:
-	std::pair<bool,double> IsSabre(Mask::NucData* nucleus);
-    void Run2Step(const std::string& filename) override;
-	void Run3Step(const std::string& filename) override;
-    void RunDecay(const std::string& filename) override;
-	void Run1Step(const std::string& filename) override;
+	std::pair<bool,double> IsSabre(Mask::Nucleus& nucleus);
 
 	std::vector<SabreDetector> detectors;
     

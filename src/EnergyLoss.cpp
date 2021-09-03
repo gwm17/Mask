@@ -46,7 +46,7 @@ double EnergyLoss::GetEnergyLoss(int zp, int ap, double e_initial, double thickn
   if( ZP != zp) { 
     ZP = zp;
     AP = ap;
-    MP = MASS.FindMass(ZP, AP)*MEV2U;
+    MP = MassLookup::GetInstance()->FindMass(ZP, AP)*MEV2U;
   }
 
   double e_final = e_initial;
@@ -98,7 +98,7 @@ double EnergyLoss::GetReverseEnergyLoss(int zp, int ap, double e_final, double t
   if( ZP != zp) { 
     ZP = zp;
     AP = ap;
-    MP = MASS.FindMass(ZP, AP)*MEV2U;
+    MP = MassLookup::GetInstance()->FindMass(ZP, AP)*MEV2U;
   }
 
   double e_initial = e_final;

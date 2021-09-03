@@ -11,9 +11,9 @@
 
 //Back strips from lowest z to highest z
 
-#include <TRandom3.h>
 #include <cmath>
 #include <vector>
+#include <random>
 
 #include "Vec3.h"
 #include "Rotation.h"
@@ -27,7 +27,7 @@ public:
 	inline Mask::Vec3 GetBackStripCoordinates(int stripch, int corner) { return back_strip_coords[stripch][corner]; };
 	inline Mask::Vec3 GetRotatedFrontStripCoordinates(int stripch, int corner) { return rotated_front_strip_coords[stripch][corner]; };
 	inline Mask::Vec3 GetRotatedBackStripCoordinates(int stripch, int corner) { return rotated_back_strip_coords[stripch][corner]; };
-	inline void SetRandomNumberGenerator(TRandom3* random) { m_random = random; };
+	inline void SetRandomNumberGenerator(std::mt19937* random) { m_random = random; };
 	Mask::Vec3 GetHitCoordinates(int front_stripch, double front_strip_ratio);
 	std::pair<int,double> GetChannelRatio(double theta, double phi);
 
@@ -51,7 +51,9 @@ private:
 
 	Mask::ZRotation zRot;
 
-	TRandom3* m_random; //Not owned by StripDetector!
+	std::uniform_real_distribution<double> m_uniform_fraction;
+
+	std::mt19937* m_random; //Not owned by StripDetector!
 
 	inline bool ValidChannel(int f) { return ((f >= 0 && f < num_strips) ? true : false); };
 	inline bool ValidRatio(double r) { return ((r >= -1 && r <= 1) ? true : false); };

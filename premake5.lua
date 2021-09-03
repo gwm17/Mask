@@ -12,14 +12,35 @@ project "Mask"
 	cppdialect "C++11"
 
 	files {
-		"src/**.cpp",
-		"include/**.h",
-		"src/**.cxx"
+		"src/*.cpp",
+		"include/*.h"
 	}
 
-	prebuildcommands {
-		"rootcint -f src/kinematics_dict.cxx include/Kinematics.h include/LinkDef_Kinematics.h",
-		"{MOVE} src/kinematics_dict_rdict.pcm bin/"
+	includedirs {
+		"include"
+	}
+
+	filter "configurations:Debug"
+		symbols "On"
+
+	filter "configurations:Release"
+		optimize "On"
+
+project	"RootPlot"
+	kind "ConsoleApp"
+	language "C++"
+	targetdir "bin"
+	objdir "objs"
+	cppdialect "c++11"
+
+	files {
+		"src/Plotters/ROOT/RootPlotter.cpp",
+		"src/MaskFile.cpp",
+		"src/Nucleus.cpp",
+		"src/Vec4.cpp",
+		"src/Vec3.cpp",
+		"src/MassLookup.cpp",
+		"include/*.h"
 	}
 
 	filter "system:windows"
@@ -53,6 +74,36 @@ project "Mask"
 		linkoptions {
 			"`root-config --glibs`"
 		}
+
+	filter "configurations:Debug"
+		symbols "On"
+
+	filter "configurations:Release"
+		optimize "On"
+
+project	"DetectEff"
+	kind "ConsoleApp"
+	language "C++"
+	targetdir "bin"
+	objdir "objs"
+	cppdialect "c++11"
+
+	files {
+		"src/Detectors/*.cpp",
+		"src/MaskFile.cpp",
+		"src/Nucleus.cpp",
+		"src/Vec4.cpp",
+		"src/Vec3.cpp",
+		"src/MassLookup.cpp",
+		"src/Rotation.cpp",
+		"src/Target.cpp",
+		"src/EnergyLoss.cpp",
+		"include/*.h"
+	}
+
+	includedirs {
+		"include"
+	}
 
 	filter "configurations:Debug"
 		symbols "On"

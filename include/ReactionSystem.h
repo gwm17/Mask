@@ -12,45 +12,65 @@
 #include "Reaction.h"
 #include "KinematicsExceptions.h"
 #include <vector>
-#include <TRandom3.h>
+#include <random>
 
 namespace Mask {
 
-class ReactionSystem {
-public:
-	ReactionSystem();
-	virtual ~ReactionSystem();
-
-	virtual bool SetNuclei(std::vector<int>& z, std::vector<int>& a) = 0;
-	virtual void RunSystem() = 0;
-
-	void AddTargetLayer(std::vector<int>& zt, std::vector<int>& at, std::vector<int>& stoich, double thickness);
-
-	/*Set sampling parameters*/
-	virtual void SetRandomGenerator(TRandom3* gen);
-	inline void SetBeamDistro(double mean, double sigma) { m_beamDist = std::make_pair(mean, sigma); };
-	inline void SetTheta1Range(double min, double max) { m_theta1Range = std::make_pair(min*deg2rad, max*deg2rad); };
-	inline void SetPhi1Range(double min, double max) { m_phi1Range = std::make_pair(min*deg2rad, max*deg2rad); };
-	inline void SetExcitationDistro(double mean, double sigma) { m_exDist = std::make_pair(mean, sigma); };
-
-	inline const std::string& GetSystemEquation() const { return m_sys_equation; };
-
-protected:
-	virtual void LinkTarget() = 0;
-	virtual void SetSystemEquation() = 0;
+	class ReactionSystem {
+	public:
+		ReactionSystem();
+		virtual ~ReactionSystem();
 	
-	LayeredTarget target;
+		virtual bool SetNuclei(std::vector<int>& z, std::vector<int>& a) = 0;
+		virtual void RunSystem() = 0;
+	
+		void AddTargetLayer(std::vector<int>& zt, std::vector<int>& at, std::vector<int>& stoich, double thickness);
+	
+		/*Set sampling parameters*/
+		virtual void SetRandomGenerator(std::mt19937* gen);
+		inline void SetBeamDistro(double mean, double sigma) {
+			if(m_beamDist)
+				delete m_beamDist;
+			m_beamDist = new std::normal_distribution<double>(mean, sigma); 
+		}
+	
+		inline void SetTheta1Range(double min, double max) { 
+			if(m_theta1Range)
+				delete m_theta1Range;
+			m_theta1Range = new std::uniform_real_distribution<double>(std::cos(min*deg2rad), std::cos(max*deg2rad)); 
+		}
+	
+		inline void SetPhi1Range(double min, double max) {
+			if(m_phi1Range)
+				delete m_phi1Range;
+			m_phi1Range = new std::uniform_real_distribution<double>(min*deg2rad, max*deg2rad); 
+		}
+	
+		inline void SetExcitationDistro(double mean, double sigma) {
+			if(m_exDist)
+				delete m_exDist;
+			m_exDist = new std::normal_distribution<double>(mean, sigma); 
+		}
+	
+		inline const std::string& GetSystemEquation() const { return m_sys_equation; }
+	
+	protected:
+		virtual void LinkTarget() = 0;
+		virtual void SetSystemEquation() = 0;
+		
+		LayeredTarget target;
+	
+		//Sampling information
+		std::normal_distribution<double> *m_beamDist, *m_exDist;
+		std::uniform_real_distribution<double> *m_theta1Range, *m_phi1Range; 
+		std::mt19937* generator; //not owned by ReactionSystem
+	
+		bool target_set_flag, gen_set_flag;
+		int rxnLayer;
+		std::string m_sys_equation;
+		static constexpr double deg2rad = M_PI/180.0;
+	};
 
-	//Sampling information
-	std::pair<double, double> m_beamDist, m_theta1Range, m_phi1Range, m_exDist;
-	TRandom3* generator; //not owned by ReactionSystem
-
-	bool target_set_flag, gen_set_flag;
-	int rxnLayer;
-	std::string m_sys_equation;
-	static constexpr double deg2rad = M_PI/180.0;
-};
-
-};
+}
 
 #endif

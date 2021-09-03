@@ -1,5 +1,5 @@
 ----------Data Information----------
-OutputFile: /data1/gwm17/mask_tests/7Bedp_600keV_beam_centered_target_targetgap_BackQQQ_rndmCM_test.root
+OutputFile: /data1/gwm17/mask_tests/7Bedp_600keV_beam_centered_target_targetgap_BackQQQ_rndmCM_test.mask
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------
@@ -20,8 +20,8 @@ Z	A	Stoich
 0
 ~
 ----------Sampling Information----------
-NumberOfSamples: 100000
-BeamMeanEnergy(MeV): 0.6 BeamEnergySigma(MeV): 0.001
+NumberOfSamples: 10000
+BeamMeanEnergy(MeV): 0.6 BeamEnergySigma(MeV): 0.0
 EjectileThetaType(0=Lab,1=CM): 1
 EjectileThetaMin(deg): 0.0 EjectileThetaMax(deg): 180.0
 EjectilePhiMin(deg): 0.0 EjectilePhiMax(deg): 360.0

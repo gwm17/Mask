@@ -1,9 +1,9 @@
 #ifndef ANGULARDISTRIBUTION_H
 #define ANGULARDISTRIBUTION_H
 
-#include <TRandom3.h>
 #include <string>
 #include <vector>
+#include <random>
 
 class AngularDistribution {
 public:
@@ -11,7 +11,7 @@ public:
 	AngularDistribution(const std::string& file);
 	~AngularDistribution();
 	void ReadDistributionFile(const std::string& file);
-	void AttachRandomNumberGenerator(TRandom3* random) { generator = random; };
+	void AttachRandomNumberGenerator(std::mt19937* random) { generator = random; };
 	double GetRandomCosTheta();
 	int GetL() { return L; };
 	double GetBranchingRatio() { return branchingRatio; };
@@ -26,7 +26,9 @@ private:
 		}
 	}
 
-	TRandom3* generator; //NOT OWNED BY ANGULAR DISTRIBUTION
+	std::mt19937* generator; //NOT OWNED BY ANGULAR DISTRIBUTION
+	std::uniform_real_distribution<double> uniform_cosine_dist;
+	std::uniform_real_distribution<double> uniform_prob_dist;
 
 	double branchingRatio;
 	int L;
