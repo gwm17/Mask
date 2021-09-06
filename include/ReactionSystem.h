@@ -27,7 +27,6 @@ namespace Mask {
 		void AddTargetLayer(std::vector<int>& zt, std::vector<int>& at, std::vector<int>& stoich, double thickness);
 	
 		/*Set sampling parameters*/
-		virtual void SetRandomGenerator(std::mt19937* gen);
 		inline void SetBeamDistro(double mean, double sigma) {
 			if(m_beamDist)
 				delete m_beamDist;
@@ -63,7 +62,6 @@ namespace Mask {
 		//Sampling information
 		std::normal_distribution<double> *m_beamDist, *m_exDist;
 		std::uniform_real_distribution<double> *m_theta1Range, *m_phi1Range; 
-		std::mt19937* generator; //not owned by ReactionSystem
 	
 		bool target_set_flag, gen_set_flag;
 		int rxnLayer;

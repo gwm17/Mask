@@ -7,8 +7,6 @@
 #include "TwoStepSystem.h"
 #include "ThreeStepSystem.h"
 
-#include <random>
-
 namespace Mask {
 
 	class Kinematics {
@@ -42,7 +40,6 @@ namespace Mask {
 	
 		int m_rxn_type, m_nsamples;
 	
-		std::mt19937* global_generator;
 	};
 
 }

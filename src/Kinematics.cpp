@@ -9,13 +9,9 @@ namespace Mask {
 		sys(nullptr)
 	{
 		std::cout<<"----------GWM Kinematics Simulation----------"<<std::endl;
-	
-		std::random_device rd;
-		global_generator = new std::mt19937(rd());
 	}
 	
 	Kinematics::~Kinematics() {
-		delete global_generator;
 		if(sys) delete sys;
 	}
 	
@@ -172,7 +168,6 @@ namespace Mask {
 				break;
 			}
 		}
-		sys->SetRandomGenerator(global_generator);
 	
 		std::cout<<"Number of samples: "<<GetNumberOfSamples()<<std::endl;
 	

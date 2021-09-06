@@ -14,8 +14,6 @@ namespace Mask {
 		bool SetNuclei(std::vector<int>& z, std::vector<int>& a) override;
 		void RunSystem() override;
 	
-		void SetRandomGenerator(std::mt19937* gen) override;
-	
 		inline void SetDecay1Distribution(const std::string& filename) { decay1dist.ReadDistributionFile(filename); };
 	
 		inline void SetReactionThetaType(int type) { step1.SetEjectileThetaType(type); };

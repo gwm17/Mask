@@ -1,4 +1,5 @@
 #include "OneStepSystem.h"
+#include "RandomGenerator.h"
 
 namespace Mask {
 
@@ -48,18 +49,16 @@ namespace Mask {
 	}
 	
 	void OneStepSystem::RunSystem() {
-		if(!gen_set_flag) return;
-		
 		//Link up the target if it hasn't been done yet
 		if(!target_set_flag) {
 			LinkTarget();
 		}
 	
 		//Sample parameters
-		double bke = (*m_beamDist)(*generator);
-		double rxnTheta = std::acos((*m_theta1Range)(*generator));
-		double rxnPhi = (*m_phi1Range)(*generator);
-		double residEx = (*m_exDist)(*generator);
+		double bke = (*m_beamDist)(RandomGenerator::GetInstance().GetGenerator());
+		double rxnTheta = std::acos((*m_theta1Range)(RandomGenerator::GetInstance().GetGenerator()));
+		double rxnPhi = (*m_phi1Range)(RandomGenerator::GetInstance().GetGenerator());
+		double residEx = (*m_exDist)(RandomGenerator::GetInstance().GetGenerator());
 		
 		step1.SetBeamKE(bke);
 		step1.SetPolarRxnAngle(rxnTheta);

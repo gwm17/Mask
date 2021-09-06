@@ -1,4 +1,5 @@
 #include "DecaySystem.h"
+#include "RandomGenerator.h"
 
 namespace Mask {
 
@@ -14,12 +15,6 @@ namespace Mask {
 	}
 	
 	DecaySystem::~DecaySystem() {}
-	
-	void DecaySystem::SetRandomGenerator(std::mt19937* gen) {
-		generator = gen;
-		decay1dist.AttachRandomNumberGenerator(gen);
-		gen_set_flag = true;
-	}
 	
 	bool DecaySystem::SetNuclei(std::vector<int>& z, std::vector<int>& a) {
 		if(z.size() != a.size() || z.size() != 2) {
@@ -52,15 +47,13 @@ namespace Mask {
 	}
 	
 	void DecaySystem::RunSystem() {
-		if(!gen_set_flag) return;
-		
 		//Link up the target if it hasn't been done yet
 		if(!target_set_flag) {
 			LinkTarget();
 		}
 	
 		double rxnTheta = std::acos(decay1dist.GetRandomCosTheta());
-		double rxnPhi = (*m_phi1Range)(*generator);
+		double rxnPhi = (*m_phi1Range)(RandomGenerator::GetInstance().GetGenerator());
 		step1.SetPolarRxnAngle(rxnTheta);
 		step1.SetAzimRxnAngle(rxnPhi);
 	

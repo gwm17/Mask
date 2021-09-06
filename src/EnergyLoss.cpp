@@ -47,7 +47,7 @@ namespace Mask {
 		if( ZP != zp) { 
 			ZP = zp;
 			AP = ap;
-			MP = MassLookup::GetInstance()->FindMass(ZP, AP)*MEV2U;
+			MP = MassLookup::GetInstance().FindMass(ZP, AP)*MEV2U;
 		}
 	
 		double e_final = e_initial;
@@ -96,7 +96,7 @@ namespace Mask {
 		if( ZP != zp) { 
 			ZP = zp;
 			AP = ap;
-			MP = MassLookup::GetInstance()->FindMass(ZP, AP)*MEV2U;
+			MP = MassLookup::GetInstance().FindMass(ZP, AP)*MEV2U;
 		}
 	
 		double e_initial = e_final;

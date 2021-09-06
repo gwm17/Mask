@@ -1,4 +1,5 @@
 #include "AngularDistribution.h"
+#include "RandomGenerator.h"
 #include <fstream>
 #include <cmath>
 #include <iostream>
@@ -7,12 +8,12 @@
 namespace Mask {
 
 	AngularDistribution::AngularDistribution() :
-		generator(nullptr), uniform_cosine_dist(-1.0, 1.0), uniform_prob_dist(0.0, 1.0), branchingRatio(1.0), L(0), isoFlag(true)
+		uniform_cosine_dist(-1.0, 1.0), uniform_prob_dist(0.0, 1.0), branchingRatio(1.0), L(0), isoFlag(true)
 	{
 	}
 	
 	AngularDistribution::AngularDistribution(const std::string& file) :
-		generator(nullptr), branchingRatio(1.0), L(0), isoFlag(true)
+		branchingRatio(1.0), L(0), isoFlag(true)
 	{
 		ReadDistributionFile(file);
 	}
@@ -80,24 +81,19 @@ namespace Mask {
 	}
 	
 	double AngularDistribution::GetRandomCosTheta() {
-	
-		if(!IsGeneratorSet()) {
-			std::cerr<<"Random number generator is not set in AngularDistribution! Returning default value of 0"<<std::endl;
-			return 0.0;
-		}
-	
-		if(isoFlag) return uniform_cosine_dist(*generator);
+		if(isoFlag) 
+			return uniform_cosine_dist(RandomGenerator::GetInstance().GetGenerator());
 	
 		double test, probability;
 		double costheta;
 	
-		test = uniform_prob_dist(*generator);
+		test = uniform_prob_dist(RandomGenerator::GetInstance().GetGenerator());
 		if(test > branchingRatio) return -10;
 	
 		do {
 			probability = 0.0;
-			costheta = uniform_cosine_dist(*generator);
-			test = uniform_prob_dist(*generator);
+			costheta = uniform_cosine_dist(RandomGenerator::GetInstance().GetGenerator());
+			test = uniform_prob_dist(RandomGenerator::GetInstance().GetGenerator());
 			for(unsigned int i=0; i<constants.size(); i++)
 				probability += constants[i]*P_l(i*2, costheta);
 		} while(test > probability);

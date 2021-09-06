@@ -19,16 +19,16 @@ namespace Mask {
 	Nucleus::Nucleus(int Z, int A) :
 		Vec4(), m_z(Z), m_a(A), m_theta_cm(0), m_detectFlag(false)
 	{
-		m_gs_mass = MassLookup::GetInstance()->FindMass(Z, A);
-		m_symbol = MassLookup::GetInstance()->FindSymbol(Z, A);
+		m_gs_mass = MassLookup::GetInstance().FindMass(Z, A);
+		m_symbol = MassLookup::GetInstance().FindSymbol(Z, A);
 		SetVectorCartesian(0,0,0,m_gs_mass); //by defualt a nucleus has mass given by the g.s.
 	}
 	
 	Nucleus::Nucleus(int Z, int A, double px, double py, double pz, double E) :
 		Vec4(px, py, pz, E), m_z(Z), m_a(A)
 	{
-		m_gs_mass = MassLookup::GetInstance()->FindMass(Z, A);
-		m_symbol = MassLookup::GetInstance()->FindSymbol(Z, A);
+		m_gs_mass = MassLookup::GetInstance().FindMass(Z, A);
+		m_symbol = MassLookup::GetInstance().FindSymbol(Z, A);
 	}
 	
 	Nucleus::~Nucleus() {}
@@ -38,8 +38,8 @@ namespace Mask {
 		
 		m_z = Z;
 		m_a = A;
-		m_gs_mass = MassLookup::GetInstance()->FindMass(Z, A);
-		m_symbol = MassLookup::GetInstance()->FindSymbol(Z, A);
+		m_gs_mass = MassLookup::GetInstance().FindMass(Z, A);
+		m_symbol = MassLookup::GetInstance().FindSymbol(Z, A);
 		SetVectorCartesian(0,0,0,m_gs_mass);
 		return true;
 	}

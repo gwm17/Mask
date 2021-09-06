@@ -13,7 +13,6 @@ Written by G.W. McCann Aug. 2020
 
 namespace Mask {
 
-	MassLookup* MassLookup::s_instance = nullptr;
 	
 	MassLookup::MassLookup() {
 	
@@ -36,7 +35,8 @@ namespace Mask {
 		}
 	}
 	
-	MassLookup::~MassLookup() {}
+	MassLookup::~MassLookup() {
+	}
 	
 	//Returns nuclear mass in MeV
 	double MassLookup::FindMass(int Z, int A) {

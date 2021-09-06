@@ -1,4 +1,5 @@
 #include "TwoStepSystem.h"
+#include "RandomGenerator.h"
 #include "KinematicsExceptions.h"
 
 namespace Mask {
@@ -16,12 +17,6 @@ namespace Mask {
 	
 	TwoStepSystem::~TwoStepSystem() {
 	
-	}
-	
-	void TwoStepSystem::SetRandomGenerator(std::mt19937* gen) {
-		generator = gen;
-		decay1dist.AttachRandomNumberGenerator(gen);
-		gen_set_flag = true;
 	}
 	
 	bool TwoStepSystem::SetNuclei(std::vector<int>&z, std::vector<int>& a) {
@@ -66,21 +61,19 @@ namespace Mask {
 	}
 	
 	void TwoStepSystem::RunSystem() {
-		if(!gen_set_flag) return;
-		
 		//Link up the target if it hasn't been done yet
 		if(!target_set_flag) {
 			LinkTarget();
 		}
 	
 		//Sample parameters
-		double bke = (*m_beamDist)(*generator);
-		double rxnTheta = acos((*m_theta1Range)(*generator));
-		double rxnPhi = (*m_phi1Range)(*generator);
+		double bke = (*m_beamDist)(RandomGenerator::GetInstance().GetGenerator());
+		double rxnTheta = acos((*m_theta1Range)(RandomGenerator::GetInstance().GetGenerator()));
+		double rxnPhi = (*m_phi1Range)(RandomGenerator::GetInstance().GetGenerator());
 		double decay1costheta = decay1dist.GetRandomCosTheta();
 		double decay1Theta = std::acos(decay1costheta);
-		double decay1Phi = m_phi2Range(*generator);
-		double residEx = (*m_beamDist)(*generator);
+		double decay1Phi = m_phi2Range(RandomGenerator::GetInstance().GetGenerator());
+		double residEx = (*m_beamDist)(RandomGenerator::GetInstance().GetGenerator());
 	
 		step1.SetBeamKE(bke);
 		step1.SetPolarRxnAngle(rxnTheta);

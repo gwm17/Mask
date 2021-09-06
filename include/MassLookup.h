@@ -24,10 +24,8 @@ namespace Mask {
 		double FindMass(int Z, int A);
 		std::string FindSymbol(int Z, int A);
 	
-		static MassLookup* GetInstance() {
-			if(s_instance == nullptr) {
-				s_instance = new MassLookup();
-			}
+		static MassLookup& GetInstance() {
+			static MassLookup s_instance;
 			return s_instance;
 		}
 	
@@ -35,8 +33,6 @@ namespace Mask {
 		MassLookup();
 		std::unordered_map<std::string, double> massTable;
 		std::unordered_map<int, std::string> elementTable;
-	
-		static MassLookup* s_instance;
 	
 		//constants
 		static constexpr double u_to_mev = 931.4940954;
