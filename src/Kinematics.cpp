@@ -24,7 +24,6 @@ namespace Mask {
 	
 		std::ifstream input(filename);
 		if(!input.is_open()) {
-			std::cerr<<"Unable to load configuration in "<<filename<<", check that it exists"<<std::endl;
 			return false;
 		}
 	

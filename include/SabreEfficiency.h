@@ -21,8 +21,8 @@ private:
 
 	std::vector<SabreDetector> detectors;
     
-	Target deadlayer;
-    Target sabre_eloss;
+	Mask::Target deadlayer;
+    Mask::Target sabre_eloss;
     DeadChannelMap dmap;
 
 	//Sabre constants

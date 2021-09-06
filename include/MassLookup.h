@@ -12,36 +12,38 @@ Converted to true singleton to simplify usage -- Aug. 2021 GWM
 #ifndef MASS_LOOKUP_H
 #define MASS_LOOKUP_H
 
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <unordered_map>
-#include <stdexcept>
 
-class MassLookup {
+namespace Mask {
 
-  public:
-    ~MassLookup();
-    double FindMass(int Z, int A);
-    std::string FindSymbol(int Z, int A);
-    static MassLookup* GetInstance() {
-        if(s_instance == nullptr) {
-          s_instance = new MassLookup();
-        }
-        return s_instance;
-    }
+	class MassLookup {
+	public:
+		~MassLookup();
+		double FindMass(int Z, int A);
+		std::string FindSymbol(int Z, int A);
+	
+		static MassLookup* GetInstance() {
+			if(s_instance == nullptr) {
+				s_instance = new MassLookup();
+			}
+			return s_instance;
+		}
+	
+	private:
+		MassLookup();
+		std::unordered_map<std::string, double> massTable;
+		std::unordered_map<int, std::string> elementTable;
+	
+		static MassLookup* s_instance;
+	
+		//constants
+		static constexpr double u_to_mev = 931.4940954;
+		static constexpr double electron_mass = 0.000548579909;
+	    
+	};
 
-  private:
-    MassLookup();
-    std::unordered_map<std::string, double> massTable;
-    std::unordered_map<int, std::string> elementTable;
-
-    static MassLookup* s_instance;
-
-    //constants
-    static constexpr double u_to_mev = 931.4940954;
-    static constexpr double electron_mass = 0.000548579909;
-    
-};
+}
 
 #endif

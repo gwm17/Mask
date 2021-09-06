@@ -17,6 +17,7 @@ int main(int argc, char** argv) {
 	sw.Start();
 	try {
 		if(!calculator.LoadConfig(argv[1])) {
+			std::cerr<<"Unable to read input file!"<<std::endl;
 			return 1;
 		}
 		calculator.Run();

@@ -1,5 +1,5 @@
 ----------Data Information----------
-OutputFile: /data1/gwm17/mask_tests/7Bedp_600keV_beam_centered_target_targetgap_BackQQQ_rndmCM_test.mask
+OutputFile: test/7Bedp_600keV_beam_centered_target_targetgap_BackQQQ_rndmCM_test.mask
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------

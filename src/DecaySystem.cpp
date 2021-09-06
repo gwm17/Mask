@@ -59,17 +59,14 @@ namespace Mask {
 			LinkTarget();
 		}
 	
-		if(step1.IsDecay()) {
-			double rxnTheta = std::acos(decay1dist.GetRandomCosTheta());
-			double rxnPhi = (*m_phi1Range)(*generator);
-			step1.SetPolarRxnAngle(rxnTheta);
-			step1.SetAzimRxnAngle(rxnPhi);
+		double rxnTheta = std::acos(decay1dist.GetRandomCosTheta());
+		double rxnPhi = (*m_phi1Range)(*generator);
+		step1.SetPolarRxnAngle(rxnTheta);
+		step1.SetAzimRxnAngle(rxnPhi);
 	
-			step1.TurnOnResidualEloss();
-			step1.Calculate();
-		} else {
-			return;
-		}
+		step1.TurnOnResidualEloss();
+		step1.Calculate();
+
 	}
 
 }

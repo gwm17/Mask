@@ -55,23 +55,19 @@ namespace Mask {
 			LinkTarget();
 		}
 	
-		if(!step1.IsDecay()) {
-			//Sample parameters
-			double bke = (*m_beamDist)(*generator);
-			double rxnTheta = std::acos((*m_theta1Range)(*generator));
-			double rxnPhi = (*m_phi1Range)(*generator);
-			double residEx = (*m_exDist)(*generator);
+		//Sample parameters
+		double bke = (*m_beamDist)(*generator);
+		double rxnTheta = std::acos((*m_theta1Range)(*generator));
+		double rxnPhi = (*m_phi1Range)(*generator);
+		double residEx = (*m_exDist)(*generator);
 		
-			step1.SetBeamKE(bke);
-			step1.SetPolarRxnAngle(rxnTheta);
-			step1.SetAzimRxnAngle(rxnPhi);
-			step1.SetExcitation(residEx);
+		step1.SetBeamKE(bke);
+		step1.SetPolarRxnAngle(rxnTheta);
+		step1.SetAzimRxnAngle(rxnPhi);
+		step1.SetExcitation(residEx);
 		
-			step1.TurnOnResidualEloss();
-			step1.Calculate();
-		} else {
-			return;
-		}
+		step1.TurnOnResidualEloss();
+		step1.Calculate();
 	}
 
 }
