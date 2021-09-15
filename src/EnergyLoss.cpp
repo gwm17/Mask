@@ -97,6 +97,7 @@ namespace Mask {
 			ZP = zp;
 			AP = ap;
 			MP = MassLookup::GetInstance().FindMass(ZP, AP)*MEV2U;
+
 		}
 	
 		double e_initial = e_final;
@@ -145,7 +146,7 @@ namespace Mask {
 			for(auto& z: ZT)
 				values.push_back(Hydrogen_dEdx_Low(e_per_u, z));
 		} else {
-			throw ELossException("Negative energy per nucleon");
+			throw ELossException("Negative energy per nucleon; given energy: "+std::to_string(energy));
 		}
 	
 		if(values.size() == 0)
@@ -208,7 +209,7 @@ namespace Mask {
 		} else {
 			double B = 0.886*std::pow(e_per_u/25.0, 0.5)/std::pow(ZP, 2.0/3.0);
 			double A = B + 0.0378*std::sin(M_PI/2.0*B);
-			z_ratio = 1.0 - std::exp(-A)*(1.034-0.1777*std::exp(-0.08114*ZP))*z;
+			z_ratio = (1.0 - std::exp(-A)*(1.034-0.1777*std::exp(-0.08114*ZP)))*ZP;
 		}
 		return z_ratio*z_ratio; //for stopping power uses ratio sq. 
 	}
