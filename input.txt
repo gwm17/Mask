@@ -1,14 +1,13 @@
 ----------Data Information----------
-OutputFile: 7Bedp_600keV_beam_centered_target_targetgap_BackQQQ_rndmCM_test.mask
+OutputFile: /data1/gwm17/mask_tests/7Be12C_870keV_beam_50CD2.mask
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------
-ReactionType: 2
+ReactionType: 1
 Z	A (order is target, projectile, ejectile, break1, break3(if pure decay is target, ejectile))
-1	2
+6   12
 4	7
-1	1
-2	4
+4	7
 ----------Target Information----------
 Name: test_targ
 Layers: 1
@@ -20,8 +19,8 @@ Z	A	Stoich
 0
 ~
 ----------Sampling Information----------
-NumberOfSamples: 10000
-BeamMeanEnergy(MeV): 0.6 BeamEnergySigma(MeV): 0.0
+NumberOfSamples: 100000
+BeamMeanEnergy(MeV): 0.87 BeamEnergySigma(MeV): 0.0
 EjectileThetaType(0=Lab,1=CM): 1
 EjectileThetaMin(deg): 0.0 EjectileThetaMax(deg): 180.0
 EjectilePhiMin(deg): 0.0 EjectilePhiMax(deg): 360.0

@@ -73,7 +73,7 @@ namespace Mask {
 		double decay1costheta = decay1dist.GetRandomCosTheta();
 		double decay1Theta = std::acos(decay1costheta);
 		double decay1Phi = m_phi2Range(RandomGenerator::GetInstance().GetGenerator());
-		double residEx = (*m_beamDist)(RandomGenerator::GetInstance().GetGenerator());
+		double residEx = (*m_exDist)(RandomGenerator::GetInstance().GetGenerator());
 	
 		step1.SetBeamKE(bke);
 		step1.SetPolarRxnAngle(rxnTheta);

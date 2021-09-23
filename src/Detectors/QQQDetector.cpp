@@ -1,7 +1,7 @@
 #include "QQQDetector.h"
 
 QQQDetector::QQQDetector(double R_in, double R_out, double deltaPhi, double phiCentral, double z, double x, double y) :
-	m_Rinner(R_in), m_Router(R_out), m_deltaPhi(deltaPhi), m_phiCentral(phiCentral), m_translation(x,y,z)
+	m_Rinner(R_in), m_Router(R_out), m_deltaPhi(deltaPhi), m_phiCentral(phiCentral), m_translation(x,y,z), m_norm(0.0,0.0,1.0), m_uniform_fraction(0.0, 1.0), rndmFlag(false)
 {
 	m_deltaR = (m_Router - m_Rinner)/nrings;
 	m_deltaPhi_per_wedge = m_deltaPhi/nwedges;
@@ -139,12 +139,20 @@ std::pair<int,int> QQQDetector::GetTrajectoryRingWedge(double theta, double phi)
 }
 
 Mask::Vec3 QQQDetector::GetHitCoordinates(int ringch, int wedgech) {
-	if(!CheckChannel(ringch) || !CheckChannel(wedgech)) {
+	if(!CheckChannel(ringch) || !CheckChannel(wedgech))
 		return Mask::Vec3();
-	}
 
-	double r_center  = m_Rinner + (0.5+ringch)*m_deltaR;
-	double phi_center = -m_deltaPhi/2.0 + (0.5+wedgech)*m_deltaPhi_per_wedge;
+	double r_center, phi_center;
+	if(rndmFlag)
+	{
+		r_center  = m_Rinner + (m_uniform_fraction(Mask::RandomGenerator::GetInstance().GetGenerator())+ringch)*m_deltaR;
+		phi_center = -m_deltaPhi/2.0 + (m_uniform_fraction(Mask::RandomGenerator::GetInstance().GetGenerator())+wedgech)*m_deltaPhi_per_wedge;
+	}
+	else
+	{
+		r_center  = m_Rinner + (0.5+ringch)*m_deltaR;
+		phi_center = -m_deltaPhi/2.0 + (0.5+wedgech)*m_deltaPhi_per_wedge;
+	}
 	double x = r_center*std::cos(phi_center);
 	double y = r_center*std::sin(phi_center);
 	double z = 0;

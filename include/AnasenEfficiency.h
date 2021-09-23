@@ -6,6 +6,16 @@
 #include "DetectorEfficiency.h"
 #include "StripDetector.h"
 #include "QQQDetector.h"
+#include "Target.h"
+#include "Nucleus.h"
+#include "MaskFile.h"
+
+struct DetectorResult {
+	bool detectFlag = false;
+	Mask::Vec3 direction;
+	double energy_deposited = 0.0;
+	std::string det_name = "";
+};
 
 class AnasenEfficiency : public DetectorEfficiency {
 public:
@@ -16,13 +26,17 @@ public:
 	double RunConsistencyCheck() override;
 
 private:
-	bool IsRing1(double theta, double phi);
-	bool IsRing2(double theta, double phi);
-	bool IsQQQ(double theta, double phi);
+	DetectorResult IsRing1(Mask::Nucleus& nucleus);
+	DetectorResult IsRing2(Mask::Nucleus& nucleus);
+	DetectorResult IsQQQ(Mask::Nucleus& nucleus);
+	DetectorResult IsAnasen(Mask::Nucleus& nucleus);
+	void CountCoincidences(const Mask::MaskFileData& data, std::vector<int>& counts, int rxn_type);
 
 	std::vector<StripDetector> m_Ring1, m_Ring2;
 	std::vector<QQQDetector> m_forwardQQQs;
 	std::vector<QQQDetector> m_backwardQQQs;
+
+	Mask::Target det_silicon;
 
 	/**** ANASEN geometry constants *****/
 	const int n_sx3_per_ring = 12;
@@ -42,8 +56,9 @@ private:
 	const double ring_phi[12] = {0.785795, 0.262014, 6.02132, 5.49779, 4.97426, 4.45052, 3.92699, 3.40346, 2.87972, 2.35619, 1.83266, 1.30893};
 	/*************************/
 
-	static constexpr double threshold = 0.2; //MeV
+	static constexpr double threshold = 0.6; //MeV
 	static constexpr double deg2rad = M_PI/180.0;
+	static constexpr double si_thickness = 1000 * 1e-4 * 2.3926 * 1e6; //thickness in um -> eff thickness in ug/cm^2 for detector
 };
 
 #endif

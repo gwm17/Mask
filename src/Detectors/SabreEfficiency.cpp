@@ -197,9 +197,9 @@ std::pair<bool,double> SabreEfficiency::IsSabre(Mask::Nucleus& nucleus) {
 			if(dmap.IsDead(i, chan.first, 0) || dmap.IsDead(i, chan.second, 1)) break; //dead channel check
 			coords = detectors[i].GetTrajectoryCoordinates(nucleus.GetTheta(), nucleus.GetPhi());
 			thetaIncident = std::acos(coords.Dot(detectors[i].GetNormTilted())/(coords.GetR()));
-			eloss = deadlayer.getEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), M_PI - thetaIncident);
+			eloss = deadlayer.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), M_PI - thetaIncident);
 			if((nucleus.GetKE() - eloss) <= ENERGY_THRESHOLD) break; //deadlayer check
-			e_deposited = sabre_eloss.getEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE() - eloss, M_PI - thetaIncident);
+			e_deposited = sabre_eloss.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE() - eloss, M_PI - thetaIncident);
 			return std::make_pair(true, e_deposited);
 		}
 	}

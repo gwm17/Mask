@@ -39,7 +39,7 @@ namespace Mask {
 	}
 	
 	/*Calculates energy loss for travelling all the way through the target*/
-	double Target::getEnergyLossTotal(int zp, int ap, double startEnergy, double theta) {
+	double Target::GetEnergyLossTotal(int zp, int ap, double startEnergy, double theta) {
 		if(theta == M_PI/2.) 
 			return startEnergy;
 		else if (theta > M_PI/2.) 
@@ -47,19 +47,20 @@ namespace Mask {
 
 		return eloss.GetEnergyLoss(zp, ap, startEnergy, thickness/fabs(cos(theta)));
 	}
-	
-	/*Calculates energy loss for travelling halfway through the target*/
-	double Target::getEnergyLossHalf(int zp, int ap, double startEnergy, double theta) {
-		if(theta == M_PI/2.) 
-			return startEnergy;
-		else if (theta > M_PI/2.) 
-			theta = M_PI - theta;
 
-		return eloss.GetEnergyLoss(zp, ap, startEnergy, thickness/(2.0*fabs(cos(theta))));
+	/*Calculates the energy loss for traveling some fraction through the target*/
+	double Target::GetEnergyLossFractionalDepth(int zp, int ap, double finalEnergy, double theta, double percent_depth)
+	{
+		if(theta == M_PI/2.)
+			return finalEnergy;
+		else if (theta > M_PI/2.)
+			theta = M_PI-theta;
+
+		return eloss.GetEnergyLoss(zp, ap, finalEnergy, thickness*percent_depth/(std::fabs(std::cos(theta))));
 	}
 	
 	/*Calculates reverse energy loss for travelling all the way through the target*/
-	double Target::getReverseEnergyLossTotal(int zp, int ap, double finalEnergy, double theta) {
+	double Target::GetReverseEnergyLossTotal(int zp, int ap, double finalEnergy, double theta) {
 		if(theta == M_PI/2.) 
 			return finalEnergy;
 		else if (theta > M_PI/2.) 
@@ -67,15 +68,16 @@ namespace Mask {
 
 		return eloss.GetReverseEnergyLoss(zp, ap, finalEnergy, thickness/fabs(cos(theta)));
 	}
-	
-	/*Calculates reverse energy loss for travelling half way through the target*/
-	double Target::getReverseEnergyLossHalf(int zp, int ap, double finalEnergy, double theta) {
-		if(theta == M_PI/2.) 
-			return finalEnergy;
-		else if (theta > M_PI/2.) 
-			theta = M_PI - theta;
 
-		return eloss.GetReverseEnergyLoss(zp, ap, finalEnergy, thickness/(2.0*fabs(cos(theta))));
+	/*Calculates the reverse energy loss for traveling some fraction through the target*/
+	double Target::GetReverseEnergyLossFractionalDepth(int zp, int ap, double finalEnergy, double theta, double percent_depth)
+	{
+		if(theta == M_PI/2.)
+			return finalEnergy;
+		else if (theta > M_PI/2.)
+			theta = M_PI-theta;
+
+		return eloss.GetReverseEnergyLoss(zp, ap, finalEnergy, thickness*percent_depth/(std::fabs(std::cos(theta))));
 	}
 
 }

@@ -43,36 +43,32 @@ project	"RootPlot"
 		"include/*.h"
 	}
 
-	filter "system:windows"
-		systemversion "latest"
-		--ROOT cannot be located using the config tools, so we must query for the ROOTSYS env variable
-		--Have to use an if statement to hide this (@penguin for example doesn't have a ROOTSYS)
-		if os.host() == windows then
-			rootpath = os.getenv("ROOTSYS")
+	--User specified path to ROOT CERN libraries--
+	ROOTIncludepath = "/usr/include/root"
+	ROOTLibpath = "/usr/lib64/root"
 
-			includedirs {
-				"include",
-				"./",
-				rootpath .. "include"
-			}
+	includedirs {
+		"include"
+	}
 
-			links {
-				rootpath .. "lib/**.lib"
-			}
-		end
+	sysincludedirs {
+		ROOTIncludepath
+	}
+
+	libdirs {
+		ROOTLibpath
+	}
+
+	links {
+		"Gui", "Core", "Imt", "RIO", "Net", "Hist", 
+		"Graf", "Graf3d", "Gpad", "ROOTDataFrame", "ROOTVecOps",
+		"Tree", "TreePlayer", "Rint", "Postscript", "Matrix",
+		"Physics", "MathCore", "Thread", "MultiProc", "m", "dl"
+	}
 
 	filter "system:macosx or linux"
-		includedirs {
-			"include",
-			"./"
-		}
-
-		buildoptions {
-			"`root-config --cflags`"
-		}
-
 		linkoptions {
-			"`root-config --glibs`"
+			"-pthread"
 		}
 
 	filter "configurations:Debug"
@@ -98,6 +94,7 @@ project	"DetectEff"
 		"src/Rotation.cpp",
 		"src/Target.cpp",
 		"src/EnergyLoss.cpp",
+		"src/RandomGenerator.cpp",
 		"include/*.h"
 	}
 

@@ -15,6 +15,8 @@ Written by G.W. McCann Aug. 2020
 
 #include <vector>
 #include <string>
+#include <random>
+#include "RandomGenerator.h"
 #include "Target.h"
 
 namespace Mask {
@@ -37,6 +39,7 @@ namespace Mask {
 	private:
 		std::vector<Target> layers;
 		std::string name;
+		std::uniform_real_distribution<double> m_fractional_depth_dist;
 	};
 
 }

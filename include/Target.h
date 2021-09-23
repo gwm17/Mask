@@ -27,10 +27,10 @@ namespace Mask {
 	 	~Target();
 	 	void SetElements(std::vector<int>& z, std::vector<int>& a, std::vector<int>& stoich);
 	 	bool ContainsElement(int z, int a);
-	 	double getEnergyLossTotal(int zp, int ap, double startEnergy, double angle);
-	 	double getEnergyLossHalf(int zp, int ap, double startEnergy, double angle);
-	 	double getReverseEnergyLossTotal(int zp, int ap, double finalEnergy, double angle);
-	 	double getReverseEnergyLossHalf(int zp, int ap, double finalEnergy, double angle);
+	 	double GetEnergyLossTotal(int zp, int ap, double startEnergy, double angle);
+	 	double GetReverseEnergyLossTotal(int zp, int ap, double finalEnergy, double angle);
+	 	double GetEnergyLossFractionalDepth(int zp, int ap, double startEnergy, double angle, double percent_depth);
+	 	double GetReverseEnergyLossFractionalDepth(int zp, int ap, double finalEnergy, double angle, double percent_depth);
 	 	inline const double& GetThickness() { return thickness; }
 	 	inline int GetNumberOfElements() { return Z.size(); }
 	 	inline int GetElementZ(int index) { return Z[index]; }

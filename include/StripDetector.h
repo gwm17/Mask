@@ -17,21 +17,28 @@
 
 #include "Vec3.h"
 #include "Rotation.h"
+#include "RandomGenerator.h"
 
 class StripDetector {
 public:
   
 	StripDetector(int ns, double len, double wid, double cphi, double cz, double crho);
 	~StripDetector();
-	inline Mask::Vec3 GetFrontStripCoordinates(int stripch, int corner) { return front_strip_coords[stripch][corner]; };
-	inline Mask::Vec3 GetBackStripCoordinates(int stripch, int corner) { return back_strip_coords[stripch][corner]; };
-	inline Mask::Vec3 GetRotatedFrontStripCoordinates(int stripch, int corner) { return rotated_front_strip_coords[stripch][corner]; };
-	inline Mask::Vec3 GetRotatedBackStripCoordinates(int stripch, int corner) { return rotated_back_strip_coords[stripch][corner]; };
-	inline void SetRandomNumberGenerator(std::mt19937* random) { m_random = random; };
+	inline Mask::Vec3 GetFrontStripCoordinates(int stripch, int corner) { return front_strip_coords[stripch][corner]; }
+	inline Mask::Vec3 GetBackStripCoordinates(int stripch, int corner) { return back_strip_coords[stripch][corner]; }
+	inline Mask::Vec3 GetRotatedFrontStripCoordinates(int stripch, int corner) { return rotated_front_strip_coords[stripch][corner]; }
+	inline Mask::Vec3 GetRotatedBackStripCoordinates(int stripch, int corner) { return rotated_back_strip_coords[stripch][corner]; }
+	inline Mask::Vec3 GetNormRotated() { return zRot*m_norm_unrot; }
+
+	inline void TurnOnRandomizedCoordinates() { rndmFlag = true; }
+	inline void TurnOffRandomizedCoordinates() { rndmFlag = false; }
+
 	Mask::Vec3 GetHitCoordinates(int front_stripch, double front_strip_ratio);
 	std::pair<int,double> GetChannelRatio(double theta, double phi);
 
 private:
+	inline bool ValidChannel(int f) { return ((f >= 0 && f < num_strips) ? true : false); };
+	inline bool ValidRatio(double r) { return ((r >= -1 && r <= 1) ? true : false); };
 	void CalculateCorners();
 
 	int num_strips;
@@ -49,14 +56,14 @@ private:
 	std::vector<std::vector<Mask::Vec3>> front_strip_coords, back_strip_coords;
 	std::vector<std::vector<Mask::Vec3>> rotated_front_strip_coords, rotated_back_strip_coords;
 
+	Mask::Vec3 m_norm_unrot;
+
 	Mask::ZRotation zRot;
 
 	std::uniform_real_distribution<double> m_uniform_fraction;
 
-	std::mt19937* m_random; //Not owned by StripDetector!
+	bool rndmFlag;
 
-	inline bool ValidChannel(int f) { return ((f >= 0 && f < num_strips) ? true : false); };
-	inline bool ValidRatio(double r) { return ((r >= -1 && r <= 1) ? true : false); };
 };
 
 #endif

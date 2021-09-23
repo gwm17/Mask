@@ -1,19 +1,23 @@
 #include "StripDetector.h"
+#include <iostream>
 
 /*
   Corner layout for each strip in the un-rotated frame
   0--------------------------1
-  |                          |              y
-  |                          |              ^
-  |                          |              |
-  |                          |              |
-  |                          |              |
+  |                          |              
+  |                          |              
+  |                          |              
+  |                          |              
+  |                          |              x
   2--------------------------3    z<--------X
-                                            x
+																						|
+																						|
+																						|
+																						y
 */
 
 StripDetector::StripDetector(int ns, double len, double wid, double cphi, double cz, double crho) :
-	m_random(nullptr), m_uniform_fraction(0.0, 1.0)
+	m_norm_unrot(1.0,0.0,0.0), m_uniform_fraction(0.0, 1.0), rndmFlag(false)
 {
 
 	num_strips = ns;
@@ -53,19 +57,19 @@ void StripDetector::CalculateCorners() {
 		y_min = -total_width/2.0 + front_strip_width*s;
 		z_max = center_z + length/2.0;
 		z_min = center_z - length/2.0;
-		front_strip_coords[s][0] = Mask::Vec3(center_rho, y_max, z_max);
-		front_strip_coords[s][1] = Mask::Vec3(center_rho, y_max, z_min);
-		front_strip_coords[s][2] = Mask::Vec3(center_rho, y_min, z_max);
-		front_strip_coords[s][3] = Mask::Vec3(center_rho, y_min, z_min);
+		front_strip_coords[s][2] = Mask::Vec3(center_rho, y_max, z_max);
+		front_strip_coords[s][3] = Mask::Vec3(center_rho, y_max, z_min);
+		front_strip_coords[s][0] = Mask::Vec3(center_rho, y_min, z_max);
+		front_strip_coords[s][1] = Mask::Vec3(center_rho, y_min, z_min);
 
 		z_max = (center_z - length/2.0) + (s+1)*back_strip_length;
 		z_min = (center_z - length/2.0) + (s)*back_strip_length;
 		y_max = total_width/2.0;
 		y_min = -total_width/2.0;
-		back_strip_coords[s][0] = Mask::Vec3(center_rho, y_max, z_max);
-		back_strip_coords[s][1] = Mask::Vec3(center_rho, y_max, z_min);
-		back_strip_coords[s][2] = Mask::Vec3(center_rho, y_min, z_max);
-		back_strip_coords[s][3] = Mask::Vec3(center_rho, y_min, z_min);
+		back_strip_coords[s][2] = Mask::Vec3(center_rho, y_max, z_max);
+		back_strip_coords[s][3] = Mask::Vec3(center_rho, y_max, z_min);
+		back_strip_coords[s][0] = Mask::Vec3(center_rho, y_min, z_max);
+		back_strip_coords[s][1] = Mask::Vec3(center_rho, y_min, z_min);
 	}
 
 	for(int s=0; s<num_strips; s++) {
@@ -86,9 +90,8 @@ Mask::Vec3 StripDetector::GetHitCoordinates(int front_stripch, double front_stri
 	if (!ValidChannel(front_stripch) || !ValidRatio(front_strip_ratio)) return Mask::Vec3(0,0,0);
 
 	double y;
-	//If we have a random number generator, randomize y position within pixel. Otherwise take halfway.
-	if(m_random) {
-		y = -total_width/2.0 + (front_stripch + m_uniform_fraction(*m_random))*front_strip_width;
+	if(rndmFlag) {
+		y = -total_width/2.0 + (front_stripch + m_uniform_fraction(Mask::RandomGenerator::GetInstance().GetGenerator()))*front_strip_width;
 	} else {
 		y = -total_width/2.0 + (front_stripch+0.5)*front_strip_width;
 	}
@@ -128,7 +131,7 @@ std::pair<int,double> StripDetector::GetChannelRatio(double theta, double phi) {
 	double ratio=0;
 	for (int s=0; s<num_strips; s++) {
 		if (xhit >= front_strip_coords[s][0].GetX() && xhit <= front_strip_coords[s][0].GetX() && //Check min and max x (constant in flat)
-			yhit >= front_strip_coords[s][2].GetY() && yhit <= front_strip_coords[s][0].GetY() && //Check min and max y
+			yhit >= front_strip_coords[s][1].GetY() && yhit <= front_strip_coords[s][2].GetY() && //Check min and max y
 			zhit >= front_strip_coords[s][1].GetZ() && zhit <= front_strip_coords[s][0].GetZ()) //Check min and max z
 		{
 			front_ch_hit = s;

@@ -16,7 +16,7 @@ Written by G.W. McCann Aug. 2020
 namespace Mask {
 
 	LayeredTarget::LayeredTarget() :
-		name("")
+		name(""), m_fractional_depth_dist(0.0, 1.0)
 	{
 	}
 	
@@ -31,7 +31,7 @@ namespace Mask {
 	
 	/*
 	  Here projectile refers to the incoming reactant particle (i.e. the beam)
-	  Calculates energy loss assuming that the reaction occurs in the middle of the target
+	  Calculates energy loss assuming that the reaction occurs in the middle of the target layer
 	  Note that the layer order can matter!
 	*/
 	double LayeredTarget::GetProjectileEnergyLoss(int zp, int ap, double startEnergy, int rxnLayer, double angle) {
@@ -43,12 +43,14 @@ namespace Mask {
 	
 		double eloss = 0.0;
 		double newEnergy = startEnergy;
+		double frac;
 		for(int i=0; i<=rxnLayer; i++) {
 			if(i == rxnLayer) {
-				eloss += layers[i].getEnergyLossHalf(zp, ap, newEnergy, angle);
+				frac = m_fractional_depth_dist(RandomGenerator::GetInstance().GetGenerator());
+				eloss += layers[i].GetEnergyLossFractionalDepth(zp, ap, newEnergy, angle, frac);
 				newEnergy = startEnergy - eloss;
 			} else {
-				eloss += layers[i].getEnergyLossTotal(zp, ap, newEnergy, angle);
+				eloss += layers[i].GetEnergyLossTotal(zp, ap, newEnergy, angle);
 				newEnergy = startEnergy-eloss;
 			}
 		}
@@ -69,14 +71,27 @@ namespace Mask {
 		}
 	
 		double eloss = 0.0;
-		double newEnergy = startEnergy;
-		for(unsigned int i=rxnLayer; i<layers.size(); i++) {
-			if(i == ((unsigned int)rxnLayer)) {
-				eloss += layers[i].getEnergyLossHalf(ze, ae, newEnergy, angle);
-				newEnergy = startEnergy - eloss;
-			} else {
-				eloss += layers[i].getEnergyLossTotal(ze, ae, newEnergy, angle);
-				newEnergy = startEnergy - eloss;
+		if(angle < M_PI/2.0) {
+			double newEnergy = startEnergy;
+			for(unsigned int i=rxnLayer; i<layers.size(); i++) {
+				if(i == ((unsigned int)rxnLayer)) {
+					eloss += layers[i].GetEnergyLossFractionalDepth(ze, ae, newEnergy, angle, m_fractional_depth_dist(RandomGenerator::GetInstance().GetGenerator()));
+					newEnergy = startEnergy - eloss;
+				} else {
+					eloss += layers[i].GetEnergyLossTotal(ze, ae, newEnergy, angle);
+					newEnergy = startEnergy - eloss;
+				}
+			}
+		} else { //Travelling backwards through target
+			double newEnergy = startEnergy;
+			for(int i=rxnLayer; i>=0; i--) {
+				if(i == ((unsigned int)rxnLayer)) {
+					eloss += layers[i].GetEnergyLossFractionalDepth(ze, ae, newEnergy, angle, m_fractional_depth_dist(RandomGenerator::GetInstance().GetGenerator()));
+					newEnergy = startEnergy - eloss;
+				} else {
+					eloss += layers[i].GetEnergyLossTotal(ze, ae, newEnergy, angle);
+					newEnergy = startEnergy - eloss;
+				}
 			}
 		}
 	
@@ -92,14 +107,27 @@ namespace Mask {
 		}	
 	
 		double eloss = 0.0;
-		double newEnergy = startEnergy;
-		for(int i=(layers.size()-1); i>=rxnLayer; i--) {
-			if(i == rxnLayer) {
-				eloss += layers[i].getReverseEnergyLossHalf(ze, ae, newEnergy, angle);
-				newEnergy = startEnergy + eloss;
-			} else {
-				eloss += layers[i].getReverseEnergyLossTotal(ze, ae, newEnergy, angle);
-				newEnergy = startEnergy + eloss;
+		if(angle < M_PI/2.0) {
+			double newEnergy = startEnergy;
+			for(int i=(layers.size()-1); i>=rxnLayer; i--) {
+				if(i == rxnLayer) {
+					eloss += layers[i].GetReverseEnergyLossFractionalDepth(ze, ae, newEnergy, angle, m_fractional_depth_dist(RandomGenerator::GetInstance().GetGenerator()));
+					newEnergy = startEnergy + eloss;
+				} else {
+					eloss += layers[i].GetReverseEnergyLossTotal(ze, ae, newEnergy, angle);
+					newEnergy = startEnergy + eloss;
+				}
+			}
+		} else {
+			double newEnergy = startEnergy;
+			for(int i=0; i <= rxnLayer; i++) {
+				if(i == rxnLayer) {
+					eloss += layers[i].GetReverseEnergyLossFractionalDepth(ze, ae, newEnergy, angle, m_fractional_depth_dist(RandomGenerator::GetInstance().GetGenerator()));
+					newEnergy = startEnergy + eloss;
+				} else {
+					eloss += layers[i].GetReverseEnergyLossTotal(ze, ae, newEnergy, angle);
+					newEnergy = startEnergy + eloss;
+				}
 			}
 		}
 	
