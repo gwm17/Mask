@@ -93,17 +93,21 @@ namespace Mask {
 		double thickness;
 		getline(input, junk);
 		getline(input, junk);
-		input>>junk>>junk;
 		input>>junk>>nlayers;
 		for(int i=0; i<nlayers; i++) 
 		{
 			input>>junk>>junk>>thickness;
-			getline(input, junk);
-			getline(input, junk);
 			avec.clear(); zvec.clear(); svec.clear();
-			while(input>>z) {
-				if(z == 0) break;
-				input>>a>>s;
+			while(input>>junk) 
+			{
+				if(junk == "begin_elements")
+				{
+					input>>junk>>junk>>junk;
+					continue;
+				} 
+				else if (junk == "end_elements")
+					break;
+				input>>z>>a>>s;
 				zvec.push_back(z); avec.push_back(a); svec.push_back(s);
 			}
 			sys->AddTargetLayer(zvec, avec, svec, thickness);

@@ -14,15 +14,13 @@
 */
 struct ELossException : public std::exception {
 	ELossException(const std::string& error) {
-		m_error = error;
+		m_error = "Failure to calculate particle energy loss. Reason: " + error + " See KinematicsExceptions.h for documentation.";
 	}
 
 	std::string m_error;
 
 	const char* what() const noexcept {
-		std::string err_str = "Failure to calculate particle energy loss. Reason: ";
-		err_str += m_error + " See KinematicsExceptions.h for documentation.";
-		return err_str.c_str();
+		return m_error.c_str();
 	};
 };
 

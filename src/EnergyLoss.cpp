@@ -49,6 +49,9 @@ namespace Mask {
 			AP = ap;
 			MP = MassLookup::GetInstance().FindMass(ZP, AP)*MEV2U;
 		}
+
+		if(thickness == 0.0 || e_initial == 0.0)
+			return 0;
 	
 		double e_final = e_initial;
 		double x_traversed = 0;
@@ -57,10 +60,6 @@ namespace Mask {
 		double e_threshold = 0.05*e_initial;
 	
 		int depth=0;
-	
-		
-		if(thickness == 0.0 || e_initial == 0.0) 
-			return 0;
 	
 		bool go = true;
 		while(go) {
@@ -99,7 +98,7 @@ namespace Mask {
 			MP = MassLookup::GetInstance().FindMass(ZP, AP)*MEV2U;
 
 		}
-	
+
 		double e_initial = e_final;
 		double x_traversed = 0.0;
 		double x_step = 0.25*thickness; //initial step in x

@@ -8,15 +8,14 @@ Z	A (order is target, projectile, ejectile, break1, break3(if pure decay is targ
 1	1
 2   4
 ----------Target Information----------
-Name: test_targ
-Layers: 1
-~Layer1
-Thickness(ug/cm^2): 50
-Z	A	Stoich
-1	2	2
-6	12	1
-0
-~
+NumberOfLayers: 2
+begin_layer
+	Thickness(ug/cm^2): 50
+	begin_elements (Z, A, Stoich.)
+		element	1 2 2
+		element	6 12 1
+	end_elements
+end_layer
 ----------Sampling Information----------
 NumberOfSamples: 100000
 BeamMeanEnergy(MeV): 0.87 BeamEnergySigma(MeV): 0.0
