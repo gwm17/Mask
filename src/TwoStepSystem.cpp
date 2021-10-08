@@ -7,11 +7,13 @@ namespace Mask {
 	TwoStepSystem::TwoStepSystem() :
 		ReactionSystem(), m_phi2Range(0, 2.0*M_PI)
 	{
+		nuclei.resize(6);
 	}
 	
 	TwoStepSystem::TwoStepSystem(std::vector<int>& z, std::vector<int>& a) :
 		ReactionSystem(), m_phi2Range(0, 2.0*M_PI)
 	{
+		nuclei.resize(6);
 		SetNuclei(z, a);
 	}
 	
@@ -30,6 +32,18 @@ namespace Mask {
 		step2.SetNuclei(zr, ar, 0, 0, z[3], a[3]);
 		SetSystemEquation();
 		return true;
+	}
+
+	const std::vector<Nucleus>& TwoStepSystem::GetNuclei()
+	{
+		nuclei[0] = step1.GetTarget();
+		nuclei[1] = step1.GetProjectile();
+		nuclei[2] = step1.GetEjectile();
+		nuclei[3] = step1.GetResidual();
+		nuclei[4] = step2.GetEjectile();
+		nuclei[5] = step2.GetResidual();
+
+		return nuclei;
 	}
 	
 	void TwoStepSystem::LinkTarget() {

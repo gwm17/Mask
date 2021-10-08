@@ -6,11 +6,13 @@ namespace Mask {
 	OneStepSystem::OneStepSystem() :
 		ReactionSystem()
 	{
+		nuclei.resize(4);
 	}
 	
 	OneStepSystem::OneStepSystem(std::vector<int>& z, std::vector<int>& a) :
 		ReactionSystem()
 	{
+		nuclei.resize(4);
 		SetNuclei(z, a);
 	}
 	
@@ -24,6 +26,16 @@ namespace Mask {
 		step1.SetNuclei(z[0], a[0], z[1], a[1], z[2], a[2]);
 		SetSystemEquation();
 		return true;
+	}
+
+	const std::vector<Nucleus>& OneStepSystem::GetNuclei()
+	{
+		nuclei[0] = step1.GetTarget();
+		nuclei[1] = step1.GetProjectile();
+		nuclei[2] = step1.GetEjectile();
+		nuclei[3] = step1.GetResidual();
+
+		return nuclei;
 	}
 	
 	void OneStepSystem::LinkTarget() {

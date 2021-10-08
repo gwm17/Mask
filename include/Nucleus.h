@@ -30,7 +30,7 @@ public:
 	inline double GetThetaCM() const { return m_theta_cm; };
 	inline void SetDetected() { m_detectFlag = true; };
 	inline void SetNotDetected() { m_detectFlag = false; };
-	inline bool IsDetected() { return m_detectFlag; };
+	inline bool IsDetected() const { return m_detectFlag; };
 
 	inline Nucleus& operator=(const Nucleus& rhs) {
 		SetIsotope(rhs.GetZ(), rhs.GetA());

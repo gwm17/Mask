@@ -13,6 +13,7 @@ namespace Mask {
 	
 		bool SetNuclei(std::vector<int>& z, std::vector<int>& a) override;
 		void RunSystem() override;
+		const std::vector<Nucleus>& GetNuclei() override;
 	
 		inline void SetReactionThetaType(int type) { step1.SetEjectileThetaType(type); };
 		inline const Nucleus& GetTarget() const { return step1.GetTarget(); };

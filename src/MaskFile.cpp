@@ -152,7 +152,7 @@ namespace Mask {
 		return header;
 	}
 	
-	void MaskFile::WriteData(std::vector<Nucleus>& data) {
+	void MaskFile::WriteData(const std::vector<Nucleus>& data) {
 	
 		char* data_pointer;
 		double datum;
@@ -224,7 +224,7 @@ namespace Mask {
 		}
 	}
 
-	void MaskFile::WriteData(MaskFileData& data) {
+	void MaskFile::WriteData(const MaskFileData& data) {
 	
 		char* data_pointer;
 		double datum;

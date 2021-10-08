@@ -6,11 +6,13 @@ namespace Mask {
 	DecaySystem::DecaySystem() :
 		ReactionSystem()
 	{
+		nuclei.resize(3);
 	}
 	
 	DecaySystem::DecaySystem(std::vector<int>& z, std::vector<int>& a) :
 		ReactionSystem()
 	{
+		nuclei.resize(3);
 		SetNuclei(z, a);
 	}
 	
@@ -20,10 +22,19 @@ namespace Mask {
 		if(z.size() != a.size() || z.size() != 2) {
 			return false;
 		}
-	
+
 		step1.SetNuclei(z[0], a[0], 0, 0, z[1], a[1]);
 		SetSystemEquation();
 		return true;
+	}
+
+	const std::vector<Nucleus>& DecaySystem::GetNuclei()
+	{
+		nuclei[0] = step1.GetTarget();
+		nuclei[1] = step1.GetEjectile();
+		nuclei[2] = step1.GetResidual();
+
+		return nuclei;
 	}
 	
 	void DecaySystem::LinkTarget() {

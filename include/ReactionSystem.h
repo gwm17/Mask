@@ -23,6 +23,7 @@ namespace Mask {
 	
 		virtual bool SetNuclei(std::vector<int>& z, std::vector<int>& a) = 0;
 		virtual void RunSystem() = 0;
+		virtual const std::vector<Nucleus>& GetNuclei() = 0;
 	
 		void AddTargetLayer(std::vector<int>& zt, std::vector<int>& at, std::vector<int>& stoich, double thickness);
 	
@@ -66,6 +67,7 @@ namespace Mask {
 		bool target_set_flag, gen_set_flag;
 		int rxnLayer;
 		std::string m_sys_equation;
+		std::vector<Nucleus> nuclei;
 		static constexpr double deg2rad = M_PI/180.0;
 	};
 

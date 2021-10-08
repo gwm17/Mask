@@ -7,11 +7,13 @@ namespace Mask {
 	ThreeStepSystem::ThreeStepSystem() :
 		ReactionSystem(), m_phi2Range(0, 2.0*M_PI)
 	{
+		nuclei.resize(8);
 	}
 	
 	ThreeStepSystem::ThreeStepSystem(std::vector<int>& z, std::vector<int>& a) :
 		ReactionSystem(), m_phi2Range(0, 2.0*M_PI)
 	{
+		nuclei.resize(8);
 		SetNuclei(z, a);
 	}
 	
@@ -34,6 +36,20 @@ namespace Mask {
 		return true;
 	}
 	
+	const std::vector<Nucleus>& ThreeStepSystem::GetNuclei()
+	{
+		nuclei[0] = step1.GetTarget();
+		nuclei[1] = step1.GetProjectile();
+		nuclei[2] = step1.GetEjectile();
+		nuclei[3] = step1.GetResidual();
+		nuclei[4] = step2.GetEjectile();
+		nuclei[5] = step2.GetResidual();
+		nuclei[6] = step3.GetEjectile();
+		nuclei[7] = step3.GetResidual();
+
+		return nuclei;
+	}
+
 	void ThreeStepSystem::LinkTarget() {
 		step1.SetLayeredTarget(&target);
 		step2.SetLayeredTarget(&target);

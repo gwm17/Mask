@@ -188,189 +188,37 @@ namespace Mask {
 	
 	void MaskApp::Run() {
 		std::cout<<"Running simulation..."<<std::endl;
-		switch(m_rxn_type) 
+		if(sys == nullptr) 
 		{
-			case RxnType::PureDecay :
-			{
-				RunOneStepDecay();
-				break;
-			}
-			case RxnType::OneStepRxn :
-			{
-				RunOneStepRxn();
-				break;
-			}
-			case RxnType::TwoStepRxn :
-			{
-				RunTwoStep();
-				break;
-			}
-			case RxnType::ThreeStepRxn :
-			{
-				RunThreeStep();
-				break;
-			}
+			return;
 		}
+	
+		MaskFile output(m_outfile_name, MaskFile::FileType::write);
+		output.WriteHeader(m_rxn_type, m_nsamples);
+	
+		//For progress tracking
+		uint32_t percent5 = 0.05*m_nsamples;
+		uint32_t count = 0;
+		uint32_t npercent = 0;
+	
+		for(uint32_t i=0; i<m_nsamples; i++) 
+		{
+			if(++count == percent5) 
+			{
+				npercent++;
+				count = 0;
+				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
+			}
+	
+			sys->RunSystem();
+			output.WriteData(sys->GetNuclei());
+		}
+	
+		output.Close();
+		
 		std::cout<<std::endl;
 		std::cout<<"Complete."<<std::endl;
 		std::cout<<"---------------------------------------------"<<std::endl;
-	}
-	
-	void MaskApp::RunOneStepRxn() {
-		OneStepSystem* this_sys = dynamic_cast<OneStepSystem*>(sys);
-		if(this_sys == nullptr) 
-		{
-			return;
-		}
-		
-		MaskFile output(m_outfile_name, MaskFile::FileType::write);
-		std::vector<Nucleus> data;
-		data.resize(4);
-		output.WriteHeader(m_rxn_type, m_nsamples);
-		
-	
-		//For progress tracking
-		uint32_t percent5 = 0.05*m_nsamples;
-		uint32_t count = 0;
-		uint32_t npercent = 0;
-	
-		for(uint32_t i=0; i<m_nsamples; i++) 
-		{
-			if(++count == percent5) 
-			{//Show update every 5 percent
-				npercent++;
-				count = 0;
-				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
-			}
-	
-			this_sys->RunSystem();
-			data[0] = this_sys->GetTarget();
-			data[1] = this_sys->GetProjectile();
-			data[2] = this_sys->GetEjectile();
-			data[3] = this_sys->GetResidual();
-			output.WriteData(data);
-			
-		}
-	
-		output.Close();
-	}
-	
-	void MaskApp::RunOneStepDecay() {
-		DecaySystem* this_sys = dynamic_cast<DecaySystem*>(sys);
-		if(this_sys == nullptr) 
-		{
-			return;
-		}
-	
-		MaskFile output(m_outfile_name, MaskFile::FileType::write);
-		std::vector<Nucleus> data;
-		data.resize(3);
-		output.WriteHeader(m_rxn_type, m_nsamples);
-	
-		//For progress tracking
-		uint32_t percent5 = 0.05*m_nsamples;
-		uint32_t count = 0;
-		uint32_t npercent = 0;
-	
-		for(uint32_t i=0; i<m_nsamples; i++) 
-		{
-			if(++count == percent5) 
-			{
-				npercent++;
-				count = 0;
-				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
-			}
-	
-			this_sys->RunSystem();
-			data[0] = this_sys->GetTarget();
-			data[1] = this_sys->GetEjectile();
-			data[2] = this_sys->GetResidual();
-			output.WriteData(data);
-		}
-	
-		output.Close();
-	}
-	
-	void MaskApp::RunTwoStep() {
-	
-		TwoStepSystem* this_sys = dynamic_cast<TwoStepSystem*>(sys);
-		if(this_sys == nullptr) 
-		{
-			return;
-		}
-	
-		MaskFile output(m_outfile_name, MaskFile::FileType::write);
-		std::vector<Nucleus> data;
-		data.resize(6);
-		output.WriteHeader(m_rxn_type, m_nsamples);
-	
-		//For progress tracking
-		uint32_t percent5 = 0.05*m_nsamples;
-		uint32_t count = 0;
-		uint32_t npercent = 0;
-	
-		for(uint32_t i=0; i<m_nsamples; i++) 
-		{
-			if(++count == percent5) 
-			{
-				npercent++;
-				count = 0;
-				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
-			}
-	
-			this_sys->RunSystem();
-			data[0] = this_sys->GetTarget();
-			data[1] = this_sys->GetProjectile();
-			data[2] = this_sys->GetEjectile();
-			data[3] = this_sys->GetResidual();
-			data[4] = this_sys->GetBreakup1();
-			data[5] = this_sys->GetBreakup2();
-			output.WriteData(data);
-		}
-	
-		output.Close();
-	}
-	
-	void MaskApp::RunThreeStep() {
-	
-		ThreeStepSystem* this_sys = dynamic_cast<ThreeStepSystem*>(sys);
-		if(this_sys == nullptr) 
-		{
-			return;
-		}
-	
-		MaskFile output(m_outfile_name, MaskFile::FileType::write);
-		std::vector<Nucleus> data;
-		data.resize(8);
-		output.WriteHeader(m_rxn_type, m_nsamples);
-	
-		//For progress updating
-		uint32_t percent5 = 0.05*m_nsamples;
-		uint32_t count = 0;
-		uint32_t npercent = 0;
-	
-		for(uint32_t i=0; i<m_nsamples; i++)  
-		{
-			if(++count == percent5) 
-			{
-				npercent++;
-				count = 0;
-				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
-			}
-	
-			this_sys->RunSystem();
-			data[0] = this_sys->GetTarget();
-			data[1] = this_sys->GetProjectile();
-			data[2] = this_sys->GetEjectile();
-			data[3] = this_sys->GetResidual();
-			data[4] = this_sys->GetBreakup1();
-			data[5] = this_sys->GetBreakup2();
-			data[6] = this_sys->GetBreakup3();
-			data[7] = this_sys->GetBreakup4();
-			output.WriteData(data);
-		}
-	
-		output.Close();
 	}
 
 }

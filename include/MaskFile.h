@@ -38,8 +38,8 @@ namespace Mask {
 		void Close();
 		
 		void WriteHeader(RxnType rxn_type, int nsamples);
-		void WriteData(std::vector<Nucleus>& data);
-		void WriteData(MaskFileData& data);
+		void WriteData(const std::vector<Nucleus>& data);
+		void WriteData(const MaskFileData& data);
 		MaskFileHeader ReadHeader();
 		MaskFileData ReadData();
 	

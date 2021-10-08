@@ -8,7 +8,7 @@ Z	A (order is target, projectile, ejectile, break1, break3(if pure decay is targ
 1	1
 2   4
 ----------Target Information----------
-NumberOfLayers: 2
+NumberOfLayers: 1
 begin_layer
 	Thickness(ug/cm^2): 50
 	begin_elements (Z, A, Stoich.)

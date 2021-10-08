@@ -14,6 +14,7 @@ namespace Mask {
 	
 		bool SetNuclei(std::vector<int>& z, std::vector<int>& a) override;
 		void RunSystem() override;
+		const std::vector<Nucleus>& GetNuclei() override;
 	
 		inline void SetDecay1Distribution(const std::string& filename) { decay1dist.ReadDistributionFile(filename); }
 	
