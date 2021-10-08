@@ -64,33 +64,45 @@ namespace Mask {
 		file.close();
 	}
 	
-	void MaskFile::WriteHeader(int rxn_type, int nsamples) {
-		//size of a datum = data nuclei per event * (# doubles per nucleus * sizeof double + # ints per nucleus * sizeof int + sizeof bool)
-		if(rxn_type == 0) {
-			m_rxn_type = 0;
-			data_size = 3 * ( 5 * double_size + 2 * int_size + bool_size); 
+	void MaskFile::WriteHeader(RxnType rxn_type, int nsamples) {
+
+		m_rxn_type = rxn_type;
+		switch(rxn_type)
+		{
+			case RxnType::PureDecay :
+			{
+				data_size = 3 * ( 5 * double_size + 2 * int_size + bool_size); 
+				break;
+			}
+			case RxnType::OneStepRxn :
+			{
+				data_size = 4 * ( 5 * double_size + 2 * int_size + bool_size);
+				break;
+			}
+			case RxnType::TwoStepRxn :
+			{
+				data_size = 6 * ( 5 * double_size + 2 * int_size + bool_size);
+				break;
+			}
+			case RxnType::ThreeStepRxn :
+			{
+				data_size = 8 * ( 5 * double_size + 2 * int_size + bool_size);
+				break;
+			}
+			case RxnType::None :
+			{
+				std::cerr<<"Invalid RxnType at MaskFile::WriteHeader!"<<std::endl;
+				return;
+			}
 		}
-		else if (rxn_type == 1) {
-			m_rxn_type = 1;
-			data_size = 4 * ( 5 * double_size + 2 * int_size + bool_size);
-		}
-		else if (rxn_type == 2) {
-			m_rxn_type = 2;
-			data_size = 6 * ( 5 * double_size + 2 * int_size + bool_size);
-		}
-		else if (rxn_type == 3) {
-			m_rxn_type = 3;
-			data_size = 8 * ( 5 * double_size + 2 * int_size + bool_size);
-		} else {
-			std::cerr<<"Invalid number of nuclei at MaskFile::WriteHeader! Returning"<<std::endl;
-			return;
-		}
+		
 		buffersize_bytes = buffersize * data_size; //buffersize_bytes = # of events * size of an event
 	
 		data_buffer.resize(buffersize_bytes);
 	
+		uint32_t type_value = GetIntFromRxnType(m_rxn_type);
 		file.write((char*) &nsamples, int_size);
-		file.write((char*) &m_rxn_type, int_size);
+		file.write((char*) &type_value, int_size);
 	}
 	
 	MaskFileHeader MaskFile::ReadHeader() {
@@ -99,24 +111,38 @@ namespace Mask {
 		file.read(temp_buffer.data(), 4);
 		header.nsamples = *(int*)(&temp_buffer[0]);
 		file.read(temp_buffer.data(), 4);
-		m_rxn_type = *(int*)(&temp_buffer[0]);
+		uint32_t type_value = *(uint32_t*)(&temp_buffer[0]);
+		m_rxn_type = GetRxnTypeFromInt(type_value);
 	
-		//size of a datum = data nuclei per event * (# doubles per nucleus * sizeof double + # ints per nucleus * sizeof int + sizeof bool)
-		if(m_rxn_type == 0) {
-			data_size = 3 * ( 5 * double_size + 2 * int_size + bool_size);
+		switch(m_rxn_type)
+		{
+			case RxnType::PureDecay: 
+			{
+				data_size = 3 * ( 5 * double_size + 2 * int_size + bool_size);
+				break;
+			}
+			case RxnType::OneStepRxn:
+			{
+				data_size = 4 * ( 5 * double_size + 2 * int_size + bool_size);
+				break;
+			}
+			case RxnType::TwoStepRxn: 
+			{
+				data_size = 6 * ( 5 * double_size + 2 * int_size + bool_size);
+				break;
+			}
+			case RxnType::ThreeStepRxn: 
+			{
+				data_size = 8 * ( 5 * double_size + 2 * int_size + bool_size);
+				break;
+			} 
+			case RxnType::None:
+			{
+				std::cerr<<"Unexpected reaction type at MaskFile::ReadHeader (rxn type = "<<GetIntFromRxnType(m_rxn_type)<<")! Returning"<<std::endl;
+				return header;
+			}
 		}
-		else if (m_rxn_type == 1) {
-			data_size = 4 * ( 5 * double_size + 2 * int_size + bool_size);
-		}
-		else if (m_rxn_type == 2) {
-			data_size = 6 * ( 5 * double_size + 2 * int_size + bool_size);
-		}
-		else if (m_rxn_type == 3) {
-			data_size = 8 * ( 5 * double_size + 2 * int_size + bool_size);
-		} else {
-			std::cerr<<"Unexpected reaction type at MaskFile::ReadHeader (rxn type = "<<m_rxn_type<<")! Returning"<<std::endl;
-			return header;
-		}
+
 		buffersize_bytes = buffersize * data_size;//buffersize_bytes = size of a datum * # of events
 	
 		header.rxn_type = m_rxn_type;

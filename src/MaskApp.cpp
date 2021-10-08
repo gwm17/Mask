@@ -1,46 +1,49 @@
-#include "Kinematics.h"
+#include "MaskApp.h"
 #include "MaskFile.h"
 #include <fstream>
 #include <iostream>
 
 namespace Mask {
 
-	Kinematics::Kinematics() :
+	MaskApp::MaskApp() :
 		sys(nullptr)
 	{
 		std::cout<<"----------GWM Kinematics Simulation----------"<<std::endl;
 	}
 	
-	Kinematics::~Kinematics() {
+	MaskApp::~MaskApp() 
+	{
 		if(sys) delete sys;
 	}
 	
-	bool Kinematics::LoadConfig(const std::string& filename) {
+	bool MaskApp::LoadConfig(const std::string& filename) 
+	{
 		std::cout<<"Loading configuration in "<<filename<<"..."<<std::endl;
 	
 		std::ifstream input(filename);
-		if(!input.is_open()) {
+		if(!input.is_open()) 
+		{
 			return false;
 		}
 	
 		std::string junk;
 		getline(input, junk);
 		input>>junk>>m_outfile_name;
-		input>>junk>>junk;
-		input>>junk>>junk;
 	
 		std::vector<int> avec, zvec, svec;
 		int z, a, s;
 		getline(input, junk);
 		getline(input, junk);
-		input>>junk>>m_rxn_type;
+		input>>junk>>junk;
+		m_rxn_type = GetRxnTypeFromString(junk);
 		getline(input, junk);
 		getline(input, junk);
-		switch(m_rxn_type) {
-			case 0:
+		switch(m_rxn_type) 
+		{
+			case RxnType::PureDecay:
 			{
 				sys = new DecaySystem();
-				m_rxn_type = ONESTEP_DECAY;
+				m_rxn_type = RxnType::PureDecay;
 				for(int i=0; i<2; i++) {
 					input>>z>>a;
 					avec.push_back(a);
@@ -48,10 +51,10 @@ namespace Mask {
 				}
 				break;
 			}
-			case 1:
+			case RxnType::OneStepRxn:
 			{
 				sys = new OneStepSystem();
-				m_rxn_type = ONESTEP_RXN;
+				m_rxn_type = RxnType::OneStepRxn;
 				for(int i=0; i<3; i++) {
 					input>>z>>a;
 					avec.push_back(a);
@@ -59,10 +62,10 @@ namespace Mask {
 				}
 				break;
 			}
-			case 2:
+			case RxnType::TwoStepRxn:
 			{
 				sys = new TwoStepSystem();
-				m_rxn_type = TWOSTEP;
+				m_rxn_type = RxnType::TwoStepRxn;
 				for(int i=0; i<4; i++) {
 					input>>z>>a;
 					avec.push_back(a);
@@ -70,10 +73,10 @@ namespace Mask {
 				}
 				break;
 			}
-			case 3:
+			case RxnType::ThreeStepRxn:
 			{
 				sys = new ThreeStepSystem();
-				m_rxn_type = THREESTEP;
+				m_rxn_type = RxnType::TwoStepRxn;
 				for(int i=0; i<5; i++) {
 					input>>z>>a;
 					avec.push_back(a);
@@ -92,7 +95,8 @@ namespace Mask {
 		getline(input, junk);
 		input>>junk>>junk;
 		input>>junk>>nlayers;
-		for(int i=0; i<nlayers; i++) {
+		for(int i=0; i<nlayers; i++) 
+		{
 			input>>junk>>junk>>thickness;
 			getline(input, junk);
 			getline(input, junk);
@@ -116,18 +120,19 @@ namespace Mask {
 		input>>junk>>par1>>junk>>par2;
 		sys->SetBeamDistro(par1, par2);
 		input>>junk>>par1;
-		switch(m_rxn_type) {
-			case ONESTEP_RXN :
+		switch(m_rxn_type) 
+		{
+			case RxnType::OneStepRxn :
 			{
 				dynamic_cast<OneStepSystem*>(sys)->SetReactionThetaType(par1);
 				break;
 			}
-			case TWOSTEP:
+			case RxnType::TwoStepRxn :
 			{
 				dynamic_cast<TwoStepSystem*>(sys)->SetReactionThetaType(par1);
 				break;
 			}
-			case THREESTEP:
+			case RxnType::ThreeStepRxn :
 			{
 				dynamic_cast<ThreeStepSystem*>(sys)->SetReactionThetaType(par1);
 				break;
@@ -141,8 +146,9 @@ namespace Mask {
 		sys->SetExcitationDistro(par1, par2);
 		input>>junk>>dfile1;
 		input>>junk>>dfile2;
-		switch(m_rxn_type) {
-			case ONESTEP_DECAY:
+		switch(m_rxn_type) 
+		{
+			case RxnType::OneStepRxn :
 			{
 				DecaySystem* this_sys = dynamic_cast<DecaySystem*>(sys);
 				this_sys->SetDecay1Distribution(dfile1);
@@ -150,7 +156,7 @@ namespace Mask {
 				std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
 				break;
 			}
-			case TWOSTEP:
+			case RxnType::TwoStepRxn :
 			{
 				TwoStepSystem* this_sys = dynamic_cast<TwoStepSystem*>(sys);
 				this_sys->SetDecay1Distribution(dfile1);
@@ -158,7 +164,7 @@ namespace Mask {
 				std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
 				break;
 			}
-			case THREESTEP:
+			case RxnType::ThreeStepRxn :
 			{
 				ThreeStepSystem* this_sys = dynamic_cast<ThreeStepSystem*>(sys);
 				this_sys->SetDecay1Distribution(dfile1);
@@ -174,27 +180,28 @@ namespace Mask {
 		return true;
 	}
 	
-	bool Kinematics::SaveConfig(const std::string& filename) { return true; }
+	bool MaskApp::SaveConfig(const std::string& filename) { return true; }
 	
-	void Kinematics::Run() {
+	void MaskApp::Run() {
 		std::cout<<"Running simulation..."<<std::endl;
-		switch(m_rxn_type) {
-			case ONESTEP_DECAY:
+		switch(m_rxn_type) 
+		{
+			case RxnType::PureDecay :
 			{
 				RunOneStepDecay();
 				break;
 			}
-			case ONESTEP_RXN:
+			case RxnType::OneStepRxn :
 			{
 				RunOneStepRxn();
 				break;
 			}
-			case TWOSTEP:
+			case RxnType::TwoStepRxn :
 			{
 				RunTwoStep();
 				break;
 			}
-			case THREESTEP:
+			case RxnType::ThreeStepRxn :
 			{
 				RunThreeStep();
 				break;
@@ -205,9 +212,10 @@ namespace Mask {
 		std::cout<<"---------------------------------------------"<<std::endl;
 	}
 	
-	void Kinematics::RunOneStepRxn() {
+	void MaskApp::RunOneStepRxn() {
 		OneStepSystem* this_sys = dynamic_cast<OneStepSystem*>(sys);
-		if(this_sys == nullptr) {
+		if(this_sys == nullptr) 
+		{
 			return;
 		}
 		
@@ -218,12 +226,14 @@ namespace Mask {
 		
 	
 		//For progress tracking
-		int percent5 = 0.05*m_nsamples;
-		int count = 0;
-		int npercent = 0;
+		uint64_t percent5 = 0.05*m_nsamples;
+		uint64_t count = 0;
+		uint64_t npercent = 0;
 	
-		for(int i=0; i<m_nsamples; i++) {
-			if(++count == percent5) {//Show update every 5 percent
+		for(uint64_t i=0; i<m_nsamples; i++) 
+		{
+			if(++count == percent5) 
+			{//Show update every 5 percent
 				npercent++;
 				count = 0;
 				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
@@ -241,9 +251,10 @@ namespace Mask {
 		output.Close();
 	}
 	
-	void Kinematics::RunOneStepDecay() {
+	void MaskApp::RunOneStepDecay() {
 		DecaySystem* this_sys = dynamic_cast<DecaySystem*>(sys);
-		if(this_sys == nullptr) {
+		if(this_sys == nullptr) 
+		{
 			return;
 		}
 	
@@ -253,12 +264,14 @@ namespace Mask {
 		output.WriteHeader(m_rxn_type, m_nsamples);
 	
 		//For progress tracking
-		int percent5 = 0.05*m_nsamples;
-		int count = 0;
-		int npercent = 0;
+		uint64_t percent5 = 0.05*m_nsamples;
+		uint64_t count = 0;
+		uint64_t npercent = 0;
 	
-		for(int i=0; i<m_nsamples; i++) {
-			if(++count == percent5) {//Show update every 5 percent
+		for(uint64_t i=0; i<m_nsamples; i++) 
+		{
+			if(++count == percent5) 
+			{
 				npercent++;
 				count = 0;
 				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
@@ -274,10 +287,11 @@ namespace Mask {
 		output.Close();
 	}
 	
-	void Kinematics::RunTwoStep() {
+	void MaskApp::RunTwoStep() {
 	
 		TwoStepSystem* this_sys = dynamic_cast<TwoStepSystem*>(sys);
-		if(this_sys == nullptr) {
+		if(this_sys == nullptr) 
+		{
 			return;
 		}
 	
@@ -287,12 +301,14 @@ namespace Mask {
 		output.WriteHeader(m_rxn_type, m_nsamples);
 	
 		//For progress tracking
-		int percent5 = 0.05*m_nsamples;
-		int count = 0;
-		int npercent = 0;
+		uint64_t percent5 = 0.05*m_nsamples;
+		uint64_t count = 0;
+		uint64_t npercent = 0;
 	
-		for(int i=0; i<m_nsamples; i++) {
-			if(++count == percent5) {//Show update every 5 percent
+		for(uint64_t i=0; i<m_nsamples; i++) 
+		{
+			if(++count == percent5) 
+			{
 				npercent++;
 				count = 0;
 				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
@@ -311,10 +327,11 @@ namespace Mask {
 		output.Close();
 	}
 	
-	void Kinematics::RunThreeStep() {
+	void MaskApp::RunThreeStep() {
 	
 		ThreeStepSystem* this_sys = dynamic_cast<ThreeStepSystem*>(sys);
-		if(this_sys == nullptr) {
+		if(this_sys == nullptr) 
+		{
 			return;
 		}
 	
@@ -324,12 +341,14 @@ namespace Mask {
 		output.WriteHeader(m_rxn_type, m_nsamples);
 	
 		//For progress updating
-		int percent5 = 0.05*m_nsamples;
-		int count = 0;
-		int npercent = 0;
+		uint64_t percent5 = 0.05*m_nsamples;
+		uint64_t count = 0;
+		uint64_t npercent = 0;
 	
-		for(int i=0; i<m_nsamples; i++) {
-			if(++count == percent5) {//Show update every 5 percent
+		for(uint64_t i=0; i<m_nsamples; i++)  
+		{
+			if(++count == percent5) 
+			{
 				npercent++;
 				count = 0;
 				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;

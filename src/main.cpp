@@ -2,7 +2,7 @@
 #include <string>
 #include "Stopwatch.h"
 #include "MaskFile.h"
-#include "Kinematics.h"
+#include "MaskApp.h"
 #include "KinematicsExceptions.h"
 
 int main(int argc, char** argv) {
@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
 	Stopwatch sw;
 
 
-	Mask::Kinematics calculator;
+	Mask::MaskApp calculator;
 	sw.Start();
 	try {
 		if(!calculator.LoadConfig(argv[1])) {
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 	Mask::MaskFileData data;
 	Mask::MaskFileHeader header = input.ReadHeader();
 
-	std::cout<<"Header Found -- rxn type: "<<header.rxn_type<<" nsamples: "<<header.nsamples;
+	std::cout<<"Header Found -- rxn type: "<<GetStringFromRxnType(header.rxn_type)<<" nsamples: "<<header.nsamples;
 	std::cout<<std::endl;
 
 	int counter=0;

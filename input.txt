@@ -1,9 +1,7 @@
 ----------Data Information----------
-OutputFile: /media/gordon/ANASENData/MaskData/Kinematics/7Bedp_870keV_beam_50CD2.mask
-SaveTree: yes
-SavePlots: yes
+OutputFile: /media/gordon/ANASENData/MaskData/Kinematics/7Bedp_870keV_beam_50CD2_test.mask
 ----------Reaction Information----------
-ReactionType: 2
+ReactionType: TwoStepRxn
 Z	A (order is target, projectile, ejectile, break1, break3(if pure decay is target, ejectile))
 1   2
 4	7

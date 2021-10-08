@@ -1,5 +1,4 @@
 #include "AnasenEfficiency.h"
-#include "Kinematics.h"
 #include <fstream>
 #include <iomanip>
 
@@ -321,16 +320,16 @@ DetectorResult AnasenEfficiency::IsAnasen(Mask::Nucleus& nucleus) {
 	return result;
 }
 
-void AnasenEfficiency::CountCoincidences(const Mask::MaskFileData& data, std::vector<int>& counts, int rxn_type) {
-	if (rxn_type == 0 && data.detect_flag[1] && data.detect_flag[2])
+void AnasenEfficiency::CountCoincidences(const Mask::MaskFileData& data, std::vector<int>& counts, Mask::RxnType rxn_type) {
+	if (rxn_type == Mask::RxnType::PureDecay && data.detect_flag[1] && data.detect_flag[2])
 	{
 		counts[0]++;
 	}
-	else if (rxn_type == 1 && data.detect_flag[2] && data.detect_flag[3])
+	else if (rxn_type == Mask::RxnType::OneStepRxn && data.detect_flag[2] && data.detect_flag[3])
 	{
 		counts[0]++;
 	}
-	else if(rxn_type == 2)
+	else if(rxn_type == Mask::RxnType::TwoStepRxn)
 	{
 		if(data.detect_flag[2] && data.detect_flag[4]) 
 		{
@@ -349,7 +348,7 @@ void AnasenEfficiency::CountCoincidences(const Mask::MaskFileData& data, std::ve
 			counts[3]++;
 		}
 	}
-	else if(rxn_type == 3)
+	else if(rxn_type == Mask::RxnType::ThreeStepRxn)
 	{
 		if(data.detect_flag[2] && data.detect_flag[4]) 
 		{
@@ -418,25 +417,25 @@ void AnasenEfficiency::CalculateEfficiency(const std::string& inputname, const s
 	std::vector<int> counts;
 	std::vector<int> coinc_counts;
 	switch(header.rxn_type) {
-		case 0:
+		case Mask::RxnType::PureDecay:
 			counts.resize(3, 0);
 			coinc_counts.resize(1, 0);
 			break;
-		case 1:
+		case Mask::RxnType::OneStepRxn:
 			counts.resize(4, 0);
 			coinc_counts.resize(1, 0);
 			break;
-		case 2:
+		case Mask::RxnType::TwoStepRxn:
 			counts.resize(6, 0);
 			coinc_counts.resize(4, 0);
 			break;
-		case 3:
+		case Mask::RxnType::ThreeStepRxn:
 			counts.resize(8, 0);
 			coinc_counts.resize(11, 0);
 			break;
 		default:
 		{
-			std::cerr<<"Bad reaction type at AnasenEfficiency::CalculateEfficiency (given value: "<<header.rxn_type<<"). Quiting..."<<std::endl;
+			std::cerr<<"Bad reaction type at AnasenEfficiency::CalculateEfficiency (given value: "<<GetStringFromRxnType(header.rxn_type)<<"). Quiting..."<<std::endl;
 			input.Close();
 			output.Close();
 			stats.close();
@@ -494,17 +493,17 @@ void AnasenEfficiency::CalculateEfficiency(const std::string& inputname, const s
 	}
 	stats<<"Coincidence Efficiency"<<std::endl;
 	stats<<"---------------------"<<std::endl;
-	if(header.rxn_type == 0)
+	if(header.rxn_type == Mask::RxnType::PureDecay)
 	{
 		stats<<std::setw(10)<<"1 + 2"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
 		stats<<"---------------------"<<std::endl;
 	}
-	else if(header.rxn_type == 1)
+	else if(header.rxn_type == Mask::RxnType::OneStepRxn)
 	{
 		stats<<std::setw(10)<<"2 + 3"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
 		stats<<"---------------------"<<std::endl;
 	}
-	else if(header.rxn_type == 2)
+	else if(header.rxn_type == Mask::RxnType::TwoStepRxn)
 	{
 		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
 		stats<<"---------------------"<<std::endl;
@@ -515,7 +514,7 @@ void AnasenEfficiency::CalculateEfficiency(const std::string& inputname, const s
 		stats<<std::setw(10)<<"2 + 4 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[3]/header.nsamples)<<std::endl;
 		stats<<"---------------------"<<std::endl;
 	}
-	else if(header.rxn_type == 3)
+	else if(header.rxn_type == Mask::RxnType::ThreeStepRxn)
 	{
 		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
 		stats<<"---------------------"<<std::endl;

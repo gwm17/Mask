@@ -6,11 +6,12 @@
 #include <vector>
 
 #include "Nucleus.h"
+#include "RxnType.h"
 
 namespace Mask {
 
 	struct MaskFileHeader {
-		int rxn_type = -1;
+		RxnType rxn_type = RxnType::None;
 		int nsamples = -1;
 	};
 
@@ -36,7 +37,7 @@ namespace Mask {
 		inline bool IsOpen() { return file.is_open(); }
 		void Close();
 		
-		void WriteHeader(int rxn_type, int nsamples);
+		void WriteHeader(RxnType rxn_type, int nsamples);
 		void WriteData(std::vector<Nucleus>& data);
 		void WriteData(MaskFileData& data);
 		MaskFileHeader ReadHeader();
@@ -51,7 +52,7 @@ namespace Mask {
 		unsigned int buffer_position;
 		unsigned int buffer_end;
 		unsigned int data_size;
-		int m_rxn_type;
+		RxnType m_rxn_type;
 		int buffersize_bytes;
 	
 		std::fstream file;

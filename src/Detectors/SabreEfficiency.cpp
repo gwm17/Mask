@@ -53,21 +53,21 @@ void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const st
 
 	std::vector<int> counts;
 	switch(header.rxn_type) {
-		case 0:
+		case Mask::RxnType::PureDecay:
 			counts.resize(3, 0);
 			break;
-		case 1:
+		case Mask::RxnType::OneStepRxn:
 			counts.resize(4, 0);
 			break;
-		case 2:
+		case Mask::RxnType::TwoStepRxn:
 			counts.resize(6, 0);
 			break;
-		case 3:
+		case Mask::RxnType::ThreeStepRxn:
 			counts.resize(8, 0);
 			break;
 		default:
 		{
-			std::cerr<<"Bad reaction type at AnasenEfficiency::CalculateEfficiency (given value: "<<header.rxn_type<<"). Quiting..."<<std::endl;
+			std::cerr<<"Bad reaction type at AnasenEfficiency::CalculateEfficiency (given value: "<<GetStringFromRxnType(header.rxn_type)<<"). Quiting..."<<std::endl;
 			input.Close();
 			output.Close();
 			stats.close();

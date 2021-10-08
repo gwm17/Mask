@@ -30,7 +30,7 @@ private:
 	DetectorResult IsRing2(Mask::Nucleus& nucleus);
 	DetectorResult IsQQQ(Mask::Nucleus& nucleus);
 	DetectorResult IsAnasen(Mask::Nucleus& nucleus);
-	void CountCoincidences(const Mask::MaskFileData& data, std::vector<int>& counts, int rxn_type);
+	void CountCoincidences(const Mask::MaskFileData& data, std::vector<int>& counts, Mask::RxnType rxn_type);
 
 	std::vector<StripDetector> m_Ring1, m_Ring2;
 	std::vector<QQQDetector> m_forwardQQQs;

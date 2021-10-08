@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
 
 	Mask::MaskFileHeader header = input.ReadHeader();
 
-	std::cout<<"File Header -- rxn type: "<<header.rxn_type<<" nsamples: "<<header.nsamples<<std::endl;
+	std::cout<<"File Header -- rxn type: "<<GetStringFromRxnType(header.rxn_type)<<" nsamples: "<<header.nsamples<<std::endl;
 
 	Mask::MaskFileData data;
 	Mask::Nucleus nucleus;
