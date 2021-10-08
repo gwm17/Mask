@@ -12,6 +12,7 @@
 .DS_Store
 Makefile
 *.make
+__pycache__
 
 
 ###Keep this file###

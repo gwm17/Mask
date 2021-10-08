@@ -9,7 +9,7 @@ AnasenEfficiency::AnasenEfficiency() :
 	for(int i=0; i<n_sx3_per_ring; i++) {
 		m_Ring1.emplace_back(4, sx3_length, sx3_width, ring_phi[i], ring1_z, ring_rho[i]);
 		m_Ring1[i].TurnOnRandomizedCoordinates();
-		m_Ring2.emplace_back(4, sx3_length, sx3_width, ring_phi[i], -1.0*ring1_z, ring_rho[i]);
+		m_Ring2.emplace_back(4, sx3_length, sx3_width, ring_phi[i], ring2_z, ring_rho[i]);
 		m_Ring2[i].TurnOnRandomizedCoordinates();
 	}
 	for(int i=0; i<n_qqq; i++) {
@@ -113,11 +113,9 @@ void AnasenEfficiency::DrawDetectorSystem(const std::string& filename) {
 	}
 
 	output<<"ANASEN Geometry File -- Coordinates for Detectors"<<std::endl;
-	output<<"Edges: x y z"<<std::endl;
 	for(unsigned int i=0; i<x.size(); i++) {
 		output<<x[i]<<" "<<y[i]<<" "<<z[i]<<std::endl;
 	}
-	output<<"Centers: x y z"<<std::endl;
 	for(unsigned int i=0; i<cx.size(); i++) {
 		output<<cx[i]<<" "<<cy[i]<<" "<<cz[i]<<std::endl;
 	}

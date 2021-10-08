@@ -1,0 +1,6 @@
+#!/bin/bash
+
+InputFile=$1;
+OutputFile=$2;
+
+./src/Plotters/Python/PyPlotter.py ${InputFile} ${OutputFile}

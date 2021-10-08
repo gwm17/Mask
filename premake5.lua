@@ -44,8 +44,8 @@ project	"RootPlot"
 	}
 
 	--User specified path to ROOT CERN libraries--
-	ROOTIncludepath = "/usr/include/root"
-	ROOTLibpath = "/usr/lib64/root"
+	ROOTIncludepath = "/home/gordon/cern/root-6.22.02/root-install/include"
+	ROOTLibpath = "/home/gordon/cern/root-6.22.02/root-install/lib"
 
 	includedirs {
 		"include"

@@ -1,13 +1,14 @@
 ----------Data Information----------
-OutputFile: /data1/gwm17/mask_tests/7Be12C_870keV_beam_50CD2.mask
+OutputFile: /media/gordon/ANASENData/MaskData/Kinematics/7Bedp_870keV_beam_50CD2.mask
 SaveTree: yes
 SavePlots: yes
 ----------Reaction Information----------
-ReactionType: 1
+ReactionType: 2
 Z	A (order is target, projectile, ejectile, break1, break3(if pure decay is target, ejectile))
-6   12
+1   2
 4	7
-4	7
+1	1
+2   4
 ----------Target Information----------
 Name: test_targ
 Layers: 1

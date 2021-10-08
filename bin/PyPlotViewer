@@ -1,0 +1,5 @@
+#!/bin/bash
+
+FileName=$1;
+
+./src/Plotters/Python/ViewPyPlots.py ${FileName}
