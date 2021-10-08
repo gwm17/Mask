@@ -33,7 +33,7 @@ namespace Mask {
 		std::string m_outfile_name;
 	
 		RxnType m_rxn_type;
-		uint64_t m_nsamples;
+		uint32_t m_nsamples;
 	
 	};
 

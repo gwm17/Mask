@@ -226,11 +226,11 @@ namespace Mask {
 		
 	
 		//For progress tracking
-		uint64_t percent5 = 0.05*m_nsamples;
-		uint64_t count = 0;
-		uint64_t npercent = 0;
+		uint32_t percent5 = 0.05*m_nsamples;
+		uint32_t count = 0;
+		uint32_t npercent = 0;
 	
-		for(uint64_t i=0; i<m_nsamples; i++) 
+		for(uint32_t i=0; i<m_nsamples; i++) 
 		{
 			if(++count == percent5) 
 			{//Show update every 5 percent
@@ -264,11 +264,11 @@ namespace Mask {
 		output.WriteHeader(m_rxn_type, m_nsamples);
 	
 		//For progress tracking
-		uint64_t percent5 = 0.05*m_nsamples;
-		uint64_t count = 0;
-		uint64_t npercent = 0;
+		uint32_t percent5 = 0.05*m_nsamples;
+		uint32_t count = 0;
+		uint32_t npercent = 0;
 	
-		for(uint64_t i=0; i<m_nsamples; i++) 
+		for(uint32_t i=0; i<m_nsamples; i++) 
 		{
 			if(++count == percent5) 
 			{
@@ -301,11 +301,11 @@ namespace Mask {
 		output.WriteHeader(m_rxn_type, m_nsamples);
 	
 		//For progress tracking
-		uint64_t percent5 = 0.05*m_nsamples;
-		uint64_t count = 0;
-		uint64_t npercent = 0;
+		uint32_t percent5 = 0.05*m_nsamples;
+		uint32_t count = 0;
+		uint32_t npercent = 0;
 	
-		for(uint64_t i=0; i<m_nsamples; i++) 
+		for(uint32_t i=0; i<m_nsamples; i++) 
 		{
 			if(++count == percent5) 
 			{
@@ -341,11 +341,11 @@ namespace Mask {
 		output.WriteHeader(m_rxn_type, m_nsamples);
 	
 		//For progress updating
-		uint64_t percent5 = 0.05*m_nsamples;
-		uint64_t count = 0;
-		uint64_t npercent = 0;
+		uint32_t percent5 = 0.05*m_nsamples;
+		uint32_t count = 0;
+		uint32_t npercent = 0;
 	
-		for(uint64_t i=0; i<m_nsamples; i++)  
+		for(uint32_t i=0; i<m_nsamples; i++)  
 		{
 			if(++count == percent5) 
 			{

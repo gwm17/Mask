@@ -49,26 +49,26 @@ namespace Mask {
 
 		FileType file_type;
 		std::string filename;
-		unsigned int buffer_position;
-		unsigned int buffer_end;
-		unsigned int data_size;
+		uint32_t buffer_position;
+		uint32_t buffer_end;
+		uint32_t data_size;
 		RxnType m_rxn_type;
-		int buffersize_bytes;
+		uint32_t buffersize_bytes;
 	
 		std::fstream file;
 	
 		std::vector<char> data_buffer;
 	
-		static constexpr int onestep_rxn_n = 2;
-		static constexpr int twostep_rxn_n = 4;
-		static constexpr int threestep_rxn_n = 6;
+		static constexpr uint32_t onestep_rxn_n = 2;
+		static constexpr uint32_t twostep_rxn_n = 4;
+		static constexpr uint32_t threestep_rxn_n = 6;
 	
-		static constexpr int buffersize = 10000; //number of events
+		static constexpr uint64_t buffersize = 10000; //number of events
 		static constexpr int width = 0;
 		static constexpr int precision = 3;
 
 		static constexpr std::size_t double_size = sizeof(double);
-		static constexpr std::size_t int_size = sizeof(int);
+		static constexpr std::size_t int_size = sizeof(uint32_t);
 		static constexpr std::size_t bool_size = sizeof(bool);
 	};
 
