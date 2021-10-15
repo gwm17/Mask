@@ -9,6 +9,7 @@
 *.pcm
 *.o
 *.swp
+*.pickle
 .DS_Store
 Makefile
 *.make
