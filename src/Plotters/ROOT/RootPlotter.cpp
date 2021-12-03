@@ -31,8 +31,8 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc, double detKE, const std::st
 	}
 	else
 	{
-		MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetKE(), 2);
-		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, nuc.GetKE(), 4);
+		MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, detKE, 2);
+		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, detKE, 4);
 		MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
 		MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
 	}
@@ -91,6 +91,77 @@ void RootPlotter::GenerateGraphs() {
 	}
 }
 
+std::vector<Mask::Nucleus> GetParents(const Mask::MaskFileData& data, Mask::RxnType rxn_type)
+{
+	std::vector<Mask::Nucleus> parents;
+	Mask::Nucleus temp1, temp2, temp3;
+	switch(rxn_type)
+	{
+		case Mask::RxnType::PureDecay :
+		{
+			temp1.SetIsotope(data.Z[0], data.A[0]);
+			temp1.SetVectorSpherical(data.theta[0], data.phi[0], data.p[0], data.E[0]);
+			parents.push_back(temp1);
+			return parents;
+		}
+		case Mask::RxnType::OneStepRxn :
+		{
+			temp1.SetIsotope(data.Z[0], data.A[0]);
+			temp1.SetVectorSpherical(data.theta[0], data.phi[0], data.p[0], data.E[0]);
+			temp2.SetIsotope(data.Z[1], data.A[1]);
+			temp2.SetVectorSpherical(data.theta[1], data.phi[1], data.p[1], data.E[1]);
+			temp3 = temp1 + temp2;
+			parents.push_back(temp3);
+			return parents;
+		}
+		case Mask::RxnType::TwoStepRxn :
+		{
+			temp1.SetIsotope(data.Z[0], data.A[0]);
+			temp1.SetVectorSpherical(data.theta[0], data.phi[0], data.p[0], data.E[0]);
+			temp2.SetIsotope(data.Z[1], data.A[1]);
+			temp2.SetVectorSpherical(data.theta[1], data.phi[1], data.p[1], data.E[1]);
+			temp3 = temp1 + temp2;
+			parents.push_back(temp3);
+			temp3.SetIsotope(data.Z[3], data.A[3]);
+			temp3.SetVectorSpherical(data.theta[3], data.phi[3], data.p[3], data.E[3]);
+			parents.push_back(temp3);
+			return parents;
+		}
+		case Mask::RxnType::ThreeStepRxn :
+		{
+			temp1.SetIsotope(data.Z[0], data.A[0]);
+			temp1.SetVectorSpherical(data.theta[0], data.phi[0], data.p[0], data.E[0]);
+			temp2.SetIsotope(data.Z[1], data.A[1]);
+			temp2.SetVectorSpherical(data.theta[1], data.phi[1], data.p[1], data.E[1]);
+			temp3 = temp1 + temp2;
+			parents.push_back(temp3);
+			temp3.SetIsotope(data.Z[3], data.A[3]);
+			temp3.SetVectorSpherical(data.theta[3], data.phi[3], data.p[3], data.E[3]);
+			parents.push_back(temp3);
+			temp3.SetIsotope(data.Z[5], data.A[5]);
+			temp3.SetVectorSpherical(data.theta[5], data.phi[5], data.p[5], data.E[5]);
+			parents.push_back(temp3);
+			return parents;
+		}
+	}
+}
+
+void SetThetaCM(Mask::Nucleus& daughter, const Mask::Nucleus& parent)
+{
+	const double* boost = parent.GetBoost();
+	double boost2cm[3];
+	double boost2lab[3];
+	for(int i=0; i<3; i++)
+	{
+		boost2lab[i] = boost[i];
+		boost2cm[i] = -1.0*boost[i];
+	}
+
+	daughter.ApplyBoost(boost2cm);
+	daughter.SetThetaCM(daughter.GetTheta());
+	daughter.ApplyBoost(boost2lab);
+}
+
 int main(int argc, char** argv) {
 	if(argc != 3) {
 		std::cout<<"Unable to run ROOT plotting tool with incorrect number of arguments! Expected 2 args, given: "<<argc<<" Exiting."<<std::endl;
@@ -112,6 +183,7 @@ int main(int argc, char** argv) {
 
 	Mask::MaskFileData data;
 	Mask::Nucleus nucleus;
+	std::vector<Mask::Nucleus> parents; //for use with CM theta calc
 
 	double flush_frac = 0.05;
 	int count = 0, flush_val = flush_frac*header.nsamples, flush_count = 0;
@@ -125,9 +197,28 @@ int main(int argc, char** argv) {
 		data = input.ReadData();
 		if(data.eof)
 			break;
+
+		parents = GetParents(data, header.rxn_type);
 		for(unsigned int i=0; i<data.Z.size(); i++) {
 			nucleus.SetIsotope(data.Z[i], data.A[i]);
 			nucleus.SetVectorSpherical(data.theta[i], data.phi[i], data.p[i], data.E[i]);
+			/*
+				Little dirty, but works well. Save theta CM using parent from specific rxn step.
+				I.e. ejectile calculated from first parent, break1 from second parent, break3 from third...
+			*/
+			if(i==1 || i==2 || i==3)
+			{
+				SetThetaCM(nucleus, parents[0]);
+			}
+			else if (i==4 || i==5)
+			{
+				SetThetaCM(nucleus, parents[1]);
+			}
+			else if(i==6 || i==7)
+			{
+				SetThetaCM(nucleus, parents[2]);
+			}
+
 			plotter.FillData(nucleus);
 			if(data.detect_flag[i] == true) {
 				plotter.FillData(nucleus, data.KE[i], "detected");
