@@ -49,8 +49,8 @@ namespace Mask {
 
 		FileType file_type;
 		std::string filename;
-		uint32_t buffer_position;
-		uint32_t buffer_end;
+		uint64_t buffer_position;
+		uint64_t buffer_end;
 		uint32_t data_size;
 		RxnType m_rxn_type;
 		uint32_t buffersize_bytes;

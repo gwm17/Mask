@@ -206,48 +206,40 @@ DetectorResult AnasenEfficiency::IsRing1(Mask::Nucleus& nucleus) {
 
 	DetectorResult observation;
 	//Mask::Vec3 coords;
-	double thetaIncident, eloss, e_dep;
+	double thetaIncident;
 	for(auto& sx3 : m_Ring1) {
 		auto result = sx3.GetChannelRatio(nucleus.GetTheta(), nucleus.GetPhi());
 		if(result.first != -1) {
-			//coords = sx3.GetHitCoordinates(result.first, result.second);
 			observation.detectFlag = true;
 			observation.direction = sx3.GetHitCoordinates(result.first, result.second);
 			thetaIncident = std::acos(observation.direction.Dot(sx3.GetNormRotated())/observation.direction.GetR());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
-			//e_dep = det_silicon.getEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
 			observation.energy_deposited = det_silicon.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
 			observation.det_name = "R1";
-			//return std::make_pair(true, e_dep);
 			return observation;
 		}
 	}
 
-	//return std::make_pair(false, 0.0);
 	return observation;
 }
 
 DetectorResult AnasenEfficiency::IsRing2(Mask::Nucleus& nucleus) {
 
 	DetectorResult observation;
-	//Mask::Vec3 coords;
-	double thetaIncident, eloss, e_dep;
+	double thetaIncident;
 	for(auto& sx3 : m_Ring2) {
 		auto result = sx3.GetChannelRatio(nucleus.GetTheta(), nucleus.GetPhi());
 		if(result.first != -1) {
-			//coords = sx3.GetHitCoordinates(result.first, result.second);
 			observation.detectFlag = true;
 			observation.direction = sx3.GetHitCoordinates(result.first, result.second);
 			thetaIncident = std::acos(observation.direction.Dot(sx3.GetNormRotated())/observation.direction.GetR());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
-			//e_dep = det_silicon.getEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
 			observation.energy_deposited = det_silicon.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
 			observation.det_name = "R2";
-			//return std::make_pair(true, e_dep);
 			return observation;
 		}
 	}
@@ -258,22 +250,17 @@ DetectorResult AnasenEfficiency::IsRing2(Mask::Nucleus& nucleus) {
 DetectorResult AnasenEfficiency::IsQQQ(Mask::Nucleus& nucleus) {
 
 	DetectorResult observation;
-	//Mask::Vec3 coords;
-	double thetaIncident, eloss, e_dep;
-
+	double thetaIncident;
 	for(auto& qqq : m_forwardQQQs) {
 		auto result = qqq.GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
 		if(result.first != -1) {
-			//coords = qqq.GetHitCoordinates(result.first, result.second);
 			observation.detectFlag = true;
 			observation.direction = qqq.GetHitCoordinates(result.first, result.second);
 			thetaIncident = std::acos(observation.direction.Dot(qqq.GetNorm())/observation.direction.GetR());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
-			//e_dep = det_silicon.getEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
 			observation.energy_deposited = det_silicon.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
-			//return std::make_pair(true, e_dep);
 			observation.det_name = "FQQQ";
 			return observation;
 		}
@@ -283,22 +270,18 @@ DetectorResult AnasenEfficiency::IsQQQ(Mask::Nucleus& nucleus) {
 	for(auto& qqq : m_backwardQQQs) {
 		auto result = qqq.GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
 		if(result.first != -1) {
-			//coords = qqq.GetHitCoordinates(result.first, result.second);
 			observation.detectFlag = true;
 			observation.direction = qqq.GetHitCoordinates(result.first, result.second);
 			thetaIncident = std::acos(observation.direction.Dot(qqq.GetNorm())/observation.direction.GetR());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
-			//e_dep = det_silicon.getEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
 			observation.energy_deposited = det_silicon.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
-			//return std::make_pair(true, e_dep);
 			observation.det_name = "BQQQ";
 			return observation;
 		}
 	}
 
-	//return std::make_pair(false, 0.0);
 	return observation;
 }
 

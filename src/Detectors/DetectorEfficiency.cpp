@@ -25,10 +25,10 @@ int main(int argc, char** argv) {
 	*/
 
 	try {
- 	AnasenEfficiency anasen;
- 	anasen.CalculateEfficiency(inputname, outputname, statsname);
+ 		AnasenEfficiency anasen;
+ 		anasen.CalculateEfficiency(inputname, outputname, statsname);
  	//std::cout<<"Running consistency check(1=success): "<<anasen.RunConsistencyCheck()<<std::endl;
- 	//anasen.DrawDetectorSystem("/data1/gwm17/TRIUMF_7Bed/simulation/ANASENGeo_centered_target_targetGap_BackQQQ_test.root");
+ 	//anasen.DrawDetectorSystem("/data1/gwm17/TRIUMF_7Bed/simulation/ANASENGeo_centered_target_targetGap_BackQQQ_fixedZ.txt");
 	} catch(const std::exception& e) {
 		std::cerr<<"Error: "<<e.what()<<std::endl;
 		std::cerr<<"Terminating."<<std::endl;

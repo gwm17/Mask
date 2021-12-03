@@ -36,6 +36,7 @@ namespace Mask {
 			case RxnType::OneStepRxn: return "OneStepRxn";
 			case RxnType::TwoStepRxn: return "TwoStepRxn";
 			case RxnType::ThreeStepRxn: return "ThreeStepRxn";
+			case RxnType::None : return "None";
 		}
 
 		return "None";
@@ -50,8 +51,6 @@ namespace Mask {
 	{
 		return static_cast<uint32_t>(type);
 	}
-
-	
 
 }
 

@@ -1,7 +1,7 @@
 workspace "Mask" 
 	configurations {
-		"Debug",
-		"Release"
+		"Release",
+		"Debug"
 	}
 
 project "Mask"
@@ -44,8 +44,8 @@ project	"RootPlot"
 	}
 
 	--User specified path to ROOT CERN libraries--
-	ROOTIncludepath = "/home/gordon/cern/root-6.22.02/root-install/include"
-	ROOTLibpath = "/home/gordon/cern/root-6.22.02/root-install/lib"
+	ROOTIncludepath = "/usr/include/root"
+	ROOTLibpath = "/usr/lib64/root"
 
 	includedirs {
 		"include"

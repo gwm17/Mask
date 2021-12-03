@@ -6,14 +6,14 @@
 namespace Mask {
 
 	MaskApp::MaskApp() :
-		sys(nullptr)
+		m_sys(nullptr)
 	{
 		std::cout<<"----------GWM Kinematics Simulation----------"<<std::endl;
 	}
 	
 	MaskApp::~MaskApp() 
 	{
-		if(sys) delete sys;
+		if(m_sys) delete m_sys;
 	}
 	
 	bool MaskApp::LoadConfig(const std::string& filename) 
@@ -42,7 +42,7 @@ namespace Mask {
 		{
 			case RxnType::PureDecay:
 			{
-				sys = new DecaySystem();
+				m_sys = new DecaySystem();
 				m_rxn_type = RxnType::PureDecay;
 				for(int i=0; i<2; i++) {
 					input>>z>>a;
@@ -53,7 +53,7 @@ namespace Mask {
 			}
 			case RxnType::OneStepRxn:
 			{
-				sys = new OneStepSystem();
+				m_sys = new OneStepSystem();
 				m_rxn_type = RxnType::OneStepRxn;
 				for(int i=0; i<3; i++) {
 					input>>z>>a;
@@ -64,7 +64,7 @@ namespace Mask {
 			}
 			case RxnType::TwoStepRxn:
 			{
-				sys = new TwoStepSystem();
+				m_sys = new TwoStepSystem();
 				m_rxn_type = RxnType::TwoStepRxn;
 				for(int i=0; i<4; i++) {
 					input>>z>>a;
@@ -75,7 +75,7 @@ namespace Mask {
 			}
 			case RxnType::ThreeStepRxn:
 			{
-				sys = new ThreeStepSystem();
+				m_sys = new ThreeStepSystem();
 				m_rxn_type = RxnType::TwoStepRxn;
 				for(int i=0; i<5; i++) {
 					input>>z>>a;
@@ -87,7 +87,7 @@ namespace Mask {
 			default:
 				return false;
 		}
-		sys->SetNuclei(zvec, avec);
+		m_sys->SetNuclei(zvec, avec);
 	
 		int nlayers;
 		double thickness;
@@ -110,7 +110,7 @@ namespace Mask {
 				input>>z>>a>>s;
 				zvec.push_back(z); avec.push_back(a); svec.push_back(s);
 			}
-			sys->AddTargetLayer(zvec, avec, svec, thickness);
+			m_sys->AddTargetLayer(zvec, avec, svec, thickness);
 			input>>junk;
 		}
 		std::cout<<"Reaction equation: "<<GetSystemName()<<std::endl;
@@ -122,39 +122,39 @@ namespace Mask {
 	
 		input>>junk>>m_nsamples;
 		input>>junk>>par1>>junk>>par2;
-		sys->SetBeamDistro(par1, par2);
+		m_sys->SetBeamDistro(par1, par2);
 		input>>junk>>par1;
 		switch(m_rxn_type) 
 		{
 			case RxnType::OneStepRxn :
 			{
-				dynamic_cast<OneStepSystem*>(sys)->SetReactionThetaType(par1);
+				dynamic_cast<OneStepSystem*>(m_sys)->SetReactionThetaType(par1);
 				break;
 			}
 			case RxnType::TwoStepRxn :
 			{
-				dynamic_cast<TwoStepSystem*>(sys)->SetReactionThetaType(par1);
+				dynamic_cast<TwoStepSystem*>(m_sys)->SetReactionThetaType(par1);
 				break;
 			}
 			case RxnType::ThreeStepRxn :
 			{
-				dynamic_cast<ThreeStepSystem*>(sys)->SetReactionThetaType(par1);
+				dynamic_cast<ThreeStepSystem*>(m_sys)->SetReactionThetaType(par1);
 				break;
 			}
 		}
 		input>>junk>>par1>>junk>>par2;
-		sys->SetTheta1Range(par1, par2);
+		m_sys->SetTheta1Range(par1, par2);
 		input>>junk>>par1>>junk>>par2;
-		sys->SetPhi1Range(par1, par2);
+		m_sys->SetPhi1Range(par1, par2);
 		input>>junk>>par1>>junk>>par2;
-		sys->SetExcitationDistro(par1, par2);
+		m_sys->SetExcitationDistro(par1, par2);
 		input>>junk>>dfile1;
 		input>>junk>>dfile2;
 		switch(m_rxn_type) 
 		{
 			case RxnType::OneStepRxn :
 			{
-				DecaySystem* this_sys = dynamic_cast<DecaySystem*>(sys);
+				DecaySystem* this_sys = dynamic_cast<DecaySystem*>(m_sys);
 				this_sys->SetDecay1Distribution(dfile1);
 				std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<std::endl;
 				std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
@@ -162,7 +162,7 @@ namespace Mask {
 			}
 			case RxnType::TwoStepRxn :
 			{
-				TwoStepSystem* this_sys = dynamic_cast<TwoStepSystem*>(sys);
+				TwoStepSystem* this_sys = dynamic_cast<TwoStepSystem*>(m_sys);
 				this_sys->SetDecay1Distribution(dfile1);
 				std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<std::endl;
 				std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
@@ -170,7 +170,7 @@ namespace Mask {
 			}
 			case RxnType::ThreeStepRxn :
 			{
-				ThreeStepSystem* this_sys = dynamic_cast<ThreeStepSystem*>(sys);
+				ThreeStepSystem* this_sys = dynamic_cast<ThreeStepSystem*>(m_sys);
 				this_sys->SetDecay1Distribution(dfile1);
 				this_sys->SetDecay2Distribution(dfile2);
 				std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<" Decay2 angular momentum: "<<this_sys->GetDecay2AngularMomentum()<<std::endl;
@@ -188,7 +188,7 @@ namespace Mask {
 	
 	void MaskApp::Run() {
 		std::cout<<"Running simulation..."<<std::endl;
-		if(sys == nullptr) 
+		if(m_sys == nullptr) 
 		{
 			return;
 		}
@@ -210,8 +210,8 @@ namespace Mask {
 				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
 			}
 	
-			sys->RunSystem();
-			output.WriteData(sys->GetNuclei());
+			m_sys->RunSystem();
+			output.WriteData(m_sys->GetNuclei());
 		}
 	
 		output.Close();

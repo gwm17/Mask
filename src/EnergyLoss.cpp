@@ -24,7 +24,7 @@ namespace Mask {
 	EnergyLoss::~EnergyLoss() {}
 	
 	/*Targets are defined by their atomic number, total number of nucleons, and their stoichiometry within the target compound*/
-	void EnergyLoss::SetTargetComponents(std::vector<int>& Zt, std::vector<int>& At, std::vector<int>& Stoich) {
+	void EnergyLoss::SetTargetComponents(const std::vector<int>& Zt, const std::vector<int>& At, const std::vector<int>& Stoich) {
 		comp_denom = 0;
 		ZT = Zt;
 		AT = At;

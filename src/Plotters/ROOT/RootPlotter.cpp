@@ -11,7 +11,7 @@ RootPlotter::RootPlotter() :
 
 RootPlotter::~RootPlotter() {}
 
-void RootPlotter::FillData(const Mask::Nucleus& nuc, const std::string& modifier) {
+void RootPlotter::FillData(const Mask::Nucleus& nuc, double detKE, const std::string& modifier) {
 	std::string sym = nuc.GetIsotopicSymbol();
 	std::string ke_vs_th_name = sym + modifier + "_ke_vs_theta";
 	std::string ke_vs_th_title = ke_vs_th_name + ";#theta_{lab} (degrees);Kinetic Energy (MeV)";
@@ -22,10 +22,20 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc, const std::string& modifier
 	std::string angdist_name = sym + modifier +"_angDist";
 	std::string angdist_title = angdist_name+";cos#right(#theta_{CM}#left);counts";
 	
-	MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetKE(), 2);
-	MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, nuc.GetKE(), 4);
-	MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
-	MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
+	if(detKE == 0.0)
+	{
+		MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetKE(), 2);
+		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, nuc.GetKE(), 4);
+		MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
+		MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
+	}
+	else
+	{
+		MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetKE(), 2);
+		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, nuc.GetKE(), 4);
+		MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
+		MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
+	}
 	
 }
 
@@ -120,7 +130,7 @@ int main(int argc, char** argv) {
 			nucleus.SetVectorSpherical(data.theta[i], data.phi[i], data.p[i], data.E[i]);
 			plotter.FillData(nucleus);
 			if(data.detect_flag[i] == true) {
-				plotter.FillData(nucleus, "detected");
+				plotter.FillData(nucleus, data.KE[i], "detected");
 			}
 		}
 		count++;

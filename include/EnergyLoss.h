@@ -28,7 +28,7 @@ namespace Mask {
 		double GetEnergyLoss(int zp, int ap, double e_initial, double thickness);
 		double GetReverseEnergyLoss(int zp, int ap, double e_final, double thickness);
 		double GetRange(double energy);
-		void SetTargetComponents(std::vector<int>& Zt, std::vector<int>& At, std::vector<int>& Stoich);
+		void SetTargetComponents(const std::vector<int>& Zt, const std::vector<int>& At, const std::vector<int>& Stoich);
 	
 	private:
 		double GetElectronicStoppingPower(double energy);

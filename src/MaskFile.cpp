@@ -332,7 +332,7 @@ namespace Mask {
 			}
 		}
 	
-		unsigned int local_end = buffer_position + data_size;
+		uint64_t local_end = buffer_position + data_size;
 		if(local_end > buffer_end) {
 			std::cerr<<"Attempting to read past end of file at MaskFile::ReadData! Returning empty"<<std::endl;
 			data.eof = true;
