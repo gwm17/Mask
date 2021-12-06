@@ -4,7 +4,7 @@
 #include "DetectorEfficiency.h"
 #include "SabreDetector.h"
 #include "Target.h"
-#include "DeadChannelMap.h"
+#include "SabreDeadChannelMap.h"
 #include "Nucleus.h"
 
 class SabreEfficiency : public DetectorEfficiency {
@@ -23,7 +23,7 @@ private:
     
 	Mask::Target deadlayer;
     Mask::Target sabre_eloss;
-    DeadChannelMap dmap;
+    SabreDeadChannelMap dmap;
 
 	//Sabre constants
 	const double INNER_R = 0.0326;

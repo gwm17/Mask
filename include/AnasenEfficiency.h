@@ -9,6 +9,7 @@
 #include "Target.h"
 #include "Nucleus.h"
 #include "MaskFile.h"
+#include "AnasenDeadChannelMap.h"
 
 struct DetectorResult {
 	bool detectFlag = false;
@@ -24,6 +25,7 @@ public:
 	void CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) override;
 	void DrawDetectorSystem(const std::string& filename) override;
 	double RunConsistencyCheck() override;
+	inline void SetDeadChannelMap(const std::string& filename) { dmap.LoadMapfile(filename); }
 
 private:
 	DetectorResult IsRing1(Mask::Nucleus& nucleus);
@@ -37,6 +39,8 @@ private:
 	std::vector<QQQDetector> m_backwardQQQs;
 
 	Mask::Target det_silicon;
+
+	AnasenDeadChannelMap dmap;
 
 	/**** ANASEN geometry constants *****/
 	const int n_sx3_per_ring = 12;
@@ -54,7 +58,7 @@ private:
 	const double qqq_z[4] = {qqq_nom_z, qqq_nom_z, qqq_nom_z, qqq_nom_z};
 	const double qqq_phi[4] = {5.49779, 0.785398, 2.35619, 3.92699};
 	const double ring_rho[12] = {0.0890601, 0.0889871, 0.0890354, 0.0890247, 0.0890354, 0.0890354, 0.0890247, 0.0890354, 0.0890354, 0.0890247, 0.0890354, 0.0890354};
-	const double ring_phi[12] = {0.785795, 0.262014, 6.02132, 5.49779, 4.97426, 4.45052, 3.92699, 3.40346, 2.87972, 2.35619, 1.83266, 1.30893};
+	const double ring_phi[12] = {4.97426, 5.49739, 6.02132, 0.261868, 0.785398, 1.30893, 1.83266, 2.35619, 2.87972, 3.40346, 3.92699, 4.45052};
 	/*************************/
 
 	static constexpr double threshold = 0.6; //MeV

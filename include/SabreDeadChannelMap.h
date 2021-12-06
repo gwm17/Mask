@@ -1,16 +1,17 @@
-#ifndef DEADCHANNELMAP_H
-#define DEADCHANNELMAP_H
+#ifndef SABREDEADCHANNELMAP_H
+#define SABREDEADCHANNELMAP_H
 
 #include <string>
 #include <iostream>
 #include <unordered_map>
 
-class DeadChannelMap {
+class SabreDeadChannelMap 
+{
 public:
-	DeadChannelMap();
-	DeadChannelMap(std::string& name);
-	~DeadChannelMap();
-	void LoadMapfile(std::string& name);
+	SabreDeadChannelMap();
+	SabreDeadChannelMap(const std::string& name);
+	~SabreDeadChannelMap();
+	void LoadMapfile(const std::string& name);
 	bool IsDead(int det, int channel, int ringwedgeFlag);
 	bool IsValid() { return validFlag; };
 

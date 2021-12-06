@@ -158,7 +158,7 @@ double AnasenEfficiency::RunConsistencyCheck() {
 	for(auto& point : r1_points) {
 		for(auto& sx3 : m_Ring1) {
 			auto result = sx3.GetChannelRatio(point.GetTheta(), point.GetPhi());
-			coords = sx3.GetHitCoordinates(result.first, result.second);
+			coords = sx3.GetHitCoordinates(result.front_strip_index, result.front_ratio);
 			if(IsDoubleEqual(point.GetX(), coords.GetX()) && IsDoubleEqual(point.GetY(), coords.GetY()) && IsDoubleEqual(point.GetZ(), coords.GetZ())) {
 				count++;
 				break;
@@ -168,7 +168,7 @@ double AnasenEfficiency::RunConsistencyCheck() {
 	for(auto& point : r2_points) {
 		for(auto& sx3 : m_Ring2) {
 			auto result = sx3.GetChannelRatio(point.GetTheta(), point.GetPhi());
-			coords = sx3.GetHitCoordinates(result.first, result.second);
+			coords = sx3.GetHitCoordinates(result.front_strip_index, result.front_ratio);
 			if(IsDoubleEqual(point.GetX(), coords.GetX()) && IsDoubleEqual(point.GetY(), coords.GetY()) && IsDoubleEqual(point.GetZ(), coords.GetZ())) {
 				count++;
 				break;
@@ -205,14 +205,15 @@ double AnasenEfficiency::RunConsistencyCheck() {
 DetectorResult AnasenEfficiency::IsRing1(Mask::Nucleus& nucleus) {
 
 	DetectorResult observation;
-	//Mask::Vec3 coords;
 	double thetaIncident;
-	for(auto& sx3 : m_Ring1) {
-		auto result = sx3.GetChannelRatio(nucleus.GetTheta(), nucleus.GetPhi());
-		if(result.first != -1) {
+	for(int i=0; i<n_sx3_per_ring; i++) {
+		auto result = m_Ring1[i].GetChannelRatio(nucleus.GetTheta(), nucleus.GetPhi());
+		if(result.front_strip_index != -1 /*&& !dmap.IsDead(AnasenDetectorType::Barrel1, i, result.front_strip_index, AnasenDetectorSide::Front)*/
+			&& !dmap.IsDead(AnasenDetectorType::Barrel1, i, result.back_strip_index, AnasenDetectorSide::Back)) 
+		{
 			observation.detectFlag = true;
-			observation.direction = sx3.GetHitCoordinates(result.first, result.second);
-			thetaIncident = std::acos(observation.direction.Dot(sx3.GetNormRotated())/observation.direction.GetR());
+			observation.direction = m_Ring1[i].GetHitCoordinates(result.front_strip_index, result.front_ratio);
+			thetaIncident = std::acos(observation.direction.Dot(m_Ring1[i].GetNormRotated())/observation.direction.GetR());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
@@ -229,12 +230,14 @@ DetectorResult AnasenEfficiency::IsRing2(Mask::Nucleus& nucleus) {
 
 	DetectorResult observation;
 	double thetaIncident;
-	for(auto& sx3 : m_Ring2) {
-		auto result = sx3.GetChannelRatio(nucleus.GetTheta(), nucleus.GetPhi());
-		if(result.first != -1) {
+	for(int i=0; i<n_sx3_per_ring; i++) {
+		auto result = m_Ring2[i].GetChannelRatio(nucleus.GetTheta(), nucleus.GetPhi());
+		if(result.front_strip_index != -1 /*&& !dmap.IsDead(AnasenDetectorType::Barrel2, i, result.front_strip_index, AnasenDetectorSide::Front)*/
+			&& !dmap.IsDead(AnasenDetectorType::Barrel2, i, result.back_strip_index, AnasenDetectorSide::Back)) 
+		{
 			observation.detectFlag = true;
-			observation.direction = sx3.GetHitCoordinates(result.first, result.second);
-			thetaIncident = std::acos(observation.direction.Dot(sx3.GetNormRotated())/observation.direction.GetR());
+			observation.direction = m_Ring2[i].GetHitCoordinates(result.front_strip_index, result.front_ratio);
+			thetaIncident = std::acos(observation.direction.Dot(m_Ring2[i].GetNormRotated())/observation.direction.GetR());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
@@ -251,12 +254,14 @@ DetectorResult AnasenEfficiency::IsQQQ(Mask::Nucleus& nucleus) {
 
 	DetectorResult observation;
 	double thetaIncident;
-	for(auto& qqq : m_forwardQQQs) {
-		auto result = qqq.GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
-		if(result.first != -1) {
+	for(int i=0; i<n_qqq; i++) {
+		auto result = m_forwardQQQs[i].GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
+		if(result.first != -1 /*&& !dmap.IsDead(AnasenDetectorType::FQQQ, i, result.first, AnasenDetectorSide::Front)*/ &&
+			!dmap.IsDead(AnasenDetectorType::FQQQ, i, result.second, AnasenDetectorSide::Back)) 
+		{
 			observation.detectFlag = true;
-			observation.direction = qqq.GetHitCoordinates(result.first, result.second);
-			thetaIncident = std::acos(observation.direction.Dot(qqq.GetNorm())/observation.direction.GetR());
+			observation.direction = m_forwardQQQs[i].GetHitCoordinates(result.first, result.second);
+			thetaIncident = std::acos(observation.direction.Dot(m_forwardQQQs[i].GetNorm())/observation.direction.GetR());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
@@ -267,12 +272,14 @@ DetectorResult AnasenEfficiency::IsQQQ(Mask::Nucleus& nucleus) {
 	}
 
 	
-	for(auto& qqq : m_backwardQQQs) {
-		auto result = qqq.GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
-		if(result.first != -1) {
+	for(int i=0; i<n_qqq; i++) {
+		auto result = m_backwardQQQs[i].GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
+		if(result.first != -1 /*&& !dmap.IsDead(AnasenDetectorType::BQQQ, i, result.first, AnasenDetectorSide::Front)*/ &&
+			!dmap.IsDead(AnasenDetectorType::BQQQ, i, result.second, AnasenDetectorSide::Back)) 
+		{
 			observation.detectFlag = true;
-			observation.direction = qqq.GetHitCoordinates(result.first, result.second);
-			thetaIncident = std::acos(observation.direction.Dot(qqq.GetNorm())/observation.direction.GetR());
+			observation.direction = m_backwardQQQs[i].GetHitCoordinates(result.first, result.second);
+			thetaIncident = std::acos(observation.direction.Dot(m_backwardQQQs[i].GetNorm())/observation.direction.GetR());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
@@ -381,6 +388,14 @@ void AnasenEfficiency::CountCoincidences(const Mask::MaskFileData& data, std::ve
 }
 
 void AnasenEfficiency::CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) {
+
+	if(!dmap.IsValid())
+	{
+		std::cerr<<"Invalid Dead Channel Map at AnasenEfficiency::CalculateEfficiency()! If you want to run with all possible";
+		std::cerr<<"channels active, simply load an empty file."<<std::endl;
+		return;
+	}
+
 	std::cout<<"----------ANASEN Efficiency Calculation----------"<<std::endl;
 	std::cout<<"Loading in output from kinematics simulation: "<<inputname<<std::endl;
 	std::cout<<"Running efficiency calculation..."<<std::endl;

@@ -2,12 +2,12 @@
 #define __STRIP_DETECTOR_H
 
 // +z is along beam axis
-// +y is vertically "upward" in the lab frame
+// +y is vertically "downward" in the lab frame
 
 //angles must be in radians, but distances can be whatever
 //PROVIDED all input distances are the same
 
-//Front strips from lowest y to highest y
+//Front strips from largest y to smallest y
 
 //Back strips from lowest z to highest z
 
@@ -18,6 +18,13 @@
 #include "Vec3.h"
 #include "Rotation.h"
 #include "RandomGenerator.h"
+
+struct StripHit
+{
+	int front_strip_index=-1;
+	int back_strip_index=-1;
+	double front_ratio=0.0;
+};
 
 class StripDetector {
 public:
@@ -34,7 +41,7 @@ public:
 	inline void TurnOffRandomizedCoordinates() { rndmFlag = false; }
 
 	Mask::Vec3 GetHitCoordinates(int front_stripch, double front_strip_ratio);
-	std::pair<int,double> GetChannelRatio(double theta, double phi);
+	StripHit GetChannelRatio(double theta, double phi);
 
 private:
 	inline bool ValidChannel(int f) { return ((f >= 0 && f < num_strips) ? true : false); };

@@ -3,7 +3,7 @@
 	Class implementing geometry for QQQDetector where the detector is perpendicular to the beam axis.
 	Detector is first generated centered on the x-axis (phi=0)
 
-	Coordinate convention : +z is downstream, -z is upstream. +y is vertically up in the lab.
+	Coordinate convention : +z is downstream, -z is upstream. +y is vertically down in the lab.
 */
 #ifndef QQQDETECTOR_H
 #define QQQDETECTOR_H

@@ -1,12 +1,12 @@
 ----------Data Information----------
-OutputFile: /media/gordon/ANASENData/MaskData/Kinematics/7Bedp_870keV_beam_50CD2_test.mask
+OutputFile: /data1/gwm17/7BeNov2021/sim/7Bedp_1100keV_beam_50CD2.mask
 ----------Reaction Information----------
 ReactionType: TwoStepRxn
 Z	A (order is target, projectile, ejectile, break1, break3(if pure decay is target, ejectile))
-1   2
+1	2
 4	7
 1	1
-2   4
+2	4
 ----------Target Information----------
 NumberOfLayers: 1
 begin_layer
@@ -18,7 +18,7 @@ begin_layer
 end_layer
 ----------Sampling Information----------
 NumberOfSamples: 100000
-BeamMeanEnergy(MeV): 0.87 BeamEnergySigma(MeV): 0.0
+BeamMeanEnergy(MeV): 1.1 BeamEnergySigma(MeV): 0.0
 EjectileThetaType(0=Lab,1=CM): 1
 EjectileThetaMin(deg): 0.0 EjectileThetaMax(deg): 180.0
 EjectilePhiMin(deg): 0.0 EjectilePhiMax(deg): 360.0

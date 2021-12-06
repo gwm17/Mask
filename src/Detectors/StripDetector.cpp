@@ -53,8 +53,8 @@ StripDetector::~StripDetector() {}
 void StripDetector::CalculateCorners() {
 	double y_min, y_max, z_min, z_max; 
 	for (int s=0; s<num_strips; s++) {
-		y_max = -total_width/2.0 + front_strip_width*(s+1);
-		y_min = -total_width/2.0 + front_strip_width*s;
+		y_max = total_width/2.0 - front_strip_width*s;
+		y_min = total_width/2.0 - front_strip_width*(s+1);
 		z_max = center_z + length/2.0;
 		z_min = center_z - length/2.0;
 		front_strip_coords[s][2] = Mask::Vec3(center_rho, y_max, z_max);
@@ -104,8 +104,9 @@ Mask::Vec3 StripDetector::GetHitCoordinates(int front_stripch, double front_stri
 
 }
 
-std::pair<int,double> StripDetector::GetChannelRatio(double theta, double phi) {
+StripHit StripDetector::GetChannelRatio(double theta, double phi) {
 
+	StripHit hit;
 	while (phi < 0) phi += 2*M_PI;
 
 	//to make the math easier (and the same for each det), rotate the input phi
@@ -118,7 +119,7 @@ std::pair<int,double> StripDetector::GetChannelRatio(double theta, double phi) {
 	double det_max_phi = atan2(total_width/2,center_rho);
 	double det_min_phi = -det_max_phi;
   
-	if (phi < det_min_phi || phi > det_max_phi) return std::make_pair(-1,0);
+	if (phi < det_min_phi || phi > det_max_phi) return hit;
 
 	//for theta it's not so simple, so we have to go through the typical plane-intersect method
 	//first thing's first: we have a fixed x for the entire detector plane:
@@ -127,18 +128,26 @@ std::pair<int,double> StripDetector::GetChannelRatio(double theta, double phi) {
 	double yhit = xhit*tan(phi);
 	double zhit = sqrt(xhit*xhit+yhit*yhit)/tan(theta);
 
-	int front_ch_hit=-1;
-	double ratio=0;
 	for (int s=0; s<num_strips; s++) {
 		if (xhit >= front_strip_coords[s][0].GetX() && xhit <= front_strip_coords[s][0].GetX() && //Check min and max x (constant in flat)
 			yhit >= front_strip_coords[s][1].GetY() && yhit <= front_strip_coords[s][2].GetY() && //Check min and max y
 			zhit >= front_strip_coords[s][1].GetZ() && zhit <= front_strip_coords[s][0].GetZ()) //Check min and max z
 		{
-			front_ch_hit = s;
-			ratio = (zhit-center_z)/(length/2);
+			hit.front_strip_index = s;
+			hit.front_ratio = (zhit-center_z)/(length/2);
 			break;
 		}
 	}
 
-	return std::make_pair(front_ch_hit,ratio);
+	for (int s=0; s<num_strips; s++) {
+		if (xhit >= back_strip_coords[s][0].GetX() && xhit <= back_strip_coords[s][0].GetX() && //Check min and max x (constant in flat)
+			yhit >= back_strip_coords[s][1].GetY() && yhit <= back_strip_coords[s][2].GetY() && //Check min and max y
+			zhit >= back_strip_coords[s][1].GetZ() && zhit <= back_strip_coords[s][0].GetZ()) //Check min and max z
+		{
+			hit.back_strip_index = s;
+			break;
+		}
+	}
+
+	return hit;
 }
