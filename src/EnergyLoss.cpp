@@ -50,7 +50,7 @@ namespace Mask {
 			MP = MassLookup::GetInstance().FindMass(ZP, AP)*MEV2U;
 		}
 
-		if(thickness == 0.0 || e_initial == 0.0)
+		if(thickness == 0.0 || e_initial == 0.0 || zp == 0)
 			return 0;
 	
 		double e_final = e_initial;
