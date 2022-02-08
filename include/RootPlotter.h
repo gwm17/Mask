@@ -5,6 +5,8 @@
 #include <string>
 
 #include "Nucleus.h"
+#include "RxnType.h"
+#include "MaskFile.h"
 
 #include <THashTable.h>
 #include <TH1.h>
@@ -29,6 +31,8 @@ public:
 		return table; 
 	};
 	void FillData(const Mask::Nucleus& nuc, double detKE = 0.0, const std::string& modifier = "");
+	void FillCorrelations(const Mask::MaskFileData& data, Mask::RxnType type);
+	void FillCorrelationsDetected(const Mask::MaskFileData& data, Mask::RxnType type);
 
 private:
 	THashTable* table;

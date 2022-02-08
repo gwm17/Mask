@@ -76,7 +76,7 @@ namespace Mask {
 			case RxnType::ThreeStepRxn:
 			{
 				m_sys = new ThreeStepSystem();
-				m_rxn_type = RxnType::TwoStepRxn;
+				m_rxn_type = RxnType::ThreeStepRxn;
 				for(int i=0; i<5; i++) {
 					input>>z>>a;
 					avec.push_back(a);

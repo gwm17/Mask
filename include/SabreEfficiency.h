@@ -1,6 +1,7 @@
 #ifndef SABREEFFICIENCY_H
 #define SABREEFFICIENCY_H
 
+#include "MaskFile.h"
 #include "DetectorEfficiency.h"
 #include "SabreDetector.h"
 #include "Target.h"
@@ -18,6 +19,7 @@ public:
 
 private:
 	std::pair<bool,double> IsSabre(Mask::Nucleus& nucleus);
+    void CountCoincidences(const Mask::MaskFileData& data, std::vector<int>& counts, Mask::RxnType rxn_type);
 
 	std::vector<SabreDetector> detectors;
     

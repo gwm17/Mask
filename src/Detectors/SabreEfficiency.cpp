@@ -39,7 +39,7 @@ void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const st
 
 
 	Mask::MaskFile input(inputname, Mask::MaskFile::FileType::read);
-	Mask::MaskFile output(outputname, Mask::MaskFile::FileType::read);
+	Mask::MaskFile output(outputname, Mask::MaskFile::FileType::write);
 	std::ofstream stats(statsname);
 	stats<<std::setprecision(5);
 
@@ -52,18 +52,23 @@ void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const st
 	Mask::Nucleus nucleus;
 
 	std::vector<int> counts;
+	std::vector<int> coinc_counts;
 	switch(header.rxn_type) {
 		case Mask::RxnType::PureDecay:
 			counts.resize(3, 0);
+			coinc_counts.resize(1, 0);
 			break;
 		case Mask::RxnType::OneStepRxn:
 			counts.resize(4, 0);
+			coinc_counts.resize(1, 0);
 			break;
 		case Mask::RxnType::TwoStepRxn:
 			counts.resize(6, 0);
+			coinc_counts.resize(4, 0);
 			break;
 		case Mask::RxnType::ThreeStepRxn:
 			counts.resize(8, 0);
+			coinc_counts.resize(11, 0);
 			break;
 		default:
 		{
@@ -96,11 +101,14 @@ void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const st
 			auto result = IsSabre(nucleus);
 			if(result.first) {
 				data.detect_flag[i] = true;
+				data.KE[i] = result.second;
 				counts[i]++;
 			} else if(data.detect_flag[i] == true) {
 				data.detect_flag[i] = false;
 			}
 		}
+
+		CountCoincidences(data, coinc_counts, header.rxn_type);
 
 		output.WriteData(data);
 	}
@@ -112,6 +120,54 @@ void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const st
 	stats<<"---------------------"<<std::endl;
 	for(unsigned int i=0; i<counts.size(); i++) {
 		stats<<std::setw(10)<<i<<"|"<<std::setw(10)<<((double)counts[i]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+	}
+	stats<<"Coincidence Efficiency"<<std::endl;
+	stats<<"---------------------"<<std::endl;
+	if(header.rxn_type == Mask::RxnType::PureDecay)
+	{
+		stats<<std::setw(10)<<"1 + 2"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+	}
+	else if(header.rxn_type == Mask::RxnType::OneStepRxn)
+	{
+		stats<<std::setw(10)<<"2 + 3"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+	}
+	else if(header.rxn_type == Mask::RxnType::TwoStepRxn)
+	{
+		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"2 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[1]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"4 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[2]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"2 + 4 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[3]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+	}
+	else if(header.rxn_type == Mask::RxnType::ThreeStepRxn)
+	{
+		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"2 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[1]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"2 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[2]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"4 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[3]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"4 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[4]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[5]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"2 + 4 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[6]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"2 + 4 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[7]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"2 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[8]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"4 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[9]/header.nsamples)<<std::endl;
+		stats<<"---------------------"<<std::endl;
+		stats<<std::setw(10)<<"2 + 4 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[10]/header.nsamples)<<std::endl;
 		stats<<"---------------------"<<std::endl;
 	}
 	stats.close();
@@ -205,4 +261,81 @@ std::pair<bool,double> SabreEfficiency::IsSabre(Mask::Nucleus& nucleus) {
 	}
 
 	return std::make_pair(false,0.0);
+}
+
+void SabreEfficiency::CountCoincidences(const Mask::MaskFileData& data, std::vector<int>& counts, Mask::RxnType rxn_type) {
+	if (rxn_type == Mask::RxnType::PureDecay && data.detect_flag[1] && data.detect_flag[2])
+	{
+		counts[0]++;
+	}
+	else if (rxn_type == Mask::RxnType::OneStepRxn && data.detect_flag[2] && data.detect_flag[3])
+	{
+		counts[0]++;
+	}
+	else if(rxn_type == Mask::RxnType::TwoStepRxn)
+	{
+		if(data.detect_flag[2] && data.detect_flag[4]) 
+		{
+			counts[0]++;
+		}
+		if(data.detect_flag[2] && data.detect_flag[5])
+		{
+			counts[1]++;
+		}
+		if(data.detect_flag[4] && data.detect_flag[5])
+		{
+			counts[2]++;
+		}
+		if(data.detect_flag[2] && data.detect_flag[4] && data.detect_flag[5])
+		{
+			counts[3]++;
+		}
+	}
+	else if(rxn_type == Mask::RxnType::ThreeStepRxn)
+	{
+		if(data.detect_flag[2] && data.detect_flag[4]) 
+		{
+			counts[0]++;
+		}
+		if(data.detect_flag[2] && data.detect_flag[6])
+		{
+			counts[1]++;
+		}
+		if(data.detect_flag[2] && data.detect_flag[7])
+		{
+			counts[2]++;
+		}
+		if(data.detect_flag[4] && data.detect_flag[6])
+		{
+			counts[3]++;
+		}
+		if(data.detect_flag[4] && data.detect_flag[7])
+		{
+			counts[4]++;
+		}
+		if(data.detect_flag[6] && data.detect_flag[7])
+		{
+			counts[5]++;
+		}
+		if(data.detect_flag[2] && data.detect_flag[4] && data.detect_flag[6])
+		{
+			counts[6]++;
+		}
+		if(data.detect_flag[2] && data.detect_flag[4] && data.detect_flag[7])
+		{
+			counts[7]++;
+		}
+		if(data.detect_flag[2] && data.detect_flag[6] && data.detect_flag[7])
+		{
+			counts[8]++;
+		}
+		if(data.detect_flag[4] && data.detect_flag[6] && data.detect_flag[7])
+		{
+			counts[9]++;
+		}
+		if(data.detect_flag[2] && data.detect_flag[4] && data.detect_flag[6] && data.detect_flag[7])
+		{
+			counts[10]++;
+		}
+	}
 }

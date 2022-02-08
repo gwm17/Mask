@@ -15,15 +15,16 @@ int main(int argc, char** argv) {
 	std::string outputname = argv[2];
 	std::string statsname = argv[3];
 
-	/*
+	
 	SabreEfficiency sabre;
 	std::string mapfile = "./etc/SabreDeadChannels.txt";
 	sabre.SetDeadChannelMap(mapfile);
 	sabre.CalculateEfficiency(inputname, outputname, statsname);
 	//std::cout<<"Running consistency check(1=success): "<<sabre.RunConsistencyCheck()<<std::endl;
 	//sabre.DrawDetectorSystem("/data1/gwm17/10B3He/Feb2021/simulation/SABREGeo.txt");
-	*/
+	
 
+	/*
 	try {
  		AnasenEfficiency anasen;
  		std::string mapfile = "./etc/AnasenDeadChannels.txt";
@@ -36,5 +37,6 @@ int main(int argc, char** argv) {
 		std::cerr<<"Terminating."<<std::endl;
 		return 1;
 	}
+	*/
 	return 0;
 }

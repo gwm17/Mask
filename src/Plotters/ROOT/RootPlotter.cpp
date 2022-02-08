@@ -1,5 +1,4 @@
 #include "RootPlotter.h"
-#include "MaskFile.h"
 #include <TFile.h>
 
 #include <iostream>
@@ -37,6 +36,60 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc, double detKE, const std::st
 		MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
 	}
 	
+}
+
+void RootPlotter::FillCorrelations(const Mask::MaskFileData& data, Mask::RxnType type)
+{
+	std::string theta_eject_theta_resid_name = "theta_eject_theta_resid_cor";
+	std::string theta_eject_theta_resid_title = theta_eject_theta_resid_name + ";#theta_{lab} Ejectile (deg);#theta_{lab} Residual";
+	if(type == Mask::RxnType::PureDecay)
+	{
+		MyFill(theta_eject_theta_resid_name, theta_eject_theta_resid_title, data.theta[1]*rad2deg, data.theta[2]*rad2deg, 4);
+	}
+	else
+	{
+		MyFill(theta_eject_theta_resid_name, theta_eject_theta_resid_title, data.theta[2]*rad2deg, data.theta[3]*rad2deg, 4);
+	}
+
+	if(type == Mask::RxnType::TwoStepRxn || type == Mask::RxnType::ThreeStepRxn)
+	{
+		std::string theta_break1_theta_break2_name = "theta_break1_theta_break2_cor";
+		std::string theta_break1_theta_break2_title = theta_break1_theta_break2_name + ";#theta_{lab} Breakup1 (deg);#theta_{lab} Breakup2 (deg)";
+		MyFill(theta_break1_theta_break2_name, theta_break1_theta_break2_title, data.theta[4]*rad2deg, data.theta[5]*rad2deg, 4);
+	}
+	if(type == Mask::RxnType::ThreeStepRxn)
+	{
+		std::string theta_break3_theta_break4_name = "theta_break3_theta_break4_cor";
+		std::string theta_break3_theta_break4_title = theta_break3_theta_break4_name + ";#theta_{lab} Breakup3 (deg);#theta_{lab} Breakup4 (deg)";
+		MyFill(theta_break3_theta_break4_name, theta_break3_theta_break4_title, data.theta[6]*rad2deg, data.theta[7]*rad2deg, 4);
+	}
+}
+
+void RootPlotter::FillCorrelationsDetected(const Mask::MaskFileData& data, Mask::RxnType type)
+{
+	std::string theta_eject_theta_resid_name = "theta_eject_theta_resid_cor_detected";
+	std::string theta_eject_theta_resid_title = theta_eject_theta_resid_name + ";#theta_{lab} Ejectile (deg);#theta_{lab} Residual";
+	if(type == Mask::RxnType::PureDecay && data.detect_flag[1] && data.detect_flag[2])
+	{
+		MyFill(theta_eject_theta_resid_name, theta_eject_theta_resid_title, data.theta[1]*rad2deg, data.theta[2]*rad2deg, 4);
+	}
+	else if(data.detect_flag[2] && data.detect_flag[3])
+	{
+		MyFill(theta_eject_theta_resid_name, theta_eject_theta_resid_title, data.theta[2]*rad2deg, data.theta[3]*rad2deg, 4);
+	}
+
+	if((type == Mask::RxnType::TwoStepRxn || type == Mask::RxnType::ThreeStepRxn) && data.detect_flag[4] && data.detect_flag[5])
+	{
+		std::string theta_break1_theta_break2_name = "theta_break1_theta_break2_cor_detected";
+		std::string theta_break1_theta_break2_title = theta_break1_theta_break2_name + ";#theta_{lab} Breakup1 (deg);#theta_{lab} Breakup2 (deg)";
+		MyFill(theta_break1_theta_break2_name, theta_break1_theta_break2_title, data.theta[4]*rad2deg, data.theta[5]*rad2deg, 4);
+	}
+	if(type == Mask::RxnType::ThreeStepRxn && data.detect_flag[6] && data.detect_flag[7])
+	{
+		std::string theta_break3_theta_break4_name = "theta_break3_theta_break4_cor_detected";
+		std::string theta_break3_theta_break4_title = theta_break3_theta_break4_name + ";#theta_{lab} Breakup3 (deg);#theta_{lab} Breakup4 (deg)";
+		MyFill(theta_break3_theta_break4_name, theta_break3_theta_break4_title, data.theta[6]*rad2deg, data.theta[7]*rad2deg, 4);
+	}
 }
 
 void RootPlotter::MyFill(const std::string& name, const std::string& title, int bins, float min, float max, double val) {
@@ -224,6 +277,8 @@ int main(int argc, char** argv) {
 				plotter.FillData(nucleus, data.KE[i], "detected");
 			}
 		}
+		plotter.FillCorrelations(data, header.rxn_type);
+		plotter.FillCorrelationsDetected(data, header.rxn_type);
 		count++;
 	}
 	std::cout<<std::endl;
