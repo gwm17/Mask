@@ -5,14 +5,14 @@ workspace "Mask"
 	}
 
 project "Mask"
-	kind "ConsoleApp"
+	kind "StaticLib"
 	language "C++"
-	targetdir "bin"
+	targetdir "lib"
 	objdir "objs"
-	cppdialect "C++11"
+	cppdialect "C++17"
 
 	files {
-		"src/*.cpp",
+		"src/Mask/*.cpp",
 		"include/*.h"
 	}
 
@@ -31,21 +31,16 @@ project	"RootPlot"
 	language "C++"
 	targetdir "bin"
 	objdir "objs"
-	cppdialect "c++11"
+	cppdialect "c++17"
 
 	files {
 		"src/Plotters/ROOT/RootPlotter.cpp",
-		"src/MaskFile.cpp",
-		"src/Nucleus.cpp",
-		"src/Vec4.cpp",
-		"src/Vec3.cpp",
-		"src/MassLookup.cpp",
 		"include/*.h"
 	}
 
 	--User specified path to ROOT CERN libraries--
-	ROOTIncludepath = "/usr/include/root"
-	ROOTLibpath = "/usr/lib64/root"
+	ROOTIncludepath = "/Users/gordon/Cern/root/include"
+	ROOTLibpath = "/Users/gordon/Cern/root/lib"
 
 	includedirs {
 		"include"
@@ -56,14 +51,45 @@ project	"RootPlot"
 	}
 
 	libdirs {
+		"lib/",
 		ROOTLibpath
 	}
 
 	links {
-		"Gui", "Core", "Imt", "RIO", "Net", "Hist", 
+		"Mask", "Gui", "Core", "Imt", "RIO", "Net", "Hist", 
 		"Graf", "Graf3d", "Gpad", "ROOTDataFrame", "ROOTVecOps",
 		"Tree", "TreePlayer", "Rint", "Postscript", "Matrix",
 		"Physics", "MathCore", "Thread", "MultiProc", "m", "dl"
+	}
+
+	filter "system:macosx or linux"
+		linkoptions {
+			"-pthread"
+		}
+
+	filter "configurations:Debug"
+		symbols "On"
+
+	filter "configurations:Release"
+		optimize "On"
+
+project "MaskApp"
+	kind "ConsoleApp"
+	language "C++"
+	targetdir "bin"
+	objdir "objs"
+	cppdialect "c++17"
+
+	files {
+		"src/MaskApp/*.cpp"
+	}
+
+	includedirs {
+		"include"
+	}
+
+	links {
+		"Mask"
 	}
 
 	filter "system:macosx or linux"
@@ -82,24 +108,19 @@ project	"DetectEff"
 	language "C++"
 	targetdir "bin"
 	objdir "objs"
-	cppdialect "c++11"
+	cppdialect "c++17"
 
 	files {
 		"src/Detectors/*.cpp",
-		"src/MaskFile.cpp",
-		"src/Nucleus.cpp",
-		"src/Vec4.cpp",
-		"src/Vec3.cpp",
-		"src/MassLookup.cpp",
-		"src/Rotation.cpp",
-		"src/Target.cpp",
-		"src/EnergyLoss.cpp",
-		"src/RandomGenerator.cpp",
 		"include/*.h"
 	}
 
 	includedirs {
 		"include"
+	}
+
+	links {
+		"Mask"
 	}
 
 	filter "configurations:Debug"
