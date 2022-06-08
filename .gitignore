@@ -16,6 +16,7 @@ Makefile
 *.make
 __pycache__
 .vscode/
+build/
 
 
 ###Keep this file###
