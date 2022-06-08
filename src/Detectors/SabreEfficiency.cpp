@@ -6,13 +6,14 @@
 
 
 SabreEfficiency::SabreEfficiency() : 
-	DetectorEfficiency(), deadlayer(DEADLAYER_THIN), sabre_eloss(SABRE_THICKNESS)
+	DetectorEfficiency(), deadlayer(DEADLAYER_THIN), sabre_eloss(SABRE_THICKNESS), degrader(DEGRADER_THICKNESS)
 {
 	detectors.reserve(5);
 	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI0*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
 	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI1*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
- 	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI2*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
- 	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI3*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
+	//Only 0,1,4 valid in degrader land
+ 	//detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI2*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
+ 	//detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI3*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
  	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI4*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
 
  	
@@ -21,6 +22,10 @@ SabreEfficiency::SabreEfficiency() :
 	std::vector<int> dead_stoich = {1};
 	deadlayer.SetElements(dead_z, dead_a, dead_stoich);
 	sabre_eloss.SetElements(dead_z, dead_a, dead_stoich);
+	std::vector<int> deg_z = {73};
+	std::vector<int> deg_a = {181};
+	std::vector<int> deg_s = {1};
+	degrader.SetElements(deg_z, deg_a, deg_s);
 }
 
 SabreEfficiency::~SabreEfficiency() {}
@@ -247,15 +252,19 @@ std::pair<bool,double> SabreEfficiency::IsSabre(Mask::Nucleus& nucleus) {
 
 	Mask::Vec3 coords;
 	double thetaIncident, eloss, e_deposited;
+	double ke = 0.0;
 	for(int i=0; i<5; i++) {
 		auto chan = detectors[i].GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
 		if(chan.first != -1 && chan.second != -1) {
 			if(dmap.IsDead(i, chan.first, 0) || dmap.IsDead(i, chan.second, 1)) break; //dead channel check
 			coords = detectors[i].GetTrajectoryCoordinates(nucleus.GetTheta(), nucleus.GetPhi());
 			thetaIncident = std::acos(coords.Dot(detectors[i].GetNormTilted())/(coords.GetR()));
-			eloss = deadlayer.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), M_PI - thetaIncident);
-			if((nucleus.GetKE() - eloss) <= ENERGY_THRESHOLD) break; //deadlayer check
-			e_deposited = sabre_eloss.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE() - eloss, M_PI - thetaIncident);
+			eloss = degrader.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
+			ke = nucleus.GetKE() - eloss;
+			eloss = deadlayer.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), ke, M_PI - thetaIncident);
+			ke -= eloss;
+			if(ke <= ENERGY_THRESHOLD) break; //deadlayer check
+			e_deposited = sabre_eloss.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), ke, M_PI - thetaIncident);
 			return std::make_pair(true, e_deposited);
 		}
 	}

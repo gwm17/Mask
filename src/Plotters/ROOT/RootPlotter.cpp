@@ -16,6 +16,8 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc, double detKE, const std::st
 	std::string ke_vs_th_title = ke_vs_th_name + ";#theta_{lab} (degrees);Kinetic Energy (MeV)";
 	std::string ke_vs_ph_name = sym + modifier + "_ke_vs_phi";
 	std::string ke_vs_ph_title = ke_vs_ph_name + ";#phi_{lab} (degrees);Kinetic Energy (MeV)";
+	std::string th_vs_ph_name = sym + modifier + "_theta_vs_phi";
+	std::string th_vs_ph_title = th_vs_ph_name + ";#theta_{lab};#phi_{lab}";
 	std::string ex_name = sym + modifier + "_ex";
 	std::string ex_title = ex_name + ";E_{ex} (MeV);counts";
 	std::string angdist_name = sym + modifier +"_angDist";
@@ -25,6 +27,7 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc, double detKE, const std::st
 	{
 		MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetKE(), 2);
 		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, nuc.GetKE(), 4);
+		MyFill(th_vs_ph_name.c_str(), th_vs_ph_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetPhi()*rad2deg, 2);
 		MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
 		MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
 	}
@@ -32,6 +35,7 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc, double detKE, const std::st
 	{
 		MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.GetTheta()*rad2deg, detKE, 2);
 		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, detKE, 4);
+		MyFill(th_vs_ph_name.c_str(), th_vs_ph_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetPhi()*rad2deg, 2);
 		MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
 		MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
 	}
@@ -56,6 +60,9 @@ void RootPlotter::FillCorrelations(const Mask::MaskFileData& data, Mask::RxnType
 		std::string theta_break1_theta_break2_name = "theta_break1_theta_break2_cor";
 		std::string theta_break1_theta_break2_title = theta_break1_theta_break2_name + ";#theta_{lab} Breakup1 (deg);#theta_{lab} Breakup2 (deg)";
 		MyFill(theta_break1_theta_break2_name, theta_break1_theta_break2_title, data.theta[4]*rad2deg, data.theta[5]*rad2deg, 4);
+		std::string theta_resid_theta_break1_name = "theta_resid_theta_break1_cor";
+		std::string theta_resid_theta_break1_title = theta_resid_theta_break1_name + ";#theta_{lab} Residual (deg);#theta_{lab} Breakup1 (deg)";
+		MyFill(theta_resid_theta_break1_name, theta_resid_theta_break1_title, data.theta[3]*rad2deg, data.theta[4]*rad2deg, 4);
 	}
 	if(type == Mask::RxnType::ThreeStepRxn)
 	{
@@ -76,6 +83,12 @@ void RootPlotter::FillCorrelationsDetected(const Mask::MaskFileData& data, Mask:
 	else if(data.detect_flag[2] && data.detect_flag[3])
 	{
 		MyFill(theta_eject_theta_resid_name, theta_eject_theta_resid_title, data.theta[2]*rad2deg, data.theta[3]*rad2deg, 4);
+	}
+	if((type == Mask::RxnType::TwoStepRxn || type == Mask::RxnType::ThreeStepRxn) && data.detect_flag[4])
+	{
+		std::string theta_resid_theta_break1_name = "theta_resid_theta_break1_cor_detected";
+		std::string theta_resid_theta_break1_title = theta_resid_theta_break1_name + ";#theta_{lab} Residual (deg);#theta_{lab} Breakup1 (deg)";
+		MyFill(theta_resid_theta_break1_name, theta_resid_theta_break1_title, data.theta[3]*rad2deg, data.theta[4]*rad2deg, 4);
 	}
 
 	if((type == Mask::RxnType::TwoStepRxn || type == Mask::RxnType::ThreeStepRxn) && data.detect_flag[4] && data.detect_flag[5])
