@@ -163,6 +163,7 @@ std::vector<Mask::Nucleus> GetParents(const Mask::MaskFileData& data, Mask::RxnT
 	Mask::Nucleus temp1, temp2, temp3;
 	switch(rxn_type)
 	{
+		case Mask::RxnType::None : break;
 		case Mask::RxnType::PureDecay :
 		{
 			temp1.SetIsotope(data.Z[0], data.A[0]);
@@ -210,6 +211,7 @@ std::vector<Mask::Nucleus> GetParents(const Mask::MaskFileData& data, Mask::RxnT
 			return parents;
 		}
 	}
+	return parents;
 }
 
 void SetThetaCM(Mask::Nucleus& daughter, const Mask::Nucleus& parent)

@@ -126,6 +126,8 @@ namespace Mask {
 		input>>junk>>par1;
 		switch(m_rxn_type) 
 		{
+			case RxnType::PureDecay : break;
+			case RxnType::None : break;
 			case RxnType::OneStepRxn :
 			{
 				dynamic_cast<OneStepSystem*>(m_sys)->SetReactionThetaType(par1);
@@ -152,6 +154,8 @@ namespace Mask {
 		input>>junk>>dfile2;
 		switch(m_rxn_type) 
 		{
+			case RxnType::PureDecay : break;
+			case RxnType::None : break;
 			case RxnType::OneStepRxn :
 			{
 				DecaySystem* this_sys = dynamic_cast<DecaySystem*>(m_sys);
