@@ -8,12 +8,14 @@
 *.cxx
 *.pcm
 *.o
+*.a
 *.swp
 *.pickle
 .DS_Store
 Makefile
 *.make
 __pycache__
+.vscode/
 
 
 ###Keep this file###
