@@ -19,7 +19,7 @@ public:
 	Nucleus();
 	Nucleus(int Z, int A);
 	Nucleus(int Z, int A, double px, double py, double pz, double E);
-	~Nucleus();
+	virtual ~Nucleus() override;
 	bool SetIsotope(int Z, int A);
 	inline void SetThetaCM(double tcm) { m_theta_cm = tcm; }; //save theta in rxn CM frame
 	inline int GetZ() const { return m_z; };
