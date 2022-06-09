@@ -26,4 +26,5 @@ target_sources(Mask PRIVATE
     Vec4.cpp
 )
 
+target_link_libraries(Mask catima)
 set_target_properties(Mask PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${MASK_LIBRARY_DIR})

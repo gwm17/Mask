@@ -22,6 +22,7 @@ namespace Mask {
 	public:
 		~MassLookup();
 		double FindMass(int Z, int A);
+		double FindMassU(int Z, int A) { return FindMass(Z, A)/u_to_mev; }
 		std::string FindSymbol(int Z, int A);
 	
 		static MassLookup& GetInstance() {

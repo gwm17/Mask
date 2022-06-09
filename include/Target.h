@@ -17,6 +17,8 @@ Written by G.W. McCann Aug. 2020
 #include <vector>
 #include <cmath>
 #include "EnergyLoss.h"
+#include "catima/gwm_integrators.h"
+#include "MassLookup.h"
 
 namespace Mask {
 
@@ -39,7 +41,9 @@ namespace Mask {
 	
 	private:
 		EnergyLoss eloss;
+		catima::Material target_material;
 		double thickness;
+		double thickness_gcm2;
 		std::vector<int> Z, A, Stoich;
 	
 	};

@@ -1,5 +1,6 @@
 #include "RootPlotter.h"
 #include <TFile.h>
+#include <TVector3.h>
 
 #include <iostream>
 
@@ -57,12 +58,19 @@ void RootPlotter::FillCorrelations(const Mask::MaskFileData& data, Mask::RxnType
 
 	if(type == Mask::RxnType::TwoStepRxn || type == Mask::RxnType::ThreeStepRxn)
 	{
+		TVector3 p1, p2;
+		p1.SetMagThetaPhi(1.0, data.theta[3], data.phi[3]);
+		p2.SetMagThetaPhi(1.0, data.theta[4], data.phi[4]);
+		double theta_resid_break1 = std::acos(p1.Dot(p2));
 		std::string theta_break1_theta_break2_name = "theta_break1_theta_break2_cor";
 		std::string theta_break1_theta_break2_title = theta_break1_theta_break2_name + ";#theta_{lab} Breakup1 (deg);#theta_{lab} Breakup2 (deg)";
 		MyFill(theta_break1_theta_break2_name, theta_break1_theta_break2_title, data.theta[4]*rad2deg, data.theta[5]*rad2deg, 4);
 		std::string theta_resid_theta_break1_name = "theta_resid_theta_break1_cor";
 		std::string theta_resid_theta_break1_title = theta_resid_theta_break1_name + ";#theta_{lab} Residual (deg);#theta_{lab} Breakup1 (deg)";
 		MyFill(theta_resid_theta_break1_name, theta_resid_theta_break1_title, data.theta[3]*rad2deg, data.theta[4]*rad2deg, 4);
+		std::string ke_break1_theta_rel_name = "ke_break1_theta_rel";
+		std::string ke_break1_theta_rel_title = ke_break1_theta_rel_name + ";#theta_{resid-break1};KE_{break1} (MeV)";
+		MyFill(ke_break1_theta_rel_name, ke_break1_theta_rel_title, theta_resid_break1*rad2deg, data.KE[4], 4);
 	}
 	if(type == Mask::RxnType::ThreeStepRxn)
 	{
@@ -86,9 +94,16 @@ void RootPlotter::FillCorrelationsDetected(const Mask::MaskFileData& data, Mask:
 	}
 	if((type == Mask::RxnType::TwoStepRxn || type == Mask::RxnType::ThreeStepRxn) && data.detect_flag[4])
 	{
+		TVector3 p1, p2;
+		p1.SetMagThetaPhi(1.0, data.theta[3], data.phi[3]);
+		p2.SetMagThetaPhi(1.0, data.theta[4], data.phi[4]);
+		double theta_resid_break1 = std::acos(p1.Dot(p2));
 		std::string theta_resid_theta_break1_name = "theta_resid_theta_break1_cor_detected";
 		std::string theta_resid_theta_break1_title = theta_resid_theta_break1_name + ";#theta_{lab} Residual (deg);#theta_{lab} Breakup1 (deg)";
 		MyFill(theta_resid_theta_break1_name, theta_resid_theta_break1_title, data.theta[3]*rad2deg, data.theta[4]*rad2deg, 4);
+		std::string ke_break1_theta_rel_name = "ke_break1_theta_rel_detected";
+		std::string ke_break1_theta_rel_title = ke_break1_theta_rel_name + ";#theta_{resid-break1};KE_{break1} (MeV)";
+		MyFill(ke_break1_theta_rel_name, ke_break1_theta_rel_title, theta_resid_break1*rad2deg, data.KE[4], 4);
 	}
 
 	if((type == Mask::RxnType::TwoStepRxn || type == Mask::RxnType::ThreeStepRxn) && data.detect_flag[4] && data.detect_flag[5])

@@ -8,6 +8,7 @@ set(MASK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(CMAKE_CXX_STANDARD 17)
 
+add_subdirectory(src/vendor/catima)
 add_subdirectory(src/Mask)
 add_subdirectory(src/MaskApp)
 add_subdirectory(src/Detectors)

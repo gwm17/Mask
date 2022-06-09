@@ -14,6 +14,7 @@ target_sources(DetectEff PUBLIC
 
 target_link_libraries(DetectEff
     Mask
+    catima
 )
 
 set_target_properties(DetectEff PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${MASK_BINARY_DIR})

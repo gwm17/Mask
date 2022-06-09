@@ -25,6 +25,7 @@ private:
     
 	Mask::Target deadlayer;
     Mask::Target sabre_eloss;
+    Mask::Target degrader;
     SabreDeadChannelMap dmap;
 
 	//Sabre constants
@@ -41,6 +42,7 @@ private:
     const double DEG2RAD = M_PI/180.0;
     static constexpr double DEADLAYER_THIN = 50 * 1e-7 * 2.3296 * 1e6; // ug/cm^2 (50 nm thick * density)
     static constexpr double SABRE_THICKNESS = 500 * 1e-4 * 2.3926 * 1e6; // ug/cm^2 (500 um thick * density)
+    static constexpr double DEGRADER_THICKNESS = 70.0 * 1.0e-4 * 16.69 * 1e6; //tantalum degrader (70 um thick) 
 
     const double ENERGY_THRESHOLD = 0.2; //in MeV
 

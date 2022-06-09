@@ -1,6 +1,7 @@
 #include "AnasenEfficiency.h"
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 
 AnasenEfficiency::AnasenEfficiency() :
 	DetectorEfficiency(), det_silicon(si_thickness)

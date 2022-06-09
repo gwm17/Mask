@@ -11,12 +11,14 @@ Written by G.W. McCann Aug. 2020
 
 */
 #include "Target.h"
+#include "catima/nucdata.h"
 
 namespace Mask {
 
 	/*Targets must be of known thickness*/
 	Target::Target(double thick) {
 		thickness = thick;
+		thickness_gcm2 = thickness*1.0e-6;
 	}
 	
 	Target::~Target() {}
@@ -26,8 +28,12 @@ namespace Mask {
 		Z = z;
 		A = a;
 		Stoich = stoich;
-		
+		MassLookup& masses = MassLookup::GetInstance();
 		eloss.SetTargetComponents(Z, A, Stoich);
+		for(size_t i=0; i<Z.size(); i++)
+		{
+			target_material.add_element(masses.FindMassU(Z[i], A[i]), Z[i], Stoich[i]);
+		}
 	}
 	
 	/*Element verification*/
@@ -44,8 +50,11 @@ namespace Mask {
 			return startEnergy;
 		else if (theta > M_PI/2.) 
 			theta = M_PI - theta;
-
-		return eloss.GetEnergyLoss(zp, ap, startEnergy, thickness/fabs(cos(theta)));
+		catima::Projectile proj(MassLookup::GetInstance().FindMassU(zp, ap), zp, 0.0, 0.0);
+		proj.T = startEnergy/proj.A;
+		target_material.thickness(thickness_gcm2/fabs(cos(theta)));
+		return catima::integrate_energyloss(proj, target_material);
+		//return eloss.GetEnergyLoss(zp, ap, startEnergy, thickness/fabs(cos(theta)));
 	}
 
 	/*Calculates the energy loss for traveling some fraction through the target*/
@@ -56,7 +65,11 @@ namespace Mask {
 		else if (theta > M_PI/2.)
 			theta = M_PI-theta;
 
-		return eloss.GetEnergyLoss(zp, ap, finalEnergy, thickness*percent_depth/(std::fabs(std::cos(theta))));
+		catima::Projectile proj(MassLookup::GetInstance().FindMassU(zp, ap), zp, 0.0, 0.0);
+		proj.T = finalEnergy/proj.A;
+		target_material.thickness(thickness_gcm2*percent_depth/fabs(cos(theta)));
+		return catima::integrate_energyloss(proj, target_material);
+		//return eloss.GetEnergyLoss(zp, ap, finalEnergy, thickness*percent_depth/(std::fabs(std::cos(theta))));
 	}
 	
 	/*Calculates reverse energy loss for travelling all the way through the target*/
@@ -66,7 +79,11 @@ namespace Mask {
 		else if (theta > M_PI/2.) 
 			theta = M_PI - theta;
 
-		return eloss.GetReverseEnergyLoss(zp, ap, finalEnergy, thickness/fabs(cos(theta)));
+		catima::Projectile proj(MassLookup::GetInstance().FindMassU(zp, ap), zp, 0.0, 0.0);
+		proj.T = finalEnergy/proj.A;
+		target_material.thickness(thickness_gcm2/fabs(cos(theta)));
+		return catima::reverse_integrate_energyloss(proj, target_material);
+		//return eloss.GetReverseEnergyLoss(zp, ap, finalEnergy, thickness/fabs(cos(theta)));
 	}
 
 	/*Calculates the reverse energy loss for traveling some fraction through the target*/
@@ -76,8 +93,11 @@ namespace Mask {
 			return finalEnergy;
 		else if (theta > M_PI/2.)
 			theta = M_PI-theta;
-
-		return eloss.GetReverseEnergyLoss(zp, ap, finalEnergy, thickness*percent_depth/(std::fabs(std::cos(theta))));
+		catima::Projectile proj(MassLookup::GetInstance().FindMassU(zp, ap), zp, 0.0, 0.0);
+		proj.T = finalEnergy/proj.A;
+		target_material.thickness(thickness_gcm2*percent_depth/fabs(cos(theta)));
+		return catima::reverse_integrate_energyloss(proj, target_material);
+		//return eloss.GetReverseEnergyLoss(zp, ap, finalEnergy, thickness*percent_depth/(std::fabs(std::cos(theta))));
 	}
 
 }

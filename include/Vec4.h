@@ -15,7 +15,7 @@ namespace Mask {
 	public:
 		Vec4();
 		Vec4(double px, double py, double pz, double E);
-		virtual ~Vec4();
+		virtual ~Vec4(); 
 		void SetVectorCartesian(double px, double py, double pz, double E);
 		void SetVectorSpherical(double theta, double phi, double p, double E);
 	
