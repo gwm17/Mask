@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 
 	
 	SabreEfficiency sabre;
-	std::string mapfile = "./etc/SabreDeadChannels.txt";
+	std::string mapfile = "./etc/sabreDeadChannels_May2022.txt";
 	sabre.SetDeadChannelMap(mapfile);
 	sabre.CalculateEfficiency(inputname, outputname, statsname);
 	//std::cout<<"Running consistency check(1=success): "<<sabre.RunConsistencyCheck()<<std::endl;

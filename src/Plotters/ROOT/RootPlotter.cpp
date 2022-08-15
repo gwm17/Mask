@@ -30,7 +30,7 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc, double detKE, const std::st
 		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, nuc.GetKE(), 4);
 		MyFill(th_vs_ph_name.c_str(), th_vs_ph_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetPhi()*rad2deg, 2);
 		MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
-		MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
+		MyFill(angdist_name.c_str(), angdist_title.c_str(),20,-1.0,1.0,std::cos(nuc.GetThetaCM()));
 	}
 	else
 	{
@@ -38,7 +38,7 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc, double detKE, const std::st
 		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.GetPhi()*rad2deg, detKE, 4);
 		MyFill(th_vs_ph_name.c_str(), th_vs_ph_title.c_str(), nuc.GetTheta()*rad2deg, nuc.GetPhi()*rad2deg, 2);
 		MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
-		MyFill(angdist_name.c_str(), angdist_title.c_str(),100,-1.0,1.0,std::cos(nuc.GetThetaCM()));
+		MyFill(angdist_name.c_str(), angdist_title.c_str(),20,-1.0,1.0,std::cos(nuc.GetThetaCM()));
 	}
 	
 }

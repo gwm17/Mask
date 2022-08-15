@@ -1,0 +1,4 @@
+DetectorID RING/WEDGE Channel
+4 WEDGE 4
+3 RING 2
+1 RING 13

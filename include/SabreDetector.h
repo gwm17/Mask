@@ -62,7 +62,7 @@ class SabreDetector {
 public:
 
 	SabreDetector();
-	SabreDetector(double Rin, double Rout, double deltaPhi_flat, double phiCentral, double tiltFromVert, double zdist, double xdist=0, double ydist=0);
+	SabreDetector(int detID, double Rin, double Rout, double deltaPhi_flat, double phiCentral, double tiltFromVert, double zdist, double xdist=0, double ydist=0);
 	~SabreDetector();
 
 	/*Return coordinates of the corners of each ring/wedge in SABRE*/
@@ -84,6 +84,7 @@ public:
 	inline double GetTiltAngle() { return m_tilt; };
 	inline Mask::Vec3 GetTranslation() { return m_translation; };
 	inline Mask::Vec3 GetNormTilted() { return TransformToTiltedFrame(m_norm_flat); };
+	int GetDetectorID() { return m_detectorID; }
 
 
 private:
@@ -165,6 +166,7 @@ private:
 	Mask::ZRotation m_ZRot;
 	double m_deltaR_flat, m_deltaR_flat_ring, m_deltaPhi_flat_wedge;
 	Mask::Vec3 m_norm_flat;
+	int m_detectorID;
 
 	std::vector<std::vector<Mask::Vec3>> m_ringCoords_flat, m_wedgeCoords_flat;
 	std::vector<std::vector<Mask::Vec3>> m_ringCoords_tilt, m_wedgeCoords_tilt;

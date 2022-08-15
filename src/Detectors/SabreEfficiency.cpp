@@ -8,13 +8,12 @@
 SabreEfficiency::SabreEfficiency() : 
 	DetectorEfficiency(), deadlayer(DEADLAYER_THIN), sabre_eloss(SABRE_THICKNESS), degrader(DEGRADER_THICKNESS)
 {
-	detectors.reserve(5);
-	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI0*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
-	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI1*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
-	//Only 0,1,4 valid in degrader land
- 	//detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI2*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
- 	//detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI3*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
- 	detectors.emplace_back(INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI4*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
+	//Only 0, 1, 4 valid in degrader land
+	//detectors.emplace_back(0, INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI0*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
+	//detectors.emplace_back(1, INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI1*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
+ 	detectors.emplace_back(2, INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI2*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
+ 	detectors.emplace_back(3, INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI3*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
+ 	//detectors.emplace_back(4, INNER_R,OUTER_R,PHI_COVERAGE*DEG2RAD,PHI4*DEG2RAD,TILT*DEG2RAD,DIST_2_TARG);
 
  	
 	std::vector<int> dead_z = {14};
@@ -103,6 +102,7 @@ void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const st
 		for(unsigned int i=0; i<data.Z.size(); i++) {
 			nucleus.SetIsotope(data.Z[i], data.A[i]);
 			nucleus.SetVectorSpherical(data.theta[i], data.phi[i], data.p[i], data.E[i]);
+			
 			auto result = IsSabre(nucleus);
 			if(result.first) {
 				data.detect_flag[i] = true;
@@ -253,16 +253,17 @@ std::pair<bool,double> SabreEfficiency::IsSabre(Mask::Nucleus& nucleus) {
 	Mask::Vec3 coords;
 	double thetaIncident, eloss, e_deposited;
 	double ke = 0.0;
-	for(int i=0; i<5; i++) {
-		auto chan = detectors[i].GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
+	for(auto& detector : detectors) {
+		auto chan = detector.GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
 		if(chan.first != -1 && chan.second != -1) {
-			if(dmap.IsDead(i, chan.first, 0) || dmap.IsDead(i, chan.second, 1)) break; //dead channel check
-			coords = detectors[i].GetTrajectoryCoordinates(nucleus.GetTheta(), nucleus.GetPhi());
-			thetaIncident = std::acos(coords.Dot(detectors[i].GetNormTilted())/(coords.GetR()));
-			eloss = degrader.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
-			ke = nucleus.GetKE() - eloss;
+			if(dmap.IsDead(detector.GetDetectorID(), chan.first, 0) || dmap.IsDead(detector.GetDetectorID(), chan.second, 1)) break; //dead channel check
+			coords = detector.GetTrajectoryCoordinates(nucleus.GetTheta(), nucleus.GetPhi());
+			thetaIncident = std::acos(coords.Dot(detector.GetNormTilted())/(coords.GetR()));
+			//eloss = degrader.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
+			//ke = nucleus.GetKE() - eloss;
 			eloss = deadlayer.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), ke, M_PI - thetaIncident);
-			ke -= eloss;
+			ke = nucleus.GetKE() - eloss;
+			//ke -= eloss;
 			if(ke <= ENERGY_THRESHOLD) break; //deadlayer check
 			e_deposited = sabre_eloss.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), ke, M_PI - thetaIncident);
 			return std::make_pair(true, e_deposited);
