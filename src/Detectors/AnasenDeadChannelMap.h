@@ -25,7 +25,7 @@ public:
 	AnasenDeadChannelMap(const std::string& filename);
 	~AnasenDeadChannelMap();
 	void LoadMapfile(const std::string& filename);
-	inline const bool IsValid() const { return valid_flag; }
+	const bool IsValid() const { return valid_flag; }
 	const bool IsDead(AnasenDetectorType type, int detIndex, int channel, AnasenDetectorSide side) const;
 private:
 	void InitMap();

@@ -1,4 +1,4 @@
-/*
+/*ayer
 	Reaction.cpp
 	Reaction is a class which implements either a decay or scattering reaction. As such it requires either
 	3 (decay) or 4 (scattering) nuclei to perform any calcualtions. I also links together the target, which provides
@@ -9,29 +9,33 @@
 #include "Reaction.h"
 #include "KinematicsExceptions.h"
 
+#include "Math/Boost.h"
+
 namespace Mask {
 
 	Reaction::Reaction() :
-		target(nullptr), m_bke(0), m_theta(0), m_phi(0), m_ex(0), rxnLayer(0), m_eject_theta_type(lab), nuc_initFlag(false), resid_elossFlag(false)
+		m_target(nullptr), m_projectile(nullptr), m_ejectile(nullptr), m_residual(nullptr), m_layeredTarget(nullptr), 
+		m_bke(0), m_theta(0), m_phi(0), m_ex(0), m_rxnLayer(0), m_ejectThetaType(s_lab), m_isInit(false), m_isResidEloss(false)
 	{
 	}
 	
-	Reaction::Reaction(int zt, int at, int zp, int ap, int ze, int ae) :
-		target(nullptr), m_bke(0), m_theta(0), m_phi(0), m_ex(0), rxnLayer(0), m_eject_theta_type(lab), resid_elossFlag(false)
+	Reaction::Reaction(Nucleus* target, Nucleus* projectile, Nucleus* ejectile, Nucleus* residual) :
+		m_target(nullptr), m_projectile(nullptr), m_ejectile(nullptr), m_residual(nullptr),
+		m_layeredTarget(nullptr), m_bke(0), m_theta(0), m_phi(0), m_ex(0), m_rxnLayer(0), m_ejectThetaType(s_lab), m_isResidEloss(false)
 	{
-		SetNuclei(zt, at, zp, ap, ze, ae);
+		BindNuclei(target, projectile, ejectile, residual);
 	}
 	
 	Reaction::~Reaction()
 	{
 	}
 	
-	bool Reaction::Calculate() {
-	
-		if(!nuc_initFlag) 
+	bool Reaction::Calculate()
+	{
+		if(!m_isInit) 
 			return false;
 	
-		if(decayFlag) {
+		if(m_isDecay) {
 			CalculateDecay();
 			return true;
 		} else {
@@ -40,203 +44,184 @@ namespace Mask {
 		}
 	}
 	
-	//Deep copy of nucleus array
-	void Reaction::SetNuclei(const Nucleus* nucs) {
-		reactants[0] = nucs[0];
-		reactants[1] = nucs[1];
-		reactants[2] = nucs[2];
-		reactants[3] = nucs[3];
-		nuc_initFlag = true;
+	void Reaction::BindNuclei(Nucleus* target, Nucleus* projectile, Nucleus* ejectile, Nucleus* residual)
+	{
+		m_target = target;
+		m_projectile = projectile;
+		m_ejectile = ejectile;
+		m_residual = residual;
+
+		if(m_projectile == nullptr)
+			m_isDecay = true;
+		else
+			m_isDecay = false;
+
+		if(m_target == nullptr || m_ejectile ==  nullptr || m_residual == nullptr)
+			m_isInit = false;
+		else
+			m_isInit = true;
 	}
 	
-	void Reaction::SetNuclei(int zt, int at, int zp, int ap, int ze, int ae) {
-		int zr, ar;
-		reactants[0] = Nucleus(zt, at);
-		reactants[2] = Nucleus(ze, ae);
-		if(ap == 0) {
-			decayFlag = true;
-			zr = zt - ze;
-			ar = at - ae;
-		} else {
-			reactants[1] = Nucleus(zp, ap);
-			decayFlag = false;
-			zr = zt + zp - ze;
-			ar = at + ap - ae;
-		}
-	
-		if(zr < 0 || ar <= 0) {
-			nuc_initFlag = false;
-		} else {
-			reactants[3] = Nucleus(zr, ar);
-			nuc_initFlag = true;
-		}
-	}
-	
-	void Reaction::SetBeamKE(double bke) {
-		if(!nuc_initFlag || decayFlag) 
+	void Reaction::SetBeamKE(double bke)
+	{
+		if(!m_isInit || m_isDecay) 
 			return;
 	
-		m_bke = bke - target->GetProjectileEnergyLoss(reactants[1].GetZ(), reactants[1].GetA(), bke, rxnLayer, 0);
+		m_bke = bke - m_layeredTarget->GetProjectileEnergyLoss(m_projectile->Z, m_projectile->A, bke, m_rxnLayer, 0);
 	}
 	
-	void Reaction::SetEjectileThetaType(int type) {
-		if(decayFlag) return;
-		if(type != center_of_mass && type != lab) return;
+	void Reaction::SetEjectileThetaType(int type)
+	{
+		if(m_isDecay)
+			return;
+		if(type != s_centerOfMass && type != s_lab)
+			return;
 	
-		m_eject_theta_type = type;
+		m_ejectThetaType = type;
 	}
 	
 	//Methods given by Iliadis in Nuclear Physics of Stars, Appendix C
 	//For use with lab frame restricted angles. May not give appropriate disribution for ejectile
-	void Reaction::CalculateReactionThetaLab() {
-		reactants[0].SetVectorCartesian(0.,0.,0.,reactants[0].GetGroundStateMass());
-		double beam_pz = std::sqrt(m_bke*(m_bke + 2.0 * reactants[1].GetGroundStateMass()));
-		double beam_E = m_bke + reactants[1].GetGroundStateMass();
-		reactants[1].SetVectorCartesian(0.,0.,beam_pz,beam_E);
+	void Reaction::CalculateReactionThetaLab()
+	{
+		m_target->vec4.SetPxPyPzE(0.,0.,0.,m_target->groundStateMass);
+		double beam_pz = std::sqrt(m_bke*(m_bke + 2.0 * m_projectile->groundStateMass));
+		double beam_E = m_bke + m_projectile->groundStateMass;
+		m_projectile->vec4.SetPxPyPzE(0.,0.,beam_pz,beam_E);
 	
-		double Q = reactants[0].GetGroundStateMass() + reactants[1].GetGroundStateMass() - (reactants[2].GetGroundStateMass() + reactants[3].GetGroundStateMass() + m_ex);
+		double Q = m_target->groundStateMass + m_projectile->groundStateMass - (m_ejectile->groundStateMass + m_residual->groundStateMass + m_ex);
 	
-		double Ethresh = -Q*(reactants[2].GetGroundStateMass()+reactants[3].GetGroundStateMass())/(reactants[2].GetGroundStateMass() + reactants[3].GetGroundStateMass() - reactants[1].GetGroundStateMass());
-		if(m_bke < Ethresh) {
+		double Ethresh = -Q*(m_ejectile->groundStateMass+m_residual->groundStateMass) / 
+						 (m_ejectile->groundStateMass + m_residual->groundStateMass - m_projectile->groundStateMass);
+		if(m_bke < Ethresh)
 			throw EnergyThresholdException();
-		}
 	
-		double term1 = sqrt(reactants[1].GetGroundStateMass()*reactants[2].GetGroundStateMass()*m_bke)/(reactants[2].GetGroundStateMass()+reactants[3].GetGroundStateMass())*cos(m_theta);
-		double term2 = (m_bke*(reactants[3].GetGroundStateMass() - reactants[1].GetGroundStateMass()) + reactants[3].GetGroundStateMass()*Q)/(reactants[3].GetGroundStateMass() + reactants[2].GetGroundStateMass());
-		double sqrt_pos_ejectKE = term1 + sqrt(term1*term1 + term2);
-		double sqrt_neg_ejectKE = term1 - sqrt(term1*term1 + term2);
+		double term1 = std::sqrt(m_projectile->groundStateMass * m_ejectile->groundStateMass * m_bke)/
+					   (m_ejectile->groundStateMass + m_residual->groundStateMass) * std::cos(m_theta);
+		double term2 = (m_bke * (m_residual->groundStateMass - m_projectile->groundStateMass) + m_residual->groundStateMass*Q) / 
+					   (m_residual->groundStateMass + m_ejectile->groundStateMass);
+		double sqrt_pos_ejectKE = term1 + std::sqrt(term1*term1 + term2);
+		double sqrt_neg_ejectKE = term1 - std::sqrt(term1*term1 + term2);
 		double ejectKE;
-		if(sqrt_pos_ejectKE > 0) {
+		if(sqrt_pos_ejectKE > 0)
 			ejectKE = sqrt_pos_ejectKE*sqrt_pos_ejectKE;
-		} else {
+		else
 			ejectKE = sqrt_neg_ejectKE*sqrt_neg_ejectKE;
-		}
-		double ejectP = std::sqrt(ejectKE*(ejectKE + 2.0 * reactants[2].GetGroundStateMass()));
-		double ejectE = ejectKE + reactants[2].GetGroundStateMass();
+
+		double ejectP = std::sqrt(ejectKE * (ejectKE + 2.0 * m_ejectile->groundStateMass));
+		double ejectE = ejectKE + m_ejectile->groundStateMass;
 	
-		reactants[2].SetVectorSpherical(m_theta, m_phi, ejectP, ejectE);
+		m_ejectile->SetVec4Spherical(m_theta, m_phi, ejectP, ejectE);
 	
-		reactants[3] = reactants[0] + reactants[1] - reactants[2];
+		m_residual->vec4 = m_target->vec4 + m_projectile->vec4 - m_ejectile->vec4;
 	
-		ejectKE -= target->GetEjectileEnergyLoss(reactants[2].GetZ(), reactants[2].GetA(), ejectKE, rxnLayer, m_theta);
-		ejectP = std::sqrt(ejectKE*(ejectKE + 2.0 * reactants[2].GetGroundStateMass()));
-		ejectE = ejectKE + reactants[2].GetGroundStateMass();
-		reactants[2].SetVectorSpherical(m_theta, m_phi, ejectP, ejectE);
+		ejectKE -= m_layeredTarget->GetEjectileEnergyLoss(m_ejectile->Z, m_ejectile->A, ejectKE, m_rxnLayer, m_theta);
+		ejectP = std::sqrt(ejectKE*(ejectKE + 2.0 * m_ejectile->groundStateMass));
+		ejectE = ejectKE + m_ejectile->groundStateMass;
+		m_ejectile->SetVec4Spherical(m_theta, m_phi, ejectP, ejectE);
 	
-		if(resid_elossFlag) {
-			double residKE = reactants[3].GetKE() - target->GetEjectileEnergyLoss(reactants[3].GetZ(), reactants[3].GetA(), reactants[3].GetKE(), rxnLayer, reactants[3].GetTheta());
-			double residP = std::sqrt(residKE*(residKE + 2.0*reactants[3].GetInvMass()));
-			double residE = residKE + reactants[3].GetInvMass();
-			reactants[3].SetVectorSpherical(reactants[3].GetTheta(), reactants[3].GetPhi(), residP, residE);
+		if(m_isResidEloss) {
+			double residKE = m_residual->GetKE() - m_layeredTarget->GetEjectileEnergyLoss(m_residual->Z, m_residual->A, m_residual->GetKE(), 
+																						  m_rxnLayer, m_residual->vec4.Theta());
+			double residP = std::sqrt(residKE*(residKE + 2.0*m_residual->vec4.M()));
+			double residE = residKE + m_residual->vec4.M();
+			m_residual->SetVec4Spherical(m_residual->vec4.Theta(), m_residual->vec4.Phi(), residP, residE);
 		}
 	}
 	
 	//Methods from original ANASEN. Gives proper distribution for inverse kinematics.
-	void Reaction::CalculateReactionThetaCM() {
+	void Reaction::CalculateReactionThetaCM()
+	{
 		//Target assumed at rest, with 0 excitation energy
-		reactants[0].SetVectorCartesian(0.,0.,0.,reactants[0].GetGroundStateMass());
-		double beam_pz = std::sqrt(m_bke*(m_bke + 2.0 * reactants[1].GetGroundStateMass()));
-		double beam_E = m_bke + reactants[1].GetGroundStateMass();
-		reactants[1].SetVectorCartesian(0.,0.,beam_pz,beam_E);
+		m_target->vec4.SetPxPyPzE(0.,0.,0.,m_target->groundStateMass);
+		double beam_pz = std::sqrt(m_bke*(m_bke + 2.0 * m_projectile->groundStateMass));
+		double beam_E = m_bke + m_projectile->groundStateMass;
+		m_projectile->vec4.SetPxPyPzE(0.,0.,beam_pz,beam_E);
 	
+		double Q = m_target->groundStateMass + m_projectile->groundStateMass - (m_ejectile->groundStateMass + m_residual->groundStateMass + m_ex);
 	
-		double Q = reactants[0].GetGroundStateMass() + reactants[1].GetGroundStateMass() - (reactants[2].GetGroundStateMass() + reactants[3].GetGroundStateMass() + m_ex);
-	
-		double Ethresh = -Q*(reactants[2].GetGroundStateMass()+reactants[3].GetGroundStateMass())/(reactants[2].GetGroundStateMass() + reactants[3].GetGroundStateMass() - reactants[1].GetGroundStateMass());
-		if(m_bke < Ethresh) {
+		double Ethresh = -Q*(m_ejectile->groundStateMass + m_residual->groundStateMass) / 
+						 (m_ejectile->groundStateMass + m_residual->groundStateMass - m_projectile->groundStateMass);
+		if(m_bke < Ethresh)
 			throw EnergyThresholdException();
-		}
 		
-		auto parent = reactants[0] + reactants[1];
-		double boost2lab[3];
-		double boost2cm[3];
-		const double* boost = parent.GetBoost();
-		for(int i=0; i<3; i++) {
-			boost2lab[i] = boost[i];
-			boost2cm[i] = boost[i]*(-1.0);
-		}
-		parent.ApplyBoost(boost2cm);
-		double ejectE_cm = (std::pow(reactants[2].GetGroundStateMass(), 2.0) - std::pow(reactants[3].GetGroundStateMass() + m_ex, 2.0) + std::pow(parent.GetE(),2.0))/(2.0*parent.GetE());
-		double ejectP_cm = std::sqrt(ejectE_cm*ejectE_cm - std::pow(reactants[2].GetGroundStateMass(), 2.0));
-		reactants[2].SetVectorSpherical(m_theta, m_phi, ejectP_cm, ejectE_cm);
-		reactants[2].ApplyBoost(boost2lab);
-		reactants[3] = reactants[0] + reactants[1] - reactants[2];
+		ROOT::Math::PxPyPzEVector parent = m_target->vec4 + m_projectile->vec4;
+		ROOT::Math::Boost boost(parent.BoostToCM());
+		parent = boost*parent;
+		double ejectE_cm = (std::pow(m_ejectile->groundStateMass, 2.0) - 
+							std::pow(m_residual->groundStateMass + m_ex, 2.0) + std::pow(parent.E(),2.0))/
+							(2.0*parent.E());
+		double ejectP_cm = std::sqrt(ejectE_cm*ejectE_cm - std::pow(m_ejectile->groundStateMass, 2.0));
+		m_ejectile->SetVec4Spherical(m_theta, m_phi, ejectP_cm, ejectE_cm);
+		m_ejectile->vec4 = boost.Inverse() * m_ejectile->vec4;
+		m_residual->vec4 = m_target->vec4 + m_projectile->vec4 - m_ejectile->vec4;
 	
-		double ejectKE = reactants[2].GetKE();
-		double ejectP = reactants[2].GetP();
-		double ejectE = reactants[2].GetE();
+		double ejectKE = m_ejectile->GetKE();
+		double ejectP = m_ejectile->vec4.P();
+		double ejectE = m_ejectile->vec4.E();
 		//energy loss for ejectile (after reaction!)
-		ejectKE -= target->GetEjectileEnergyLoss(reactants[2].GetZ(), reactants[2].GetA(), ejectKE, rxnLayer, reactants[2].GetTheta());
-		ejectP = std::sqrt(ejectKE*(ejectKE + 2.0 * reactants[2].GetGroundStateMass()));
-		ejectE = ejectKE + reactants[2].GetGroundStateMass();
-		reactants[2].SetVectorSpherical(reactants[2].GetTheta(), reactants[2].GetPhi(), ejectP, ejectE);
+		ejectKE -= m_layeredTarget->GetEjectileEnergyLoss(m_ejectile->Z, m_ejectile->A, ejectKE, m_rxnLayer, m_ejectile->vec4.Theta());
+		ejectP = std::sqrt(ejectKE*(ejectKE + 2.0 * m_ejectile->groundStateMass));
+		ejectE = ejectKE + m_ejectile->groundStateMass;
+		m_ejectile->SetVec4Spherical(m_ejectile->vec4.Theta(), m_ejectile->vec4.Phi(), ejectP, ejectE);
 	
 		//if on, get eloss for residual (after reaction!)
-		if(resid_elossFlag) {
-			double residKE = reactants[3].GetKE() - target->GetEjectileEnergyLoss(reactants[3].GetZ(), reactants[3].GetA(), reactants[3].GetKE(), rxnLayer, reactants[3].GetTheta());
-			double residP = std::sqrt(residKE*(residKE + 2.0*reactants[3].GetInvMass()));
-			double residE = residKE + reactants[3].GetInvMass();
-			reactants[3].SetVectorSpherical(reactants[3].GetTheta(), reactants[3].GetPhi(), residP, residE);
+		if(m_isResidEloss)
+		{
+			double residKE = m_residual->GetKE() - 
+					m_layeredTarget->GetEjectileEnergyLoss(m_residual->Z, m_residual->A, m_residual->GetKE(), m_rxnLayer, m_residual->vec4.Theta());
+			double residP = std::sqrt(residKE*(residKE + 2.0*m_residual->vec4.M()));
+			double residE = residKE + m_residual->vec4.M();
+			m_residual->SetVec4Spherical(m_residual->vec4.Theta(), m_residual->vec4.Phi(), residP, residE);
 		}
 	}
 	
-	void Reaction::CalculateReaction() {
-		switch(m_eject_theta_type) {
-			case center_of_mass:
-			{
-				CalculateReactionThetaCM();
-				break;
-			}
-			case lab:
-			{
-				CalculateReactionThetaLab();
-				break;
-			}
+	void Reaction::CalculateReaction()
+	{
+		switch(m_ejectThetaType)
+		{
+			case s_centerOfMass: CalculateReactionThetaCM(); break;
+			case s_lab: CalculateReactionThetaLab(); break;
 		}
 	}
 	
 	//Calculate in CM, where decay is isotropic
-	void Reaction::CalculateDecay() {
-	
-		double Q = reactants[0].GetInvMass() - reactants[2].GetGroundStateMass() - reactants[3].GetGroundStateMass();
-		if(Q < 0) {
+	void Reaction::CalculateDecay()
+	{
+		double Q = m_target->vec4.M() - m_ejectile->groundStateMass - m_residual->groundStateMass;
+		if(Q < 0)
 			throw QValueException();
-		}
 	
-		const double* boost = reactants[0].GetBoost();
-		double boost2cm[3];
-		double boost2lab[3];
-		for(int i=0; i<3; i++) {
-			boost2lab[i] = boost[i];
-			boost2cm[i] = boost[i]*(-1.0);
-		}
+		ROOT::Math::Boost boost(m_target->vec4.BoostToCM());
+		m_target->vec4 = boost*m_target->vec4;
+		double ejectE_cm = (m_ejectile->groundStateMass*m_ejectile->groundStateMass - 
+						   m_residual->groundStateMass*m_residual->groundStateMass + m_target->vec4.E()*m_target->vec4.E()) /
+					       (2.0*m_target->vec4.E());
+		double ejectP_cm = std::sqrt(ejectE_cm*ejectE_cm - m_ejectile->groundStateMass*m_ejectile->groundStateMass);
 	
-		reactants[0].ApplyBoost(&(boost2cm[0]));
-		double ejectE_cm = (reactants[2].GetGroundStateMass()*reactants[2].GetGroundStateMass() - reactants[3].GetGroundStateMass()*reactants[3].GetGroundStateMass() + reactants[0].GetE()*reactants[0].GetE())/
-					(2.0*reactants[0].GetE());
-		double ejectP_cm = std::sqrt(ejectE_cm*ejectE_cm - reactants[2].GetGroundStateMass()*reactants[2].GetGroundStateMass());
+		m_ejectile->SetVec4Spherical(m_theta, m_phi, ejectP_cm, ejectE_cm);
+		m_ejectile->thetaCM = m_theta;
 	
-		reactants[2].SetVectorSpherical(m_theta, m_phi, ejectP_cm, ejectE_cm);
-		reactants[2].SetThetaCM(m_theta);
+		m_target->vec4 = boost.Inverse() * m_target->vec4;
+		m_ejectile->vec4 = boost.Inverse() * m_ejectile->vec4;
 	
-		reactants[0].ApplyBoost(boost2lab);
-		reactants[2].ApplyBoost(boost2lab);
-	
-		reactants[3] = reactants[0] - reactants[2];
+		m_residual->vec4 = m_target->vec4 - m_ejectile->vec4;
 	
 		//energy loss for the *light* break up nucleus
-		double ejectKE = reactants[2].GetKE() - target->GetEjectileEnergyLoss(reactants[2].GetZ(), reactants[2].GetA(), reactants[2].GetKE(), rxnLayer, reactants[2].GetTheta());
-		double ejectP = std::sqrt(ejectKE*(ejectKE + 2.0*reactants[2].GetGroundStateMass()));
-		double ejectE = ejectKE + reactants[2].GetGroundStateMass();
-		reactants[2].SetVectorSpherical(reactants[2].GetTheta(), reactants[2].GetPhi(), ejectP, ejectE);
+		double ejectKE = m_ejectile->GetKE() - 
+					m_layeredTarget->GetEjectileEnergyLoss(m_ejectile->Z, m_ejectile->A, m_ejectile->GetKE(), m_rxnLayer, m_ejectile->vec4.Theta());
+		double ejectP = std::sqrt(ejectKE*(ejectKE + 2.0*m_ejectile->groundStateMass));
+		double ejectE = ejectKE + m_ejectile->groundStateMass;
+		m_ejectile->SetVec4Spherical(m_ejectile->vec4.Theta(), m_ejectile->vec4.Phi(), ejectP, ejectE);
 	
 		//if on, get eloss for *heavy* break up nucleus
-		if(resid_elossFlag) {
-	
-			double residKE = reactants[3].GetKE() - target->GetEjectileEnergyLoss(reactants[3].GetZ(), reactants[3].GetA(), reactants[3].GetKE(), rxnLayer, reactants[3].GetTheta());
-			double residP = std::sqrt(residKE*(residKE + 2.0*reactants[3].GetInvMass()));
-			double residE = residKE + reactants[3].GetInvMass();
-			reactants[3].SetVectorSpherical(reactants[3].GetTheta(), reactants[3].GetPhi(), residP, residE);
+		if(m_isResidEloss)
+		{
+			double residKE = m_residual->GetKE() - 
+					m_layeredTarget->GetEjectileEnergyLoss(m_residual->Z, m_residual->A, m_residual->GetKE(), m_rxnLayer, m_residual->vec4.Theta());
+			double residP = std::sqrt(residKE*(residKE + 2.0*m_residual->vec4.M()));
+			double residE = residKE + m_residual->vec4.M();
+			m_residual->SetVec4Spherical(m_residual->vec4.Theta(), m_residual->vec4.Phi(), residP, residE);
 		}
 	}
 

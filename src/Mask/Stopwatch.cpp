@@ -7,25 +7,34 @@
 */
 #include "Stopwatch.h"
 
-Stopwatch::Stopwatch() {
-	start_time = Clock::now();
-	stop_time = start_time;
-}
+namespace Mask {
 
-Stopwatch::~Stopwatch() {}
+	Stopwatch::Stopwatch()
+	{
+		start_time = Clock::now();
+		stop_time = start_time;
+	}
 
-void Stopwatch::Start() {
-	start_time = Clock::now();
-}
+	Stopwatch::~Stopwatch() {}
 
-void Stopwatch::Stop() {
-	stop_time = Clock::now();
-}
+	void Stopwatch::Start()
+	{
+		start_time = Clock::now();
+	}
 
-double Stopwatch::GetElapsedSeconds() {
-	return std::chrono::duration_cast<std::chrono::duration<double>>(stop_time-start_time).count();
-}
+	void Stopwatch::Stop()
+	{
+		stop_time = Clock::now();
+	}
 
-double Stopwatch::GetElapsedMilliseconds() {
-	return std::chrono::duration_cast<std::chrono::duration<double>>(stop_time-start_time).count()*1000.0;
+	double Stopwatch::GetElapsedSeconds()
+	{
+		return std::chrono::duration_cast<std::chrono::duration<double>>(stop_time-start_time).count();
+	}
+
+	double Stopwatch::GetElapsedMilliseconds()
+	{
+		return std::chrono::duration_cast<std::chrono::duration<double>>(stop_time-start_time).count()*1000.0;
+	}
+
 }

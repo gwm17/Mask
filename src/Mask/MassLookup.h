@@ -18,22 +18,35 @@ Converted to true singleton to simplify usage -- Aug. 2021 GWM
 
 namespace Mask {
 
-	class MassLookup {
+	class MassLookup
+	{
 	public:
+
+		struct KeyPair
+		{
+			uint32_t Z;
+			uint32_t A;
+
+			//Use szudzik pairing method to make unqiue key out of two unsigned ints. Use size_t as extra safety.
+			std::size_t GetID()
+			{
+				return Z >= A ? Z*Z + Z + A : A*A + Z;
+			}
+		};
+
 		~MassLookup();
 		double FindMass(int Z, int A);
 		double FindMassU(int Z, int A) { return FindMass(Z, A)/u_to_mev; }
 		std::string FindSymbol(int Z, int A);
 	
-		static MassLookup& GetInstance() {
-			static MassLookup s_instance;
-			return s_instance;
-		}
+		static MassLookup& GetInstance() { return *s_instance; }
 	
 	private:
 		MassLookup();
-		std::unordered_map<std::string, double> massTable;
-		std::unordered_map<int, std::string> elementTable;
+
+		static MassLookup* s_instance;
+		std::unordered_map<std::size_t, double> massTable;
+		std::unordered_map<std::size_t, std::string> elementTable;
 	
 		//constants
 		static constexpr double u_to_mev = 931.4940954;

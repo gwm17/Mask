@@ -1,19 +1,21 @@
 #include "MaskApp.h"
-#include "MaskFile.h"
 #include <fstream>
 #include <iostream>
+
+#include "TFile.h"
+#include "TTree.h"
 
 namespace Mask {
 
 	MaskApp::MaskApp() :
-		m_sys(nullptr)
+		m_system(nullptr)
 	{
 		std::cout<<"----------GWM Kinematics Simulation----------"<<std::endl;
 	}
 	
 	MaskApp::~MaskApp() 
 	{
-		if(m_sys) delete m_sys;
+		delete m_system;
 	}
 	
 	bool MaskApp::LoadConfig(const std::string& filename) 
@@ -28,23 +30,23 @@ namespace Mask {
 	
 		std::string junk;
 		getline(input, junk);
-		input>>junk>>m_outfile_name;
+		input>>junk>>m_outputName;
 	
 		std::vector<int> avec, zvec, svec;
 		int z, a, s;
 		getline(input, junk);
 		getline(input, junk);
 		input>>junk>>junk;
-		m_rxn_type = GetRxnTypeFromString(junk);
+		m_rxnType = GetRxnTypeFromString(junk);
 		getline(input, junk);
 		getline(input, junk);
-		switch(m_rxn_type) 
+		switch(m_rxnType) 
 		{
 			case RxnType::PureDecay:
 			{
-				m_sys = new DecaySystem();
-				m_rxn_type = RxnType::PureDecay;
-				for(int i=0; i<2; i++) {
+				m_system = new DecaySystem();
+				for(int i=0; i<2; i++)
+				{
 					input>>z>>a;
 					avec.push_back(a);
 					zvec.push_back(z);
@@ -53,20 +55,21 @@ namespace Mask {
 			}
 			case RxnType::OneStepRxn:
 			{
-				m_sys = new OneStepSystem();
-				m_rxn_type = RxnType::OneStepRxn;
-				for(int i=0; i<3; i++) {
+				m_system = new OneStepSystem();
+				for(int i=0; i<3; i++)
+				{
 					input>>z>>a;
 					avec.push_back(a);
 					zvec.push_back(z);
 				}
+				std::cout<<"here"<<std::endl;
 				break;
 			}
 			case RxnType::TwoStepRxn:
 			{
-				m_sys = new TwoStepSystem();
-				m_rxn_type = RxnType::TwoStepRxn;
-				for(int i=0; i<4; i++) {
+				m_system = new TwoStepSystem();
+				for(int i=0; i<4; i++)
+				{
 					input>>z>>a;
 					avec.push_back(a);
 					zvec.push_back(z);
@@ -75,9 +78,9 @@ namespace Mask {
 			}
 			case RxnType::ThreeStepRxn:
 			{
-				m_sys = new ThreeStepSystem();
-				m_rxn_type = RxnType::ThreeStepRxn;
-				for(int i=0; i<5; i++) {
+				m_system = new ThreeStepSystem();
+				for(int i=0; i<5; i++)
+				{
 					input>>z>>a;
 					avec.push_back(a);
 					zvec.push_back(z);
@@ -87,7 +90,7 @@ namespace Mask {
 			default:
 				return false;
 		}
-		m_sys->SetNuclei(zvec, avec);
+		m_system->SetNuclei(zvec, avec);
 	
 		int nlayers;
 		double thickness;
@@ -110,7 +113,7 @@ namespace Mask {
 				input>>z>>a>>s;
 				zvec.push_back(z); avec.push_back(a); svec.push_back(s);
 			}
-			m_sys->AddTargetLayer(zvec, avec, svec, thickness);
+			m_system->AddTargetLayer(zvec, avec, svec, thickness);
 			input>>junk;
 		}
 		std::cout<<"Reaction equation: "<<GetSystemName()<<std::endl;
@@ -122,51 +125,51 @@ namespace Mask {
 	
 		input>>junk>>m_nsamples;
 		input>>junk>>par1>>junk>>par2;
-		m_sys->SetBeamDistro(par1, par2);
+		m_system->SetBeamDistro(par1, par2);
 		input>>junk>>par1;
-		switch(m_rxn_type) 
+		switch(m_rxnType) 
 		{
 			case RxnType::PureDecay : break;
 			case RxnType::None : break;
 			case RxnType::OneStepRxn :
 			{
-				dynamic_cast<OneStepSystem*>(m_sys)->SetReactionThetaType(par1);
+				dynamic_cast<OneStepSystem*>(m_system)->SetReactionThetaType(par1);
 				break;
 			}
 			case RxnType::TwoStepRxn :
 			{
-				dynamic_cast<TwoStepSystem*>(m_sys)->SetReactionThetaType(par1);
+				dynamic_cast<TwoStepSystem*>(m_system)->SetReactionThetaType(par1);
 				break;
 			}
 			case RxnType::ThreeStepRxn :
 			{
-				dynamic_cast<ThreeStepSystem*>(m_sys)->SetReactionThetaType(par1);
+				dynamic_cast<ThreeStepSystem*>(m_system)->SetReactionThetaType(par1);
 				break;
 			}
 		}
 		input>>junk>>par1>>junk>>par2;
-		m_sys->SetTheta1Range(par1, par2);
+		m_system->SetTheta1Range(par1, par2);
 		input>>junk>>par1>>junk>>par2;
-		m_sys->SetPhi1Range(par1, par2);
+		m_system->SetPhi1Range(par1, par2);
 		input>>junk>>par1>>junk>>par2;
-		m_sys->SetExcitationDistro(par1, par2);
+		m_system->SetExcitationDistro(par1, par2);
 		input>>junk>>dfile1;
 		input>>junk>>dfile2;
-		switch(m_rxn_type) 
+		switch(m_rxnType) 
 		{
-			case RxnType::PureDecay : break;
-			case RxnType::None : break;
-			case RxnType::OneStepRxn :
+			case RxnType::PureDecay :
 			{
-				DecaySystem* this_sys = dynamic_cast<DecaySystem*>(m_sys);
+				DecaySystem* this_sys = dynamic_cast<DecaySystem*>(m_system);
 				this_sys->SetDecay1Distribution(dfile1);
 				std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<std::endl;
 				std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
 				break;
 			}
+			case RxnType::None : break;
+			case RxnType::OneStepRxn : break;
 			case RxnType::TwoStepRxn :
 			{
-				TwoStepSystem* this_sys = dynamic_cast<TwoStepSystem*>(m_sys);
+				TwoStepSystem* this_sys = dynamic_cast<TwoStepSystem*>(m_system);
 				this_sys->SetDecay1Distribution(dfile1);
 				std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<std::endl;
 				std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
@@ -174,7 +177,7 @@ namespace Mask {
 			}
 			case RxnType::ThreeStepRxn :
 			{
-				ThreeStepSystem* this_sys = dynamic_cast<ThreeStepSystem*>(m_sys);
+				ThreeStepSystem* this_sys = dynamic_cast<ThreeStepSystem*>(m_system);
 				this_sys->SetDecay1Distribution(dfile1);
 				this_sys->SetDecay2Distribution(dfile2);
 				std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<" Decay2 angular momentum: "<<this_sys->GetDecay2AngularMomentum()<<std::endl;
@@ -192,13 +195,14 @@ namespace Mask {
 	
 	void MaskApp::Run() {
 		std::cout<<"Running simulation..."<<std::endl;
-		if(m_sys == nullptr) 
+		if(m_system == nullptr) 
 		{
 			return;
 		}
 	
-		MaskFile output(m_outfile_name, MaskFile::FileType::write);
-		output.WriteHeader(m_rxn_type, m_nsamples);
+		TFile* output = TFile::Open(m_outputName.c_str(), "RECREATE");
+		TTree* tree = new TTree("SimTree", "SimTree");
+		tree->Branch("nuclei", m_system->GetNuclei());
 	
 		//For progress tracking
 		uint32_t percent5 = 0.05*m_nsamples;
@@ -214,11 +218,12 @@ namespace Mask {
 				std::cout<<"\rPercent complete: "<<npercent*5<<"%"<<std::flush;
 			}
 	
-			m_sys->RunSystem();
-			output.WriteData(m_sys->GetNuclei());
+			m_system->RunSystem();
+			tree->Fill();
 		}
 	
-		output.Close();
+		tree->Write(tree->GetName(), TObject::kOverwrite);
+		output->Close();
 		
 		std::cout<<std::endl;
 		std::cout<<"Complete."<<std::endl;

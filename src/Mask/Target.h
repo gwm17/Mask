@@ -16,7 +16,6 @@ Written by G.W. McCann Aug. 2020
 #include <string>
 #include <vector>
 #include <cmath>
-#include "EnergyLoss.h"
 #include "catima/gwm_integrators.h"
 #include "MassLookup.h"
 
@@ -25,26 +24,26 @@ namespace Mask {
 	class Target {
 	
 	public:
-	 	Target(double thick);
+	 	Target(const std::vector<int>& z, const std::vector<int>& a, const std::vector<int>& stoich, double thick);
 	 	~Target();
-	 	void SetElements(std::vector<int>& z, std::vector<int>& a, std::vector<int>& stoich);
 	 	bool ContainsElement(int z, int a);
 	 	double GetEnergyLossTotal(int zp, int ap, double startEnergy, double angle);
 	 	double GetReverseEnergyLossTotal(int zp, int ap, double finalEnergy, double angle);
 	 	double GetEnergyLossFractionalDepth(int zp, int ap, double startEnergy, double angle, double percent_depth);
 	 	double GetReverseEnergyLossFractionalDepth(int zp, int ap, double finalEnergy, double angle, double percent_depth);
-	 	inline const double& GetThickness() { return thickness; }
-	 	inline int GetNumberOfElements() { return Z.size(); }
-	 	inline int GetElementZ(int index) { return Z[index]; }
-	 	inline int GetElementA(int index) { return A[index]; }
-	 	inline int GetElementStoich(int index) { return Stoich[index]; }
+	 	inline const double& GetThickness() { return m_thickness; }
+	 	inline int GetNumberOfElements() { return m_Z.size(); }
+	 	inline int GetElementZ(int index) { return m_Z[index]; }
+	 	inline int GetElementA(int index) { return m_A[index]; }
+	 	inline int GetElementStoich(int index) { return m_stoich[index]; }
 	
 	private:
-		EnergyLoss eloss;
-		catima::Material target_material;
-		double thickness;
-		double thickness_gcm2;
-		std::vector<int> Z, A, Stoich;
+	 	void Init(const std::vector<int>& z, const std::vector<int>& a, const std::vector<int>& stoich);
+		
+		catima::Material m_material;
+		double m_thickness;
+		double m_thickness_gcm2;
+		std::vector<int> m_Z, m_A, m_stoich;
 	
 	};
 

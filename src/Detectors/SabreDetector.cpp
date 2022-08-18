@@ -53,126 +53,133 @@
 #include "SabreDetector.h"
 
 SabreDetector::SabreDetector() :
-m_Router(0.1351), m_Rinner(0.0326), m_deltaPhi_flat(54.4*deg2rad), m_phiCentral(0.0), m_tilt(0.0), m_translation(0.,0.,0.), m_norm_flat(0,0,1.0),
-m_detectorID(-1)
+m_outerR(0.1351), m_innerR(0.0326), m_deltaPhiFlat(54.4*s_deg2rad), m_centerPhi(0.0), m_tilt(0.0), 
+	m_translation(0.,0.,0.), m_norm(0,0,1.0), m_detectorID(-1)
 {
-	m_YRot.SetAngle(m_tilt);
-	m_ZRot.SetAngle(m_phiCentral);
+	m_yRotation.SetAngle(m_tilt);
+	m_zRotation.SetAngle(m_centerPhi);
 
 	//Initialize the coordinate arrays
-	m_ringCoords_flat.resize(m_nRings);
-	m_ringCoords_tilt.resize(m_nRings);
-	m_wedgeCoords_flat.resize(m_nWedges);
-	m_wedgeCoords_tilt.resize(m_nWedges);
-	for(int i=0; i<m_nRings; i++) {
-		m_ringCoords_flat[i].resize(4);
-		m_ringCoords_tilt[i].resize(4);
+	m_flatRingCoords.resize(s_nRings);
+	m_tiltRingCoords.resize(s_nRings);
+	m_flatWedgeCoords.resize(s_nWedges);
+	m_tiltWedgeCoords.resize(s_nWedges);
+	for(int i=0; i<s_nRings; i++) {
+		m_flatRingCoords[i].resize(4);
+		m_tiltRingCoords[i].resize(4);
 	}
-	for(int i=0; i<m_nWedges; i++) {
-		m_wedgeCoords_flat[i].resize(4);
-		m_wedgeCoords_tilt[i].resize(4);
+	for(int i=0; i<s_nWedges; i++) {
+		m_flatWedgeCoords[i].resize(4);
+		m_tiltWedgeCoords[i].resize(4);
 	}
 
-	m_deltaR_flat = m_Router - m_Rinner;
-	m_deltaR_flat_ring = m_deltaR_flat/m_nRings;
+	m_deltaRFlat = m_outerR - m_innerR;
+	m_deltaRFlatRing = m_deltaRFlat/s_nRings;
+	m_deltaPhiFlatWedge = m_deltaPhiFlat/s_nWedges;
 
 	CalculateCorners();
 }
 
-SabreDetector::SabreDetector(int detID, double Rin, double Rout, double deltaPhi_flat, double phiCentral, double tiltFromVert, double zdist, double xdist, double ydist) :
-m_Router(Rout), m_Rinner(Rin), m_deltaPhi_flat(deltaPhi_flat), m_phiCentral(phiCentral), m_tilt(tiltFromVert), m_translation(xdist, ydist, zdist), m_norm_flat(0,0,1.0),
-m_detectorID(detID)
+SabreDetector::SabreDetector(int detID, double Rin, double Rout, double deltaPhi_flat, double phiCentral, 
+							 double tiltFromVert, double zdist, double xdist, double ydist) :
+	m_outerR(Rout), m_innerR(Rin), m_deltaPhiFlat(deltaPhi_flat), m_centerPhi(phiCentral), m_tilt(tiltFromVert), 
+	m_translation(xdist, ydist, zdist), m_norm(0,0,1.0), m_detectorID(detID)
 {
-	m_YRot.SetAngle(m_tilt);
-	m_ZRot.SetAngle(m_phiCentral);
+	m_yRotation.SetAngle(m_tilt);
+	m_zRotation.SetAngle(m_centerPhi);
 
 	//Initialize coordinate arrays
-	m_ringCoords_flat.resize(m_nRings);
-	m_ringCoords_tilt.resize(m_nRings);
-	m_wedgeCoords_flat.resize(m_nWedges);
-	m_wedgeCoords_tilt.resize(m_nWedges);
-	for(int i=0; i<m_nRings; i++) {
-		m_ringCoords_flat[i].resize(4);
-		m_ringCoords_tilt[i].resize(4);
+	m_flatRingCoords.resize(s_nRings);
+	m_tiltRingCoords.resize(s_nRings);
+	m_flatWedgeCoords.resize(s_nWedges);
+	m_tiltWedgeCoords.resize(s_nWedges);
+	for(int i=0; i<s_nRings; i++)
+	{
+		m_flatRingCoords[i].resize(4);
+		m_tiltRingCoords[i].resize(4);
 	}
-	for(int i=0; i<m_nWedges; i++) {
-		m_wedgeCoords_flat[i].resize(4);
-		m_wedgeCoords_tilt[i].resize(4);
+	for(int i=0; i<s_nWedges; i++)
+	{
+		m_flatWedgeCoords[i].resize(4);
+		m_tiltWedgeCoords[i].resize(4);
 	}
 
-	m_deltaR_flat = m_Router - m_Rinner;
-	m_deltaR_flat_ring = m_deltaR_flat/m_nRings;
-	m_deltaPhi_flat_wedge = m_deltaPhi_flat/m_nWedges;
+	m_deltaRFlat = m_outerR - m_innerR;
+	m_deltaRFlatRing = m_deltaRFlat/s_nRings;
+	m_deltaPhiFlatWedge = m_deltaPhiFlat/s_nWedges;
 
 	CalculateCorners();
 }
 
 SabreDetector::~SabreDetector() {}
 
-void SabreDetector::CalculateCorners() {
+void SabreDetector::CalculateCorners()
+{
 
 	double x0, x1, x2, x3;
 	double y0, y1, y2, y3;
 	double z0, z1, z2, z3;
 
 	//Generate flat ring corner coordinates
-	for(int i=0; i<m_nRings; i++) {
-		x0 = (m_Rinner + m_deltaR_flat_ring*(i+1))*std::cos(-m_deltaPhi_flat/2.0);
-		y0 = (m_Rinner + m_deltaR_flat_ring*(i+1))*std::sin(-m_deltaPhi_flat/2.0);
+	for(int i=0; i<s_nRings; i++)
+	{
+		x0 = (m_innerR + m_deltaRFlatRing*(i+1))*std::cos(-m_deltaPhiFlat/2.0);
+		y0 = (m_innerR + m_deltaRFlatRing*(i+1))*std::sin(-m_deltaPhiFlat/2.0);
 		z0 = 0.0;
-		m_ringCoords_flat[i][0].SetVectorCartesian(x0, y0, z0);
+		m_flatRingCoords[i][0].SetXYZ(x0, y0, z0);
 
-		x1 = (m_Rinner + m_deltaR_flat_ring*(i))*std::cos(-m_deltaPhi_flat/2.0);
-		y1 = (m_Rinner + m_deltaR_flat_ring*(i))*std::sin(-m_deltaPhi_flat/2.0);
+		x1 = (m_innerR + m_deltaRFlatRing*(i))*std::cos(-m_deltaPhiFlat/2.0);
+		y1 = (m_innerR + m_deltaRFlatRing*(i))*std::sin(-m_deltaPhiFlat/2.0);
 		z1 = 0.0;
-		m_ringCoords_flat[i][1].SetVectorCartesian(x1, y1, z1);
+		m_flatRingCoords[i][1].SetXYZ(x1, y1, z1);
 
-		x2 = (m_Rinner + m_deltaR_flat_ring*(i))*std::cos(m_deltaPhi_flat/2.0);
-		y2 = (m_Rinner + m_deltaR_flat_ring*(i))*std::sin(m_deltaPhi_flat/2.0);
+		x2 = (m_innerR + m_deltaRFlatRing*(i))*std::cos(m_deltaPhiFlat/2.0);
+		y2 = (m_innerR + m_deltaRFlatRing*(i))*std::sin(m_deltaPhiFlat/2.0);
 		z2 = 0.0;
-		m_ringCoords_flat[i][2].SetVectorCartesian(x2, y2, z2);
+		m_flatRingCoords[i][2].SetXYZ(x2, y2, z2);
 
-		x3 = (m_Rinner + m_deltaR_flat_ring*(i+1))*std::cos(m_deltaPhi_flat/2.0);
-		y3 = (m_Rinner + m_deltaR_flat_ring*(i+1))*std::sin(m_deltaPhi_flat/2.0);
+		x3 = (m_innerR + m_deltaRFlatRing*(i+1))*std::cos(m_deltaPhiFlat/2.0);
+		y3 = (m_innerR + m_deltaRFlatRing*(i+1))*std::sin(m_deltaPhiFlat/2.0);
 		z3 = 0.0;
-		m_ringCoords_flat[i][3].SetVectorCartesian(x3, y3, z3);
+		m_flatRingCoords[i][3].SetXYZ(x3, y3, z3);
 	}
 
 	//Generate flat wedge corner coordinates
-	for(int i=0; i<m_nWedges; i++) {
-		x0 = m_Router * std::cos(-m_deltaPhi_flat/2.0 + i*m_deltaPhi_flat_wedge);
-		y0 = m_Router * std::sin(-m_deltaPhi_flat/2.0 + i*m_deltaPhi_flat_wedge);
+	for(int i=0; i<s_nWedges; i++)
+	{
+		x0 = m_outerR * std::cos(-m_deltaPhiFlat/2.0 + i*m_deltaPhiFlatWedge);
+		y0 = m_outerR * std::sin(-m_deltaPhiFlat/2.0 + i*m_deltaPhiFlatWedge);
 		z0 = 0.0;
-		m_wedgeCoords_flat[i][0].SetVectorCartesian(x0, y0, z0);
+		m_flatWedgeCoords[i][0].SetXYZ(x0, y0, z0);
 
-		x1 = m_Rinner * std::cos(-m_deltaPhi_flat/2.0 + i*m_deltaPhi_flat_wedge);
-		y1 = m_Rinner * std::sin(-m_deltaPhi_flat/2.0 + i*m_deltaPhi_flat_wedge);
+		x1 = m_innerR * std::cos(-m_deltaPhiFlat/2.0 + i*m_deltaPhiFlatWedge);
+		y1 = m_innerR * std::sin(-m_deltaPhiFlat/2.0 + i*m_deltaPhiFlatWedge);
 		z1 = 0.0;
-		m_wedgeCoords_flat[i][1].SetVectorCartesian(x1, y1, z1);
+		m_flatWedgeCoords[i][1].SetXYZ(x1, y1, z1);
 
-		x2 = m_Rinner * std::cos(-m_deltaPhi_flat/2.0 + (i+1)*m_deltaPhi_flat_wedge);
-		y2 = m_Rinner * std::sin(-m_deltaPhi_flat/2.0 + (i+1)*m_deltaPhi_flat_wedge);
+		x2 = m_innerR * std::cos(-m_deltaPhiFlat/2.0 + (i+1)*m_deltaPhiFlatWedge);
+		y2 = m_innerR * std::sin(-m_deltaPhiFlat/2.0 + (i+1)*m_deltaPhiFlatWedge);
 		z2 = 0.0;
-		m_wedgeCoords_flat[i][2].SetVectorCartesian(x2, y2, z2);
+		m_flatWedgeCoords[i][2].SetXYZ(x2, y2, z2);
 
-		x3 = m_Router * std::cos(-m_deltaPhi_flat/2.0 + (i+1)*m_deltaPhi_flat_wedge);
-		y3 = m_Router * std::sin(-m_deltaPhi_flat/2.0 + (i+1)*m_deltaPhi_flat_wedge);
+		x3 = m_outerR * std::cos(-m_deltaPhiFlat/2.0 + (i+1)*m_deltaPhiFlatWedge);
+		y3 = m_outerR * std::sin(-m_deltaPhiFlat/2.0 + (i+1)*m_deltaPhiFlatWedge);
 		z3 = 0.0;
-		m_wedgeCoords_flat[i][3].SetVectorCartesian(x3, y3, z3);
+		m_flatWedgeCoords[i][3].SetXYZ(x3, y3, z3);
 	}
 
 	//Generate tilted rings
-	for(int i=0; i<m_nRings; i++) {
-		for(int j=0; j<4; j++) {
-			m_ringCoords_tilt[i][j] = TransformToTiltedFrame(m_ringCoords_flat[i][j]);
-		}
+	for(int i=0; i<s_nRings; i++)
+	{
+		for(int j=0; j<4; j++)
+			m_tiltRingCoords[i][j] = Transform(m_flatRingCoords[i][j]);
 	}
 
 	//Generate tilted wedges
-	for(int i=0; i<m_nWedges; i++) {
-		for(int j=0; j<4; j++) {
-			m_wedgeCoords_tilt[i][j] = TransformToTiltedFrame(m_wedgeCoords_flat[i][j]);
-		}
+	for(int i=0; i<s_nWedges; i++)
+	{
+		for(int j=0; j<4; j++)
+			m_tiltWedgeCoords[i][j] = Transform(m_flatWedgeCoords[i][j]);
 	}
 }
 
@@ -193,35 +200,37 @@ void SabreDetector::CalculateCorners() {
 	!NOTE: This currently only applies to a configuration where there is no translation in x & y. The math becomes significantly messier in these cases.
 	Also, don't use tan(). It's behavior near PI/2 makes it basically useless for these.
 */
-Mask::Vec3 SabreDetector::GetTrajectoryCoordinates(double theta, double phi) {
-	if(m_translation.GetX() != 0.0 || m_translation.GetY() != 0.0) {
-		return Mask::Vec3();
-	}
+ROOT::Math::XYZPoint SabreDetector::GetTrajectoryCoordinates(double theta, double phi)
+{
+	if(m_translation.Vect().X() != 0.0 || m_translation.Vect().Y() != 0.0)
+		return ROOT::Math::XYZPoint();
 
 	//Calculate the *potential* phi in the flat detector
-	double phi_numerator = std::cos(m_tilt)*(std::sin(phi)*std::cos(m_phiCentral) - std::sin(m_phiCentral)*std::cos(phi));
-	double phi_denominator = std::cos(m_phiCentral)*std::cos(phi) + std::sin(m_phiCentral)*std::sin(phi);
+	double phi_numerator = std::cos(m_tilt)*(std::sin(phi)*std::cos(m_centerPhi) - std::sin(m_centerPhi)*std::cos(phi));
+	double phi_denominator = std::cos(m_centerPhi)*std::cos(phi) + std::sin(m_centerPhi)*std::sin(phi);
 	double phi_flat = std::atan2(phi_numerator, phi_denominator);
-	if(phi_flat < 0) phi_flat += M_PI*2.0;
+	if(phi_flat < 0)
+		phi_flat += M_PI*2.0;
 
 	//Calculate the *potential* R in the flat detector
-	double r_numerator = m_translation.GetZ()*std::cos(phi)*std::sin(theta);
-	double r_denominator = std::cos(phi_flat)*std::cos(m_phiCentral)*std::cos(m_tilt)*std::cos(theta) - std::sin(phi_flat)*std::sin(m_phiCentral)*std::cos(theta) - std::cos(phi_flat)*std::sin(m_tilt)*std::cos(phi)*std::sin(theta);
+	double r_numerator = m_translation.Vect().Z()*std::cos(phi)*std::sin(theta);
+	double r_denominator = std::cos(phi_flat)*std::cos(m_centerPhi)*std::cos(m_tilt)*std::cos(theta) -
+						   std::sin(phi_flat)*std::sin(m_centerPhi)*std::cos(theta) -
+						   std::cos(phi_flat)*std::sin(m_tilt)*std::cos(phi)*std::sin(theta);
 	double r_flat = r_numerator/r_denominator;
 
 	//Calculate the distance from the origin to the hit on the detector
-	double R_to_detector = (r_flat*std::cos(phi_flat)*std::sin(m_tilt) + m_translation.GetZ())/std::cos(theta);
+	double R_to_detector = (r_flat*std::cos(phi_flat)*std::sin(m_tilt) + m_translation.Vect().Z())/std::cos(theta);
 	double xhit = R_to_detector*std::sin(theta)*std::cos(phi);
 	double yhit = R_to_detector*std::sin(theta)*std::sin(phi);
 	double zhit = R_to_detector*std::cos(theta);
 
 
 	//Check to see if our flat coords fall inside the flat detector
-	if(IsInside(r_flat, phi_flat)) {
-		return Mask::Vec3(xhit, yhit, zhit);
-	} else {
-		return Mask::Vec3();
-	}
+	if(IsInside(r_flat, phi_flat))
+		return ROOT::Math::XYZPoint(xhit, yhit, zhit);
+	else
+		return ROOT::Math::XYZPoint();
 }
 
 /*
@@ -241,20 +250,23 @@ Mask::Vec3 SabreDetector::GetTrajectoryCoordinates(double theta, double phi) {
 	!NOTE: This currently only applies to a configuration where there is no translation in x & y. The math becomes significantly messier in these cases.
 	Also, don't use tan(). It's behavior near PI/2 makes it basically useless for these.
 */
-std::pair<int, int> SabreDetector::GetTrajectoryRingWedge(double theta, double phi) {
-	if(m_translation.GetX() != 0.0 || m_translation.GetY() != 0.0) {
+std::pair<int, int> SabreDetector::GetTrajectoryRingWedge(double theta, double phi)
+{
+	if(m_translation.Vect().X() != 0.0 || m_translation.Vect().Y() != 0.0)
 		return std::make_pair(-1, -1);
-	}
 
 	//Calculate the *potential* phi in the flat detector
-	double phi_numerator = std::cos(m_tilt)*(std::sin(phi)*std::cos(m_phiCentral) - std::sin(m_phiCentral)*std::cos(phi));
-	double phi_denominator = std::cos(m_phiCentral)*std::cos(phi) + std::sin(m_phiCentral)*std::sin(phi);
+	double phi_numerator = std::cos(m_tilt)*(std::sin(phi)*std::cos(m_centerPhi) - std::sin(m_centerPhi)*std::cos(phi));
+	double phi_denominator = std::cos(m_centerPhi)*std::cos(phi) + std::sin(m_centerPhi)*std::sin(phi);
 	double phi_flat = std::atan2(phi_numerator, phi_denominator);
-	if(phi_flat < 0) phi_flat += M_PI*2.0;
+	if(phi_flat < 0)
+		phi_flat += M_PI*2.0;
 
 	//Calculate the *potential* R in the flat detector
-	double r_numerator = m_translation.GetZ()*std::cos(phi)*std::sin(theta);
-	double r_denominator = std::cos(phi_flat)*std::cos(m_phiCentral)*std::cos(m_tilt)*std::cos(theta) - std::sin(phi_flat)*std::sin(m_phiCentral)*std::cos(theta) - std::cos(phi_flat)*std::sin(m_tilt)*std::cos(phi)*std::sin(theta);
+	double r_numerator = m_translation.Vect().Z()*std::cos(phi)*std::sin(theta);
+	double r_denominator = std::cos(phi_flat)*std::cos(m_centerPhi)*std::cos(m_tilt)*std::cos(theta) -
+						   std::sin(phi_flat)*std::sin(m_centerPhi)*std::cos(theta) -
+						   std::cos(phi_flat)*std::sin(m_tilt)*std::cos(phi)*std::sin(theta);
 	double r_flat = r_numerator/r_denominator;
 
 	//Calculate the distance from the origin to the hit on the detector
@@ -262,31 +274,41 @@ std::pair<int, int> SabreDetector::GetTrajectoryRingWedge(double theta, double p
 
 
 	//Check to see if our flat coords fall inside the flat detector
-	if(IsInside(r_flat, phi_flat)) {
+	if(IsInside(r_flat, phi_flat))
+	{
 		int ringch, wedgech;
-		if(phi_flat > M_PI) phi_flat -= 2.0*M_PI; //Need phi in terms of [-deltaPhi_flat/2, deltaPhi_flat/2]
-		for(int i=0; i<m_nRings; i++) {
-			if(IsRingTopEdge(r_flat, i) || IsRingBottomEdge(r_flat, i)) { //If it falls in the interstrip spacing, kill it
+		if(phi_flat > M_PI)
+			phi_flat -= 2.0*M_PI; //Need phi in terms of [-deltaPhi_flat/2, deltaPhi_flat/2]
+		for(int i=0; i<s_nRings; i++)
+		{
+			if(IsRingTopEdge(r_flat, i) || IsRingBottomEdge(r_flat, i))
+			{ //If it falls in the interstrip spacing, kill it
 				ringch = -1;
 				break;
-			} else if(IsRing(r_flat, i)) {
+			}
+			else if(IsRing(r_flat, i))
+			{
 				ringch = i;
 				break;
 			}
 		}
-		for(int i=0; i<m_nWedges; i++) {
-			if(IsWedgeTopEdge(phi_flat, i) || IsWedgeBottomEdge(phi_flat, i)){ //If it falls in the interstrip spacing, kill it
+		for(int i=0; i<s_nWedges; i++)
+		{
+			if(IsWedgeTopEdge(phi_flat, i) || IsWedgeBottomEdge(phi_flat, i))
+			{ //If it falls in the interstrip spacing, kill it
 				wedgech = -1;
 				break;
-			} else if(IsWedge(phi_flat, i)) {
+			}
+			else if(IsWedge(phi_flat, i))
+			{
 				wedgech = i;
 				break;
 			}
 		}
 		return std::make_pair(ringch, wedgech);
-	} else {
-		return std::make_pair(-1,-1);
 	}
+	else
+		return std::make_pair(-1,-1);
 }
 
 /*
@@ -295,18 +317,18 @@ std::pair<int, int> SabreDetector::GetTrajectoryRingWedge(double theta, double p
 	randomly wiggle the point within the pixel. Method intended for use with data, or
 	to smear out simulated data to mimic real data.
 */
-Mask::Vec3 SabreDetector::GetHitCoordinates(int ringch, int wedgech) {
-	if(!CheckRingChannel(ringch) || !CheckWedgeChannel(wedgech)) {
-		return Mask::Vec3();
-	}
+ROOT::Math::XYZPoint SabreDetector::GetHitCoordinates(int ringch, int wedgech)
+{
+	if(!CheckRingChannel(ringch) || !CheckWedgeChannel(wedgech))
+		return ROOT::Math::XYZPoint();
 
-	double r_center  = m_Rinner + (0.5+ringch)*m_deltaR_flat_ring;
-	double phi_center = -m_deltaPhi_flat/2.0 + (0.5+wedgech)*m_deltaPhi_flat_wedge;
+	double r_center  = m_innerR + (0.5+ringch)*m_deltaRFlatRing;
+	double phi_center = -m_deltaPhiFlat/2.0 + (0.5+wedgech)*m_deltaPhiFlatWedge;
 	double x = r_center*std::cos(phi_center);
 	double y = r_center*std::sin(phi_center);
 	double z = 0;
 
-	Mask::Vec3 hit(x, y, z);
+	ROOT::Math::XYZPoint hit(x, y, z);
 
-	return TransformToTiltedFrame(hit);
+	return Transform(hit);
 }

@@ -1,15 +1,18 @@
-find_package(ROOT REQUIRED)
 add_executable(RootPlot)
 target_include_directories(RootPlot 
-    PUBLIC ${MASK_INCLUDE_DIR}
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+           ${CMAKE_CURRENT_SOURCE_DIR}/..
     SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS}
 )
 
 target_sources(RootPlot PUBLIC
     RootPlotter.cpp
+    RootPlotter.h
+    main.cpp
 )
 
 target_link_libraries(RootPlot
+    MaskDict
     Mask
     ${ROOT_LIBRARIES}
 )

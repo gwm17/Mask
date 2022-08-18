@@ -4,7 +4,18 @@
 #include <string>
 #include <cmath>
 
-class DetectorEfficiency {
+#include "Math/Point3D.h"
+
+struct DetectorResult
+{
+	bool detectFlag = false;
+	ROOT::Math::XYZPoint direction;
+	double energy_deposited = 0.0;
+	std::string det_name = "";
+};
+
+class DetectorEfficiency
+{
 public:
 	DetectorEfficiency() {};
 	virtual ~DetectorEfficiency() {};
@@ -14,9 +25,9 @@ public:
 	virtual double RunConsistencyCheck() = 0;
 
 protected:
-	inline bool IsDoubleEqual(double x, double y) { return std::fabs(x-y) < epsilon ? true : false; };
+	inline bool IsDoubleEqual(double x, double y) { return std::fabs(x-y) < s_epsilon ? true : false; };
 
-	static constexpr double epsilon = 1.0e-6;
+	static constexpr double s_epsilon = 1.0e-6;
 };
 
 #endif

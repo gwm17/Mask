@@ -3,194 +3,221 @@
 #include <iomanip>
 #include <iostream>
 
+#include "TFile.h"
+#include "TTree.h"
+
 AnasenEfficiency::AnasenEfficiency() :
-	DetectorEfficiency(), det_silicon(si_thickness)
+	DetectorEfficiency(), m_detectorEloss({14}, {28}, {1}, s_detectorThickness)
 {
-	for(int i=0; i<n_sx3_per_ring; i++) {
-		m_Ring1.emplace_back(4, sx3_length, sx3_width, ring_phi[i], ring1_z, ring_rho[i]);
-		m_Ring1[i].TurnOnRandomizedCoordinates();
-		m_Ring2.emplace_back(4, sx3_length, sx3_width, ring_phi[i], ring2_z, ring_rho[i]);
-		m_Ring2[i].TurnOnRandomizedCoordinates();
+	for(int i=0; i<s_nSX3PerBarrel; i++)
+	{
+		m_Ring1.emplace_back(4, s_sx3Length, s_sx3Width, s_barrelPhiList[i], s_barrel1Z, s_barrelRhoList[i]);
+		m_Ring1[i].SetPixelSmearing(true);
+		m_Ring2.emplace_back(4, s_sx3Length, s_sx3Width, s_barrelPhiList[i], s_barrel2Z, s_barrelRhoList[i]);
+		m_Ring2[i].SetPixelSmearing(true);
 	}
-	for(int i=0; i<n_qqq; i++) {
-		m_forwardQQQs.emplace_back(qqq_rinner, qqq_router, qqq_deltaphi, qqq_phi[i], qqq_z[i]);
-		m_forwardQQQs[i].TurnOnRandomizedCoordinates();
-		m_backwardQQQs.emplace_back(qqq_rinner, qqq_router, qqq_deltaphi, qqq_phi[i], (-1.0)*qqq_z[i]);
-		m_backwardQQQs[i].TurnOnRandomizedCoordinates();
+	for(int i=0; i<s_nQQQ; i++)
+	{
+		m_forwardQQQs.emplace_back(s_qqqInnerR, s_qqqOuterR, s_qqqDeltaPhi, s_qqqPhiList[i], s_qqqZList[i]);
+		m_forwardQQQs[i].SetSmearing(true);
+		m_backwardQQQs.emplace_back(s_qqqInnerR, s_qqqOuterR, s_qqqDeltaPhi, s_qqqPhiList[i], (-1.0)*s_qqqZList[i]);
+		m_backwardQQQs[i].SetSmearing(true);
 	}
-
-	std::vector<int> det_z = {14};
-	std::vector<int> det_a = {28};
-	std::vector<int> det_stoich = {1};
-	det_silicon.SetElements(det_z, det_a, det_stoich);
-
 }
 
 AnasenEfficiency::~AnasenEfficiency() {}
 
 
-void AnasenEfficiency::DrawDetectorSystem(const std::string& filename) {
+void AnasenEfficiency::DrawDetectorSystem(const std::string& filename)
+{
 	std::ofstream output(filename);
 
 	std::vector<double> x, y, z;
 	std::vector<double> cx, cy, cz;
-	Mask::Vec3 coords;
-	for(int i=0; i<n_sx3_per_ring; i++) {
-		for(int j=0; j<4; j++) {
-			for(int k=0; k<4; k++) {
+	ROOT::Math::XYZPoint coords;
+	for(int i=0; i<s_nSX3PerBarrel; i++)
+	{
+		for(int j=0; j<4; j++)
+		{
+			for(int k=0; k<4; k++)
+			{
 				coords = m_Ring1[i].GetRotatedFrontStripCoordinates(j, k);
-				x.push_back(coords.GetX());
-				y.push_back(coords.GetY());
-				z.push_back(coords.GetZ());
+				x.push_back(coords.X());
+				y.push_back(coords.Y());
+				z.push_back(coords.Z());
 				coords = m_Ring1[i].GetRotatedBackStripCoordinates(j, k);
-				x.push_back(coords.GetX());
-				y.push_back(coords.GetY());
-				z.push_back(coords.GetZ());
+				x.push_back(coords.X());
+				y.push_back(coords.Y());
+				z.push_back(coords.Z());
 			}
 			coords = m_Ring1[i].GetHitCoordinates(j, 0);
-			cx.push_back(coords.GetX());
-			cy.push_back(coords.GetY());
-			cz.push_back(coords.GetZ());
+			cx.push_back(coords.X());
+			cy.push_back(coords.Y());
+			cz.push_back(coords.Z());
 		}
 	}
-	for(int i=0; i<n_sx3_per_ring; i++) {
-		for(int j=0; j<4; j++) {
-			for(int k=0; k<4; k++) {
+	for(int i=0; i<s_nSX3PerBarrel; i++)
+	{
+		for(int j=0; j<4; j++)
+		{
+			for(int k=0; k<4; k++)
+			{
 				coords = m_Ring2[i].GetRotatedFrontStripCoordinates(j, k);
-				x.push_back(coords.GetX());
-				y.push_back(coords.GetY());
-				z.push_back(coords.GetZ());
+				x.push_back(coords.X());
+				y.push_back(coords.Y());
+				z.push_back(coords.Z());
 				coords = m_Ring2[i].GetRotatedBackStripCoordinates(j, k);
-				x.push_back(coords.GetX());
-				y.push_back(coords.GetY());
-				z.push_back(coords.GetZ());
+				x.push_back(coords.X());
+				y.push_back(coords.Y());
+				z.push_back(coords.Z());
 			}
 			coords = m_Ring2[i].GetHitCoordinates(j, 0);
-			cx.push_back(coords.GetX());
-			cy.push_back(coords.GetY());
-			cz.push_back(coords.GetZ());
+			cx.push_back(coords.X());
+			cy.push_back(coords.Y());
+			cz.push_back(coords.Z());
 		}
 	}
-	for(int i=0; i<n_qqq; i++) {
-		for(int j=0; j<16; j++) {
-			for(int k=0; k<4; k++) {
+	for(int i=0; i<s_nQQQ; i++)
+	{
+		for(int j=0; j<16; j++)
+		{
+			for(int k=0; k<4; k++)
+			{
 				coords = m_forwardQQQs[i].GetRingCoordinates(j, k);
-				x.push_back(coords.GetX());
-				y.push_back(coords.GetY());
-				z.push_back(coords.GetZ());
+				x.push_back(coords.X());
+				y.push_back(coords.Y());
+				z.push_back(coords.Z());
 				coords = m_forwardQQQs[i].GetWedgeCoordinates(j, k);
-				x.push_back(coords.GetX());
-				y.push_back(coords.GetY());
-				z.push_back(coords.GetZ());
+				x.push_back(coords.X());
+				y.push_back(coords.Y());
+				z.push_back(coords.Z());
 			}
-			for(int k=0; k<16; k++) {
+			for(int k=0; k<16; k++)
+			{
 				coords = m_forwardQQQs[i].GetHitCoordinates(j, k);
-				cx.push_back(coords.GetX());
-				cy.push_back(coords.GetY());
-				cz.push_back(coords.GetZ());
+				cx.push_back(coords.X());
+				cy.push_back(coords.Y());
+				cz.push_back(coords.Z());
 			}
 		}
 	}
-	for(int i=0; i<n_qqq; i++) {
-		for(int j=0; j<16; j++) {
-			for(int k=0; k<4; k++) {
+	for(int i=0; i<s_nQQQ; i++)
+	{
+		for(int j=0; j<16; j++)
+		{
+			for(int k=0; k<4; k++)
+			{
 				coords = m_backwardQQQs[i].GetRingCoordinates(j, k);
-				x.push_back(coords.GetX());
-				y.push_back(coords.GetY());
-				z.push_back(coords.GetZ());
+				x.push_back(coords.X());
+				y.push_back(coords.Y());
+				z.push_back(coords.Z());
 				coords = m_backwardQQQs[i].GetWedgeCoordinates(j, k);
-				x.push_back(coords.GetX());
-				y.push_back(coords.GetY());
-				z.push_back(coords.GetZ());
+				x.push_back(coords.X());
+				y.push_back(coords.Y());
+				z.push_back(coords.Z());
 			}
-			for(int k=0; k<16; k++) {
+			for(int k=0; k<16; k++)
+			{
 				coords = m_backwardQQQs[i].GetHitCoordinates(j, k);
-				cx.push_back(coords.GetX());
-				cy.push_back(coords.GetY());
-				cz.push_back(coords.GetZ());
+				cx.push_back(coords.X());
+				cy.push_back(coords.Y());
+				cz.push_back(coords.Z());
 			}
 		}
 	}
 
 	output<<"ANASEN Geometry File -- Coordinates for Detectors"<<std::endl;
-	for(unsigned int i=0; i<x.size(); i++) {
+	for(std::size_t i=0; i<x.size(); i++)
 		output<<x[i]<<" "<<y[i]<<" "<<z[i]<<std::endl;
-	}
-	for(unsigned int i=0; i<cx.size(); i++) {
+	for(std::size_t i=0; i<cx.size(); i++)
 		output<<cx[i]<<" "<<cy[i]<<" "<<cz[i]<<std::endl;
-	}
 
 	output.close();
 }
 
-double AnasenEfficiency::RunConsistencyCheck() {
-	std::vector<Mask::Vec3> r1_points;
-	std::vector<Mask::Vec3> r2_points;
-	std::vector<Mask::Vec3> fqqq_points;
-	std::vector<Mask::Vec3> bqqq_points;
-	for(int i=0; i<n_sx3_per_ring; i++) {
-		for(int j=0; j<4; j++) {
+double AnasenEfficiency::RunConsistencyCheck()
+{
+	std::vector<ROOT::Math::XYZPoint> r1_points;
+	std::vector<ROOT::Math::XYZPoint> r2_points;
+	std::vector<ROOT::Math::XYZPoint> fqqq_points;
+	std::vector<ROOT::Math::XYZPoint> bqqq_points;
+	for(int i=0; i<s_nSX3PerBarrel; i++)
+	{
+		for(int j=0; j<4; j++)
 			r1_points.push_back(m_Ring1[i].GetHitCoordinates(j, 0));
-		}
 	}
-	for(int i=0; i<n_sx3_per_ring; i++) {
-		for(int j=0; j<4; j++) {
+	for(int i=0; i<s_nSX3PerBarrel; i++)
+	{
+		for(int j=0; j<4; j++)
 			r2_points.push_back(m_Ring2[i].GetHitCoordinates(j, 0));
-		}
 	}
-	for(int i=0; i<n_qqq; i++) {
-		for(int j=0; j<16; j++) {
-			for(int k=0; k<16; k++) {
+	for(int i=0; i<s_nQQQ; i++)
+	{
+		for(int j=0; j<16; j++)
+		{
+			for(int k=0; k<16; k++)
 				fqqq_points.push_back(m_forwardQQQs[i].GetHitCoordinates(j, k));
-			}
 		}
 	}
-	for(int i=0; i<n_qqq; i++) {
-		for(int j=0; j<16; j++) {
-			for(int k=0; k<16; k++) {
+	for(int i=0; i<s_nQQQ; i++)
+	{
+		for(int j=0; j<16; j++)
+		{
+			for(int k=0; k<16; k++)
 				bqqq_points.push_back(m_backwardQQQs[i].GetHitCoordinates(j, k));
-			}
 		}
 	}
 
-	int npoints = r1_points.size() + r2_points.size() + fqqq_points.size() + bqqq_points.size();
-	int count = 0;
-	Mask::Vec3 coords;
-	for(auto& point : r1_points) {
-		for(auto& sx3 : m_Ring1) {
-			auto result = sx3.GetChannelRatio(point.GetTheta(), point.GetPhi());
+	std::size_t npoints = r1_points.size() + r2_points.size() + fqqq_points.size() + bqqq_points.size();
+	std::size_t count = 0;
+	ROOT::Math::XYZPoint coords;
+	for(auto& point : r1_points)
+	{
+		for(auto& sx3 : m_Ring1)
+		{
+			auto result = sx3.GetChannelRatio(point.Theta(), point.Phi());
 			coords = sx3.GetHitCoordinates(result.front_strip_index, result.front_ratio);
-			if(IsDoubleEqual(point.GetX(), coords.GetX()) && IsDoubleEqual(point.GetY(), coords.GetY()) && IsDoubleEqual(point.GetZ(), coords.GetZ())) {
+			if(IsDoubleEqual(point.X(), coords.X()) && IsDoubleEqual(point.Y(), coords.Y()) && IsDoubleEqual(point.Z(), coords.Z()))
+			{
 				count++;
 				break;
 			}
 		}
 	}
-	for(auto& point : r2_points) {
-		for(auto& sx3 : m_Ring2) {
-			auto result = sx3.GetChannelRatio(point.GetTheta(), point.GetPhi());
+	for(auto& point : r2_points)
+	{
+		for(auto& sx3 : m_Ring2)
+		{
+			auto result = sx3.GetChannelRatio(point.Theta(), point.Phi());
 			coords = sx3.GetHitCoordinates(result.front_strip_index, result.front_ratio);
-			if(IsDoubleEqual(point.GetX(), coords.GetX()) && IsDoubleEqual(point.GetY(), coords.GetY()) && IsDoubleEqual(point.GetZ(), coords.GetZ())) {
+			if(IsDoubleEqual(point.X(), coords.X()) && IsDoubleEqual(point.Y(), coords.Y()) && IsDoubleEqual(point.Z(), coords.Z()))
+			{
 				count++;
 				break;
 			}
 		}
 	}
-	for(auto& point : fqqq_points) {
-		for(auto& qqq : m_forwardQQQs) {
-			auto result = qqq.GetTrajectoryRingWedge(point.GetTheta(), point.GetPhi());
+	for(auto& point : fqqq_points)
+	{
+		for(auto& qqq : m_forwardQQQs)
+		{
+			auto result = qqq.GetTrajectoryRingWedge(point.Theta(), point.Phi());
 			coords = qqq.GetHitCoordinates(result.first, result.second);
-			if(IsDoubleEqual(point.GetX(), coords.GetX()) && IsDoubleEqual(point.GetY(), coords.GetY()) && IsDoubleEqual(point.GetZ(), coords.GetZ())) {
+			if(IsDoubleEqual(point.X(), coords.X()) && IsDoubleEqual(point.Y(), coords.Y()) && IsDoubleEqual(point.Z(), coords.Z()))
+			{
 				count++;
 				break;
 			}
 		}
 	}
-	for(auto& point : bqqq_points) {
-		for(auto& qqq : m_backwardQQQs) {
-			auto result = qqq.GetTrajectoryRingWedge(point.GetTheta(), point.GetPhi());
+	for(auto& point : bqqq_points)
+	{
+		for(auto& qqq : m_backwardQQQs)
+		{
+			auto result = qqq.GetTrajectoryRingWedge(point.Theta(), point.Phi());
 			coords = qqq.GetHitCoordinates(result.first, result.second);
-			if(IsDoubleEqual(point.GetX(), coords.GetX()) && IsDoubleEqual(point.GetY(), coords.GetY()) && IsDoubleEqual(point.GetZ(), coords.GetZ())) {
+			if(IsDoubleEqual(point.X(), coords.X()) && IsDoubleEqual(point.Y(), coords.Y()) && IsDoubleEqual(point.Z(), coords.Z()))
+			{
 				count++;
 				break;
 			}
@@ -203,22 +230,23 @@ double AnasenEfficiency::RunConsistencyCheck() {
 
 }
 
-DetectorResult AnasenEfficiency::IsRing1(Mask::Nucleus& nucleus) {
-
+DetectorResult AnasenEfficiency::IsRing1(Mask::Nucleus& nucleus)
+{
 	DetectorResult observation;
 	double thetaIncident;
-	for(int i=0; i<n_sx3_per_ring; i++) {
-		auto result = m_Ring1[i].GetChannelRatio(nucleus.GetTheta(), nucleus.GetPhi());
+	for(int i=0; i<s_nSX3PerBarrel; i++)
+	{
+		auto result = m_Ring1[i].GetChannelRatio(nucleus.vec4.Theta(), nucleus.vec4.Phi());
 		if(result.front_strip_index != -1 /*&& !dmap.IsDead(AnasenDetectorType::Barrel1, i, result.front_strip_index, AnasenDetectorSide::Front)*/
 			&& !dmap.IsDead(AnasenDetectorType::Barrel1, i, result.back_strip_index, AnasenDetectorSide::Back)) 
 		{
 			observation.detectFlag = true;
 			observation.direction = m_Ring1[i].GetHitCoordinates(result.front_strip_index, result.front_ratio);
-			thetaIncident = std::acos(observation.direction.Dot(m_Ring1[i].GetNormRotated())/observation.direction.GetR());
+			thetaIncident = std::acos(observation.direction.Dot(m_Ring1[i].GetNormRotated())/observation.direction.R());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
-			observation.energy_deposited = det_silicon.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
+			observation.energy_deposited = m_detectorEloss.GetEnergyLossTotal(nucleus.Z, nucleus.A, nucleus.GetKE(), thetaIncident);
 			observation.det_name = "R1";
 			return observation;
 		}
@@ -227,22 +255,23 @@ DetectorResult AnasenEfficiency::IsRing1(Mask::Nucleus& nucleus) {
 	return observation;
 }
 
-DetectorResult AnasenEfficiency::IsRing2(Mask::Nucleus& nucleus) {
-
+DetectorResult AnasenEfficiency::IsRing2(Mask::Nucleus& nucleus)
+{
 	DetectorResult observation;
 	double thetaIncident;
-	for(int i=0; i<n_sx3_per_ring; i++) {
-		auto result = m_Ring2[i].GetChannelRatio(nucleus.GetTheta(), nucleus.GetPhi());
+	for(int i=0; i<s_nSX3PerBarrel; i++)
+	{
+		auto result = m_Ring2[i].GetChannelRatio(nucleus.vec4.Theta(), nucleus.vec4.Phi());
 		if(result.front_strip_index != -1 /*&& !dmap.IsDead(AnasenDetectorType::Barrel2, i, result.front_strip_index, AnasenDetectorSide::Front)*/
 			&& !dmap.IsDead(AnasenDetectorType::Barrel2, i, result.back_strip_index, AnasenDetectorSide::Back)) 
 		{
 			observation.detectFlag = true;
 			observation.direction = m_Ring2[i].GetHitCoordinates(result.front_strip_index, result.front_ratio);
-			thetaIncident = std::acos(observation.direction.Dot(m_Ring2[i].GetNormRotated())/observation.direction.GetR());
+			thetaIncident = std::acos(observation.direction.Dot(m_Ring2[i].GetNormRotated())/observation.direction.R());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
-			observation.energy_deposited = det_silicon.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
+			observation.energy_deposited = m_detectorEloss.GetEnergyLossTotal(nucleus.Z, nucleus.A, nucleus.GetKE(), thetaIncident);
 			observation.det_name = "R2";
 			return observation;
 		}
@@ -251,40 +280,42 @@ DetectorResult AnasenEfficiency::IsRing2(Mask::Nucleus& nucleus) {
 	return observation;
 }
 
-DetectorResult AnasenEfficiency::IsQQQ(Mask::Nucleus& nucleus) {
-
+DetectorResult AnasenEfficiency::IsQQQ(Mask::Nucleus& nucleus)
+{
 	DetectorResult observation;
 	double thetaIncident;
-	for(int i=0; i<n_qqq; i++) {
-		auto result = m_forwardQQQs[i].GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
+	for(int i=0; i<s_nQQQ; i++)
+	{
+		auto result = m_forwardQQQs[i].GetTrajectoryRingWedge(nucleus.vec4.Theta(), nucleus.vec4.Phi());
 		if(result.first != -1 /*&& !dmap.IsDead(AnasenDetectorType::FQQQ, i, result.first, AnasenDetectorSide::Front)*/ &&
 			!dmap.IsDead(AnasenDetectorType::FQQQ, i, result.second, AnasenDetectorSide::Back)) 
 		{
 			observation.detectFlag = true;
 			observation.direction = m_forwardQQQs[i].GetHitCoordinates(result.first, result.second);
-			thetaIncident = std::acos(observation.direction.Dot(m_forwardQQQs[i].GetNorm())/observation.direction.GetR());
+			thetaIncident = std::acos(observation.direction.Dot(m_forwardQQQs[i].GetNorm())/observation.direction.R());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
-			observation.energy_deposited = det_silicon.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
+			observation.energy_deposited = m_detectorEloss.GetEnergyLossTotal(nucleus.Z, nucleus.A, nucleus.GetKE(), thetaIncident);
 			observation.det_name = "FQQQ";
 			return observation;
 		}
 	}
 
 	
-	for(int i=0; i<n_qqq; i++) {
-		auto result = m_backwardQQQs[i].GetTrajectoryRingWedge(nucleus.GetTheta(), nucleus.GetPhi());
+	for(int i=0; i<s_nQQQ; i++)
+	{
+		auto result = m_backwardQQQs[i].GetTrajectoryRingWedge(nucleus.vec4.Theta(), nucleus.vec4.Phi());
 		if(result.first != -1 /*&& !dmap.IsDead(AnasenDetectorType::BQQQ, i, result.first, AnasenDetectorSide::Front)*/ &&
 			!dmap.IsDead(AnasenDetectorType::BQQQ, i, result.second, AnasenDetectorSide::Back)) 
 		{
 			observation.detectFlag = true;
 			observation.direction = m_backwardQQQs[i].GetHitCoordinates(result.first, result.second);
-			thetaIncident = std::acos(observation.direction.Dot(m_backwardQQQs[i].GetNorm())/observation.direction.GetR());
+			thetaIncident = std::acos(observation.direction.Dot(m_backwardQQQs[i].GetNorm())/observation.direction.R());
 			if(thetaIncident > M_PI/2.0)
 				thetaIncident = M_PI - thetaIncident;
 
-			observation.energy_deposited = det_silicon.GetEnergyLossTotal(nucleus.GetZ(), nucleus.GetA(), nucleus.GetKE(), thetaIncident);
+			observation.energy_deposited = m_detectorEloss.GetEnergyLossTotal(nucleus.Z, nucleus.A, nucleus.GetKE(), thetaIncident);
 			observation.det_name = "BQQQ";
 			return observation;
 		}
@@ -293,95 +324,93 @@ DetectorResult AnasenEfficiency::IsQQQ(Mask::Nucleus& nucleus) {
 	return observation;
 }
 
-DetectorResult AnasenEfficiency::IsAnasen(Mask::Nucleus& nucleus) {
+DetectorResult AnasenEfficiency::IsAnasen(Mask::Nucleus& nucleus)
+{
 	DetectorResult result;
-	if(nucleus.GetKE() <= threshold)
+	if(nucleus.GetKE() <= s_energyThreshold)
 		return result;
 
-	if(!result.detectFlag) {
+	if(!result.detectFlag)
 		result = IsRing1(nucleus);
-	}
-	if(!result.detectFlag) {
+	if(!result.detectFlag)
 		result = IsRing2(nucleus);
-	}
-	if(!result.detectFlag) {
+	if(!result.detectFlag)
 		result = IsQQQ(nucleus);
-	}
-
 	return result;
 }
 
-void AnasenEfficiency::CountCoincidences(const Mask::MaskFileData& data, std::vector<int>& counts, Mask::RxnType rxn_type) {
-	if (rxn_type == Mask::RxnType::PureDecay && data.detect_flag[1] && data.detect_flag[2])
+void AnasenEfficiency::CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts)
+{
+	if (data.size() == 3 && data[1].isDetected && data[2].isDetected)
 	{
 		counts[0]++;
 	}
-	else if (rxn_type == Mask::RxnType::OneStepRxn && data.detect_flag[2] && data.detect_flag[3])
+	else if (data.size() == 4 && data[2].isDetected && data[3].isDetected)
 	{
 		counts[0]++;
 	}
-	else if(rxn_type == Mask::RxnType::TwoStepRxn)
+	else if(data.size() == 6)
 	{
-		if(data.detect_flag[2] && data.detect_flag[4]) 
+		if(data[2].isDetected && data[4].isDetected) 
 		{
 			counts[0]++;
 		}
-		if(data.detect_flag[2] && data.detect_flag[5])
+		if(data[2].isDetected && data[5].isDetected)
 		{
 			counts[1]++;
 		}
-		if(data.detect_flag[4] && data.detect_flag[5])
+		if(data[4].isDetected && data[5].isDetected)
 		{
 			counts[2]++;
 		}
-		if(data.detect_flag[2] && data.detect_flag[4] && data.detect_flag[5])
+		if(data[2].isDetected && data[4].isDetected && data[5].isDetected)
 		{
 			counts[3]++;
 		}
 	}
-	else if(rxn_type == Mask::RxnType::ThreeStepRxn)
+	else if(data.size() == 8)
 	{
-		if(data.detect_flag[2] && data.detect_flag[4]) 
+		if(data[2].isDetected && data[4].isDetected) 
 		{
 			counts[0]++;
 		}
-		if(data.detect_flag[2] && data.detect_flag[6])
+		if(data[2].isDetected && data[6].isDetected)
 		{
 			counts[1]++;
 		}
-		if(data.detect_flag[2] && data.detect_flag[7])
+		if(data[2].isDetected && data[7].isDetected)
 		{
 			counts[2]++;
 		}
-		if(data.detect_flag[4] && data.detect_flag[6])
+		if(data[4].isDetected && data[6].isDetected)
 		{
 			counts[3]++;
 		}
-		if(data.detect_flag[4] && data.detect_flag[7])
+		if(data[4].isDetected && data[7].isDetected)
 		{
 			counts[4]++;
 		}
-		if(data.detect_flag[6] && data.detect_flag[7])
+		if(data[6].isDetected && data[7].isDetected)
 		{
 			counts[5]++;
 		}
-		if(data.detect_flag[2] && data.detect_flag[4] && data.detect_flag[6])
+		if(data[2].isDetected && data[4].isDetected && data[6].isDetected)
 		{
 			counts[6]++;
 		}
-		if(data.detect_flag[2] && data.detect_flag[4] && data.detect_flag[7])
+		if(data[2].isDetected && data[4].isDetected && data[7].isDetected)
 		{
 			counts[7]++;
 		}
-		if(data.detect_flag[2] && data.detect_flag[6] && data.detect_flag[7])
+		if(data[2].isDetected && data[6].isDetected && data[7].isDetected)
 		{
 			counts[8]++;
 		}
-		if(data.detect_flag[4] && data.detect_flag[6] && data.detect_flag[7])
+		if(data[4].isDetected && data[6].isDetected && data[7].isDetected)
 		{
 			counts[9]++;
 		}
-		if(data.detect_flag[2] && data.detect_flag[4] && data.detect_flag[6] && data.detect_flag[7])
+		if(data[2].isDetected && data[4].isDetected && data[6].isDetected && data[7].isDetected)
 		{
 			counts[10]++;
 		}
@@ -401,141 +430,138 @@ void AnasenEfficiency::CalculateEfficiency(const std::string& inputname, const s
 	std::cout<<"Loading in output from kinematics simulation: "<<inputname<<std::endl;
 	std::cout<<"Running efficiency calculation..."<<std::endl;
 
-	Mask::MaskFile input(inputname, Mask::MaskFile::FileType::read);
-	Mask::MaskFile output(outputname, Mask::MaskFile::FileType::write);
+	TFile* input = TFile::Open(inputname.c_str(), "READ");
+	TFile* output = TFile::Open(outputname.c_str(), "RECREATE");
 	std::ofstream stats(statsname);
 	stats<<std::setprecision(5);
 
-	Mask::MaskFileHeader header = input.ReadHeader();
-	output.WriteHeader(header.rxn_type, header.nsamples);
+	TTree* intree = (TTree*) input->Get("SimTree");
+	std::vector<Mask::Nucleus>* dataHandle = new std::vector<Mask::Nucleus>();
+	intree->SetBranchAddress("nuclei", &dataHandle);
+
+	output->cd();
+	TTree* outtree = new TTree("SimTree", "SimTree");
+	outtree->Branch("nuclei", dataHandle);
+
+	input->cd();
+
 	stats<<"Efficiency statistics for data from "<<inputname<<" using the ANASEN geometry"<<std::endl;
 	stats<<"Given in order of target=0, projectile=1, ejectile=2, residual=3, .... etc."<<std::endl;
 
-	Mask::MaskFileData data;
-
+	intree->GetEntry(1);
 	std::vector<int> counts;
 	std::vector<int> coinc_counts;
-	switch(header.rxn_type) {
-		case Mask::RxnType::PureDecay:
-			counts.resize(3, 0);
-			coinc_counts.resize(1, 0);
-			break;
-		case Mask::RxnType::OneStepRxn:
-			counts.resize(4, 0);
-			coinc_counts.resize(1, 0);
-			break;
-		case Mask::RxnType::TwoStepRxn:
-			counts.resize(6, 0);
-			coinc_counts.resize(4, 0);
-			break;
-		case Mask::RxnType::ThreeStepRxn:
-			counts.resize(8, 0);
-			coinc_counts.resize(11, 0);
-			break;
+	counts.resize(dataHandle->size());
+	switch(counts.size())
+	{
+		case 3: coinc_counts.resize(1, 0); break;
+		case 4: coinc_counts.resize(1, 0); break;
+		case 6: coinc_counts.resize(4, 0); break;
+		case 8: coinc_counts.resize(11, 0); break;
 		default:
 		{
-			std::cerr<<"Bad reaction type at AnasenEfficiency::CalculateEfficiency (given value: "<<GetStringFromRxnType(header.rxn_type)<<"). Quiting..."<<std::endl;
-			input.Close();
-			output.Close();
+			std::cerr<<"Bad reaction type at AnasenEfficiency::CalculateEfficiency (given value: "<<counts.size()<<"). Quiting..."<<std::endl;
+			input->Close();
+			output->Close();
 			stats.close();
 			return;
 		}
 	}
 
-	int percent5 = header.nsamples*0.05;
-	int count = 0;
-	int npercent = 0;
+	uint64_t nentries = intree->GetEntries();
+	uint64_t percent5 = nentries*0.05;
+	uint64_t count = 0;
+	uint64_t npercent = 0;
 
 	Mask::Nucleus nucleus;
-	int index=0;
-	while(true) {
-		if(++count == percent5) {//Show progress every 5%
+	for(uint64_t i=0; i<nentries; i++)
+	{
+		intree->GetEntry(i);
+		if(++count == percent5)
+		{//Show progress every 5%
 			npercent++;
 			count = 0;
 			std::cout<<"\rPercent completed: "<<npercent*5<<"%"<<std::flush;
 		}
 
-		data = input.ReadData();
-		if(data.eof)
-			break;
-
-		for(unsigned int i=0; i<data.Z.size(); i++) {
-			nucleus.SetIsotope(data.Z[i], data.A[i]);
-			nucleus.SetVectorSpherical(data.theta[i], data.phi[i], data.p[i], data.E[i]);
-			auto result = IsAnasen(nucleus);
-			if(result.detectFlag) {
-				data.detect_flag[i] = true;
-				data.KE[i] = result.energy_deposited;
-				data.theta[i] = result.direction.GetTheta();
-				data.phi[i] = result.direction.GetPhi();
-				counts[i]++;
-			} else if(data.detect_flag[i] == true) {
-				data.detect_flag[i] = false;
+		for(std::size_t j=0; j<dataHandle->size(); j++)
+		{
+			Mask::Nucleus& nucleus = (*dataHandle)[j];
+			DetectorResult result = IsAnasen(nucleus);
+			if(result.detectFlag)
+			{
+				nucleus.isDetected = true;
+				nucleus.detectedKE = result.energy_deposited;
+				nucleus.detectedTheta = result.direction.Theta();
+				nucleus.detectedPhi = result.direction.Phi();
+				counts[j]++;
 			}
 		}
 
-		CountCoincidences(data, coinc_counts, header.rxn_type);
+		CountCoincidences(*dataHandle, coinc_counts);
 
-		output.WriteData(data);
-
-		index++;
+		outtree->Fill();
 	}
+	input->Close();
+	output->cd();
+	outtree->Write(outtree->GetName(), TObject::kOverwrite);
+	output->Close();
 
-	input.Close();
-	output.Close();
+	delete dataHandle;
 
 	stats<<std::setw(10)<<"Index"<<"|"<<std::setw(10)<<"Efficiency"<<std::endl;
 	stats<<"---------------------"<<std::endl;
-	for(unsigned int i=0; i<counts.size(); i++) {
-		stats<<std::setw(10)<<i<<"|"<<std::setw(10)<<((double)counts[i]/header.nsamples)<<std::endl;
+	for(unsigned int i=0; i<counts.size(); i++)
+	{
+		stats<<std::setw(10)<<i<<"|"<<std::setw(10)<<((double)counts[i]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
 	}
 	stats<<"Coincidence Efficiency"<<std::endl;
 	stats<<"---------------------"<<std::endl;
-	if(header.rxn_type == Mask::RxnType::PureDecay)
+	if(dataHandle->size() == 3)
 	{
-		stats<<std::setw(10)<<"1 + 2"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"1 + 2"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
 	}
-	else if(header.rxn_type == Mask::RxnType::OneStepRxn)
+	else if(dataHandle->size() == 4)
 	{
-		stats<<std::setw(10)<<"2 + 3"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 3"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
 	}
-	else if(header.rxn_type == Mask::RxnType::TwoStepRxn)
+	else if(dataHandle->size() == 6)
 	{
-		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[1]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[1]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"4 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[2]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"4 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[2]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 4 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[3]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 4 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[3]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
 	}
-	else if(header.rxn_type == Mask::RxnType::ThreeStepRxn)
+	else if(dataHandle->size() == 8)
 	{
-		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[1]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[1]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[2]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[2]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"4 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[3]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"4 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[3]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"4 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[4]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"4 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[4]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[5]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[5]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 4 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[6]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 4 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[6]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 4 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[7]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 4 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[7]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[8]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[8]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"4 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[9]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"4 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[9]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 4 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[10]/header.nsamples)<<std::endl;
+		stats<<std::setw(10)<<"2 + 4 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[10]/nentries)<<std::endl;
 		stats<<"---------------------"<<std::endl;
 	}
 	stats.close();

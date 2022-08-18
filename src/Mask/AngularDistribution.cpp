@@ -8,26 +8,28 @@
 namespace Mask {
 
 	AngularDistribution::AngularDistribution() :
-		uniform_cosine_dist(-1.0, 1.0), uniform_prob_dist(0.0, 1.0), branchingRatio(1.0), L(0), isoFlag(true)
+		m_uniformCosineDist(-1.0, 1.0), m_uniformProbDist(0.0, 1.0), m_branchingRatio(1.0), m_L(0), m_isIsotropic(true)
 	{
 	}
 	
 	AngularDistribution::AngularDistribution(const std::string& file) :
-		branchingRatio(1.0), L(0), isoFlag(true)
+		m_branchingRatio(1.0), m_L(0), m_isIsotropic(true)
 	{
 		ReadDistributionFile(file);
 	}
 	
 	AngularDistribution::~AngularDistribution() {}
 	
-	void AngularDistribution::ReadDistributionFile(const std::string& file) {
+	void AngularDistribution::ReadDistributionFile(const std::string& file)
+	{
 	
-		if(file == "none" || file == "") {
-			L=0;
-			branchingRatio=1.0;
-			constants.clear();
-			constants.push_back(0.5);
-			isoFlag = true;
+		if(file == "none" || file == "")
+		{
+			m_L=0;
+			m_branchingRatio=1.0;
+			m_constants.clear();
+			m_constants.push_back(0.5);
+			m_isIsotropic = true;
 			return;
 		}
 	
@@ -36,67 +38,76 @@ namespace Mask {
 		int l;
 		double par;
 	
-		if(!input.is_open()) {
+		if(!input.is_open())
+		{
 			std::cerr<<"Unable to open distribution file. All values reset to default."<<std::endl;
-			L=0;
-			branchingRatio=1.0;
-			constants.clear();
-			constants.push_back(0.5);
-			isoFlag = true;
+			m_L=0;
+			m_branchingRatio=1.0;
+			m_constants.clear();
+			m_constants.push_back(0.5);
+			m_isIsotropic = true;
 			return;
 		}
 	
 		input>>junk>>l;
-		while(input>>junk) {
+		while(input>>junk)
+		{
 			input>>par;
-			constants.push_back(par);
+			m_constants.push_back(par);
 		}
 		input.close();
 	
-		if(constants.size() != ((unsigned int) l+1)) {
-			std::cerr<<"Unexpected number of constants for given angular momentum! Expected "<<l+1<<" and given "<<constants.size()<<std::endl;
+		if(m_constants.size() != ((std::size_t) l+1))
+		{
+			std::cerr<<"Unexpected number of constants for given angular momentum! Expected "<<l+1<<" and given "<<m_constants.size()<<std::endl;
 			std::cerr<<"Setting all values to default."<<std::endl;
-			branchingRatio=1.0;
-			constants.clear();
-			constants.push_back(0.5);
-			isoFlag = true;
+			m_L=0;
+			m_branchingRatio=1.0;
+			m_constants.clear();
+			m_constants.push_back(0.5);
+			m_isIsotropic = true;
 			return;
 		}
 	
 		//Total branching ratio
-		branchingRatio = constants[0]*2.0;
-		L = l;
+		m_branchingRatio = m_constants[0]*2.0;
+		m_L = l;
 	
 		//Renormalize distribution such that total prob is 1.0.
 		//Test branching ratio to see if we "make" a decay particle,
 		//then use re-normalized distribution to pick an angle. 
-		if(constants[0] < 0.5) {
-			double norm = 0.5/constants[0];
-			for(auto& value : constants)
+		if(m_constants[0] < 0.5)
+		{
+			double norm = 0.5/m_constants[0];
+			for(auto& value : m_constants)
 				value *= norm;
 		}
 	
-		isoFlag = false;
+		m_isIsotropic = false;
 	
 	}
 	
-	double AngularDistribution::GetRandomCosTheta() {
-		if(isoFlag) 
-			return uniform_cosine_dist(RandomGenerator::GetInstance().GetGenerator());
+	double AngularDistribution::GetRandomCosTheta()
+	{
+		if(m_isIsotropic) 
+			return m_uniformCosineDist(RandomGenerator::GetInstance().GetGenerator());
 	
 		double test, probability;
 		double costheta;
 	
-		test = uniform_prob_dist(RandomGenerator::GetInstance().GetGenerator());
-		if(test > branchingRatio) return -10;
+		test = m_uniformProbDist(RandomGenerator::GetInstance().GetGenerator());
+		if(test > m_branchingRatio)
+			return -10;
 	
-		do {
+		do
+		{
 			probability = 0.0;
-			costheta = uniform_cosine_dist(RandomGenerator::GetInstance().GetGenerator());
-			test = uniform_prob_dist(RandomGenerator::GetInstance().GetGenerator());
-			for(unsigned int i=0; i<constants.size(); i++)
-				probability += constants[i]*P_l(i*2, costheta);
-		} while(test > probability);
+			costheta = m_uniformCosineDist(RandomGenerator::GetInstance().GetGenerator());
+			test = m_uniformProbDist(RandomGenerator::GetInstance().GetGenerator());
+			for(std::size_t i=0; i<m_constants.size(); i++)
+				probability += m_constants[i]*P_l(i*2, costheta);
+		}
+		while(test > probability);
 	
 		return costheta;
 	}

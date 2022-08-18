@@ -16,59 +16,64 @@
 
 namespace Mask {
 
-	class ReactionSystem {
+	class ReactionSystem
+	{
 	public:
 		ReactionSystem();
 		virtual ~ReactionSystem();
 	
-		virtual bool SetNuclei(std::vector<int>& z, std::vector<int>& a) = 0;
+		virtual bool SetNuclei(const std::vector<int>& z, const std::vector<int>& a) = 0;
 		virtual void RunSystem() = 0;
-		virtual const std::vector<Nucleus>& GetNuclei() = 0;
+		virtual std::vector<Nucleus>* GetNuclei() = 0;
 	
-		void AddTargetLayer(std::vector<int>& zt, std::vector<int>& at, std::vector<int>& stoich, double thickness);
+		void AddTargetLayer(const std::vector<int>& zt, const std::vector<int>& at, const std::vector<int>& stoich, double thickness);
 	
 		/*Set sampling parameters*/
-		inline void SetBeamDistro(double mean, double sigma) {
+		void SetBeamDistro(double mean, double sigma)
+		{
 			if(m_beamDist)
 				delete m_beamDist;
 			m_beamDist = new std::normal_distribution<double>(mean, sigma); 
 		}
 	
-		inline void SetTheta1Range(double min, double max) { 
+		void SetTheta1Range(double min, double max)
+		{ 
 			if(m_theta1Range)
 				delete m_theta1Range;
-			m_theta1Range = new std::uniform_real_distribution<double>(std::cos(min*deg2rad), std::cos(max*deg2rad)); 
+			m_theta1Range = new std::uniform_real_distribution<double>(std::cos(min*s_deg2rad), std::cos(max*s_deg2rad)); 
 		}
 	
-		inline void SetPhi1Range(double min, double max) {
+		void SetPhi1Range(double min, double max)
+		{
 			if(m_phi1Range)
 				delete m_phi1Range;
-			m_phi1Range = new std::uniform_real_distribution<double>(min*deg2rad, max*deg2rad); 
+			m_phi1Range = new std::uniform_real_distribution<double>(min*s_deg2rad, max*s_deg2rad); 
 		}
 	
-		inline void SetExcitationDistro(double mean, double sigma) {
+		void SetExcitationDistro(double mean, double sigma)
+		{
 			if(m_exDist)
 				delete m_exDist;
 			m_exDist = new std::normal_distribution<double>(mean, sigma); 
 		}
 	
-		inline const std::string& GetSystemEquation() const { return m_sys_equation; }
+		const std::string& GetSystemEquation() const { return m_sysEquation; }
 	
 	protected:
 		virtual void LinkTarget() = 0;
 		virtual void SetSystemEquation() = 0;
 		
-		LayeredTarget target;
+		LayeredTarget m_target;
 	
 		//Sampling information
 		std::normal_distribution<double> *m_beamDist, *m_exDist;
 		std::uniform_real_distribution<double> *m_theta1Range, *m_phi1Range; 
 	
-		bool target_set_flag, gen_set_flag;
-		int rxnLayer;
-		std::string m_sys_equation;
-		std::vector<Nucleus> nuclei;
-		static constexpr double deg2rad = M_PI/180.0;
+		bool m_isTargetSet;
+		std::size_t m_rxnLayer;
+		std::string m_sysEquation;
+		std::vector<Nucleus> m_nuclei;
+		static constexpr double s_deg2rad = M_PI/180.0;
 	};
 
 }

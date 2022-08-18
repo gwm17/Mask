@@ -1,28 +1,26 @@
 ----------Data Information----------
-OutputFile: /data1/gwm17/7BeNov2021/sim/7Bedp_1100keV_beam_50CD2.mask
+OutputFile: /media/data/gwm17/mask_tests/10B3Hea_test.root
 ----------Reaction Information----------
-ReactionType: TwoStepRxn
+ReactionType: OneStepRxn
 Z	A (order is target, projectile, ejectile, break1, break3(if pure decay is target, ejectile))
-1	2
-4	7
-1	1
+5	10
+2	3
 2	4
 ----------Target Information----------
 NumberOfLayers: 1
 begin_layer
 	Thickness(ug/cm^2): 50
 	begin_elements (Z, A, Stoich.)
-		element	1 2 2
-		element	6 12 1
+		element	5 10 1
 	end_elements
 end_layer
 ----------Sampling Information----------
-NumberOfSamples: 100000
-BeamMeanEnergy(MeV): 1.1 BeamEnergySigma(MeV): 0.0
+NumberOfSamples: 1000
+BeamMeanEnergy(MeV): 24.0 BeamEnergySigma(MeV): 0.0
 EjectileThetaType(0=Lab,1=CM): 1
 EjectileThetaMin(deg): 0.0 EjectileThetaMax(deg): 180.0
 EjectilePhiMin(deg): 0.0 EjectilePhiMax(deg): 360.0
-ResidualExMean(MeV): 0.0 ResidualExSigma(MeV): 0.0
+ResidualExMean(MeV): 16.8 ResidualExSigma(MeV): 0.023
 Decay1_DistributionFile: ./etc/isotropic_dist.txt
 Decay2_DistributionFile: ./etc/isotropic_dist.txt
 --------------------------------------
