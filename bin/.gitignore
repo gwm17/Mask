@@ -1,5 +1,0 @@
-###keep only the directory, not the contents###
-*
-!.gitignore
-!PyPlotter
-!PyPlotViewer
