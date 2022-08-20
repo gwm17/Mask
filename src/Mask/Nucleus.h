@@ -37,8 +37,8 @@ namespace Mask {
 			return vec4.M() - groundStateMass;
 		}
 
-		int Z = 0; 
-		int A = 0;
+		uint32_t Z = 0; 
+		uint32_t A = 0;
 		double groundStateMass = 0.0;
 		std::string isotopicSymbol = "";
 		double thetaCM = 0.0;
@@ -50,7 +50,7 @@ namespace Mask {
 		double detectedPhi = 0.0;
 	};
 
-	Nucleus CreateNucleus(int z, int a);
+	Nucleus CreateNucleus(uint32_t z, uint32_t a);
 
 	bool EnforceDictionaryLinked();
 
