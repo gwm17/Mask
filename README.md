@@ -23,8 +23,6 @@ By default MASK is capable of simulating reactions of up to three steps. Here is
 
 For decays, a specific angular distribution can be given as input as a text file with values of coefficiencts of a Legendre polynomial series. Examples can be found in the `./etc` directory, including an isotropic case. It is assumed that the decays in the center-of-mass frame are isotropic in phi (i.e. m=0). Decay1 corresponds to the first decay, if there are multiple steps, Decay2 to the second. If there are no decays, these parameters are not used (or if only one decay, Decay2_AngularMomentum is not used). The input file requires that the user include target information, which will be used to calculate energy loss for all of the reactants and reaction products. The energy loss through materials is calculated using the `catima` library (found in `src/vendor`), which is a C/C++ interface to the `atima` library (the same energy loss methods used by LISE). The target can contain layers, and each layer can be composed of a compound of elements with a given stoichiometry. If the user wishes to not include energy loss in the kinematics, simply give all target layers a thickness of 0. Note that more layers and more thickness = more time spent calculating energy loss. These energy loss methods are only applicable for solid targets, and should not be applied to gas or liquid targets. Energy loss calculations have a stated uncertainty of approximately five percent.
 
-The input file requires that the user include target information, which will be used to calculate energy loss for all of the reactants and reaction products. The target can contain layers, and each layer can be composed of a compound of elements with a given stoichiometry. If the user wishes to not include energy loss in the kinematics, simply give all target layers a thickness of 0. Note that more layers and more thickness = more time spent calculating energy loss. These energy loss methods are only applicable for solid targets, and should not be applied to gas or liquid targets. Energy loss calculations have a stated uncertainty of approximately five percent. The energy loss library used is called `catima` and can be found [here](https://github.com/gwm17/catima).
-
 To run MASK simply do the following from the MASK repository:
 
 `./bin/MaskApp input.txt`
@@ -35,8 +33,6 @@ Input.txt can be replaced by any text file with the correct format.
 Detector geometry is encoded using ROOT math libraries in the `src/Detectors` folder. Two different detector geometries are already present: SPS-SABRE and ANASEN. To add a new geometry, follow the guidelines outlined by each of these cases.
 
 To choose which detector scheme is run, modify the main function in `src/Detectors/main.cpp`. The included geometries also have options to do an internal geometry consistency check and print out coordinates for drawing the detector arrays, which can be useful for testing.
-
-
 
 To run DetEff use the format
 
