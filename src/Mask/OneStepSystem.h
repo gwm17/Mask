@@ -15,7 +15,7 @@ namespace Mask {
 		void RunSystem() override;
 		std::vector<Nucleus>* GetNuclei() override;
 	
-		void SetReactionThetaType(int type) { m_step1.SetEjectileThetaType(type); };
+		virtual void SetReactionThetaType(RxnThetaType type) override { m_step1.SetEjectileThetaType(type); };
 	
 	private:
 		void LinkTarget() override;

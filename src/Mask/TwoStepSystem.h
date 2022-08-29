@@ -16,9 +16,9 @@ namespace Mask {
 		void RunSystem() override;
 		std::vector<Nucleus>* GetNuclei() override;
 	
-		void SetDecay1Distribution(const std::string& filename) { m_step2Distribution.ReadDistributionFile(filename); };
+		virtual void SetDecay1Distribution(const std::string& filename) override { m_step2Distribution.ReadDistributionFile(filename); };
 	
-		void SetReactionThetaType(int type) { m_step1.SetEjectileThetaType(type); };
+		virtual void SetReactionThetaType(RxnThetaType type) override { m_step1.SetEjectileThetaType(type); };
 
 		int GetDecay1AngularMomentum() { return m_step2Distribution.GetL(); };
 		double GetDecay1BranchingRatio() { return m_step2Distribution.GetBranchingRatio(); };

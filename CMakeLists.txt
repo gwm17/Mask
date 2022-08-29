@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
+
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_BUILD_TYPE "Release")
+    message("Building release")
+else()
+    message("Building debug")
+endif()
+
 project(Mask)
 
 set(MASK_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)

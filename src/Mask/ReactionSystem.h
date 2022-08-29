@@ -11,6 +11,7 @@
 
 #include "Reaction.h"
 #include "KinematicsExceptions.h"
+#include "RxnType.h"
 #include <vector>
 #include <random>
 
@@ -25,6 +26,9 @@ namespace Mask {
 		virtual bool SetNuclei(const std::vector<int>& z, const std::vector<int>& a) = 0;
 		virtual void RunSystem() = 0;
 		virtual std::vector<Nucleus>* GetNuclei() = 0;
+		virtual void SetReactionThetaType(RxnThetaType type) {}
+		virtual void SetDecay1Distribution(const std::string& filename) {}
+		virtual void SetDecay2Distribution(const std::string& filename) {}
 	
 		void AddTargetLayer(const std::vector<int>& zt, const std::vector<int>& at, const std::vector<int>& stoich, double thickness);
 	
@@ -56,7 +60,7 @@ namespace Mask {
 				delete m_exDist;
 			m_exDist = new std::normal_distribution<double>(mean, sigma); 
 		}
-	
+
 		const std::string& GetSystemEquation() const { return m_sysEquation; }
 	
 	protected:
@@ -76,6 +80,7 @@ namespace Mask {
 		static constexpr double s_deg2rad = M_PI/180.0;
 	};
 
+	ReactionSystem* CreateSystem(const std::vector<int>& z, const std::vector<int>& a);
 }
 
 #endif

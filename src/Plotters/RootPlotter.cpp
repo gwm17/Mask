@@ -34,13 +34,20 @@ void RootPlotter::Run(const std::string& inputname, const std::string& outputnam
 
 	for(uint64_t i=0; i<nentries; i++)
 	{
+		count++;
+		if(count == flushVal)
+		{
+			count = 0;
+			flushCount++;
+			std::cout<<"\rPercent of data processed: "<<flushCount*flushFrac*100<<"%"<<std::flush;
+		}
 		tree->GetEntry(i);
 		for(Mask::Nucleus& nuc : *(dataHandle))
 		{
 			FillData(nuc);
 		}
 	}
-
+	std::cout<<std::endl;
 	input->Close();
 	delete dataHandle;
 
@@ -68,15 +75,12 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc)
 	std::string angdist_name = sym + modifier +"_angDist";
 	std::string angdist_title = angdist_name+";cos#right(#theta_{CM}#left);counts";
 	
+	MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.vec4.Theta()*s_rad2deg, nuc.GetKE(), 2);
+	MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.vec4.Phi()*s_rad2deg, nuc.GetKE(), 4);
+	MyFill(th_vs_ph_name.c_str(), th_vs_ph_title.c_str(), nuc.vec4.Theta()*s_rad2deg, nuc.vec4.Phi()*s_rad2deg, 2);
+	MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
+	MyFill(angdist_name.c_str(), angdist_title.c_str(),20,-1.0,1.0,std::cos(nuc.thetaCM));
 	if(nuc.isDetected)
-	{
-		MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.vec4.Theta()*s_rad2deg, nuc.GetKE(), 2);
-		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.vec4.Phi()*s_rad2deg, nuc.GetKE(), 4);
-		MyFill(th_vs_ph_name.c_str(), th_vs_ph_title.c_str(), nuc.vec4.Theta()*s_rad2deg, nuc.vec4.Phi()*s_rad2deg, 2);
-		MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
-		MyFill(angdist_name.c_str(), angdist_title.c_str(),20,-1.0,1.0,std::cos(nuc.thetaCM));
-	}
-	else
 	{
 		MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.vec4.Theta()*s_rad2deg, nuc.detectedKE, 2);
 		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), nuc.vec4.Phi()*s_rad2deg, nuc.detectedKE, 4);

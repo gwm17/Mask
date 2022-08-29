@@ -14,6 +14,21 @@ namespace Mask {
 		None=4
 	};
 
+	enum class RxnThetaType
+	{
+		CenterOfMass,
+		Lab,
+		None
+	};
+
+	enum RxnSize
+	{
+		DecaySize = 2,
+		OneStepSize = 3,
+		TwoStepSize = 4,
+		ThreeStepSize = 5
+	};
+
 	static RxnType GetRxnTypeFromString(const std::string& type_str)
 	{
 		if (type_str == "PureDecay")
@@ -52,6 +67,21 @@ namespace Mask {
 		return static_cast<uint32_t>(type);
 	}
 
+	static RxnThetaType StringToRxnThetaType(const std::string& type)
+	{
+		if(type == "CenterOfMass")
+		{
+			return RxnThetaType::CenterOfMass;
+		}
+		else if(type == "Lab")
+		{
+			return RxnThetaType::Lab;
+		}
+		else
+		{
+			return RxnThetaType::None;
+		}
+	}
 }
 
 #endif

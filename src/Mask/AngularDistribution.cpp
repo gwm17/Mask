@@ -72,6 +72,9 @@ namespace Mask {
 		//Total branching ratio
 		m_branchingRatio = m_constants[0]*2.0;
 		m_L = l;
+
+		std::cout<<"Angular distribution from "<<file<<" branching ratio: "<<m_branchingRatio<<std::endl;
+		std::cout<<"Angular distribution from "<<file<<" L: "<<m_L<<std::endl;
 	
 		//Renormalize distribution such that total prob is 1.0.
 		//Test branching ratio to see if we "make" a decay particle,

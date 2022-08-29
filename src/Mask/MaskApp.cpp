@@ -36,62 +36,29 @@ namespace Mask {
 		int z, a, s;
 		getline(input, junk);
 		getline(input, junk);
-		input>>junk>>junk;
-		m_rxnType = GetRxnTypeFromString(junk);
-		getline(input, junk);
-		getline(input, junk);
-		switch(m_rxnType) 
+
+		while(input>>junk)
 		{
-			case RxnType::PureDecay:
-			{
-				m_system = new DecaySystem();
-				for(int i=0; i<2; i++)
-				{
-					input>>z>>a;
-					avec.push_back(a);
-					zvec.push_back(z);
-				}
+			if(junk == "begin_nuclei(Z,A)")
+				continue;
+			else if (junk == "end_nuclei(Z,A)")
 				break;
-			}
-			case RxnType::OneStepRxn:
+			else
 			{
-				m_system = new OneStepSystem();
-				for(int i=0; i<3; i++)
-				{
-					input>>z>>a;
-					avec.push_back(a);
-					zvec.push_back(z);
-				}
-				std::cout<<"here"<<std::endl;
-				break;
+				z = std::stoi(junk);
+				input>>a;
+				zvec.push_back(z);
+				avec.push_back(a);
 			}
-			case RxnType::TwoStepRxn:
-			{
-				m_system = new TwoStepSystem();
-				for(int i=0; i<4; i++)
-				{
-					input>>z>>a;
-					avec.push_back(a);
-					zvec.push_back(z);
-				}
-				break;
-			}
-			case RxnType::ThreeStepRxn:
-			{
-				m_system = new ThreeStepSystem();
-				for(int i=0; i<5; i++)
-				{
-					input>>z>>a;
-					avec.push_back(a);
-					zvec.push_back(z);
-				}
-				break;
-			}
-			default:
-				return false;
 		}
-		m_system->SetNuclei(zvec, avec);
-	
+
+		m_system = CreateSystem(zvec, avec);
+		if(m_system == nullptr)
+		{
+			std::cerr<<"Failure to parse reaction system... configuration not loaded."<<std::endl;
+			return false;
+		}
+
 		int nlayers;
 		double thickness;
 		getline(input, junk);
@@ -120,33 +87,16 @@ namespace Mask {
 	
 		double par1, par2;
 		std::string dfile1, dfile2;
+		std::string thetaTypeString;
 		getline(input, junk);
 		getline(input, junk);
 	
 		input>>junk>>m_nsamples;
 		input>>junk>>par1>>junk>>par2;
 		m_system->SetBeamDistro(par1, par2);
-		input>>junk>>par1;
-		switch(m_rxnType) 
-		{
-			case RxnType::PureDecay : break;
-			case RxnType::None : break;
-			case RxnType::OneStepRxn :
-			{
-				dynamic_cast<OneStepSystem*>(m_system)->SetReactionThetaType(par1);
-				break;
-			}
-			case RxnType::TwoStepRxn :
-			{
-				dynamic_cast<TwoStepSystem*>(m_system)->SetReactionThetaType(par1);
-				break;
-			}
-			case RxnType::ThreeStepRxn :
-			{
-				dynamic_cast<ThreeStepSystem*>(m_system)->SetReactionThetaType(par1);
-				break;
-			}
-		}
+		input>>junk>>thetaTypeString;
+		m_system->SetReactionThetaType(StringToRxnThetaType(thetaTypeString));
+		
 		input>>junk>>par1>>junk>>par2;
 		m_system->SetTheta1Range(par1, par2);
 		input>>junk>>par1>>junk>>par2;
@@ -155,36 +105,8 @@ namespace Mask {
 		m_system->SetExcitationDistro(par1, par2);
 		input>>junk>>dfile1;
 		input>>junk>>dfile2;
-		switch(m_rxnType) 
-		{
-			case RxnType::PureDecay :
-			{
-				DecaySystem* this_sys = dynamic_cast<DecaySystem*>(m_system);
-				this_sys->SetDecay1Distribution(dfile1);
-				std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<std::endl;
-				std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
-				break;
-			}
-			case RxnType::None : break;
-			case RxnType::OneStepRxn : break;
-			case RxnType::TwoStepRxn :
-			{
-				TwoStepSystem* this_sys = dynamic_cast<TwoStepSystem*>(m_system);
-				this_sys->SetDecay1Distribution(dfile1);
-				std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<std::endl;
-				std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<std::endl;
-				break;
-			}
-			case RxnType::ThreeStepRxn :
-			{
-				ThreeStepSystem* this_sys = dynamic_cast<ThreeStepSystem*>(m_system);
-				this_sys->SetDecay1Distribution(dfile1);
-				this_sys->SetDecay2Distribution(dfile2);
-				std::cout<<"Decay1 angular momentum: "<<this_sys->GetDecay1AngularMomentum()<<" Decay2 angular momentum: "<<this_sys->GetDecay2AngularMomentum()<<std::endl;
-				std::cout<<"Decay1 total branching ratio: "<<this_sys->GetDecay1BranchingRatio()<<" Decay2 total branching ratio: "<<this_sys->GetDecay2BranchingRatio()<<std::endl;
-				break;
-			}
-		}
+		m_system->SetDecay1Distribution(dfile1);
+		m_system->SetDecay2Distribution(dfile2);
 	
 		std::cout<<"Number of samples: "<<GetNumberOfSamples()<<std::endl;
 	

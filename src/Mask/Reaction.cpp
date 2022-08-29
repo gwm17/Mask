@@ -15,13 +15,13 @@ namespace Mask {
 
 	Reaction::Reaction() :
 		m_target(nullptr), m_projectile(nullptr), m_ejectile(nullptr), m_residual(nullptr), m_layeredTarget(nullptr), 
-		m_bke(0), m_theta(0), m_phi(0), m_ex(0), m_rxnLayer(0), m_ejectThetaType(s_lab), m_isInit(false), m_isResidEloss(false)
+		m_bke(0), m_theta(0), m_phi(0), m_ex(0), m_rxnLayer(0), m_ejectThetaType(RxnThetaType::None), m_isInit(false), m_isResidEloss(false)
 	{
 	}
 	
 	Reaction::Reaction(Nucleus* target, Nucleus* projectile, Nucleus* ejectile, Nucleus* residual) :
 		m_target(nullptr), m_projectile(nullptr), m_ejectile(nullptr), m_residual(nullptr),
-		m_layeredTarget(nullptr), m_bke(0), m_theta(0), m_phi(0), m_ex(0), m_rxnLayer(0), m_ejectThetaType(s_lab), m_isResidEloss(false)
+		m_layeredTarget(nullptr), m_bke(0), m_theta(0), m_phi(0), m_ex(0), m_rxnLayer(0), m_ejectThetaType(RxnThetaType::None), m_isResidEloss(false)
 	{
 		BindNuclei(target, projectile, ejectile, residual);
 	}
@@ -70,13 +70,11 @@ namespace Mask {
 		m_bke = bke - m_layeredTarget->GetProjectileEnergyLoss(m_projectile->Z, m_projectile->A, bke, m_rxnLayer, 0);
 	}
 	
-	void Reaction::SetEjectileThetaType(int type)
+	void Reaction::SetEjectileThetaType(RxnThetaType type)
 	{
 		if(m_isDecay)
 			return;
-		if(type != s_centerOfMass && type != s_lab)
-			return;
-	
+
 		m_ejectThetaType = type;
 	}
 	
@@ -180,8 +178,9 @@ namespace Mask {
 	{
 		switch(m_ejectThetaType)
 		{
-			case s_centerOfMass: CalculateReactionThetaCM(); break;
-			case s_lab: CalculateReactionThetaLab(); break;
+			case RxnThetaType::CenterOfMass: CalculateReactionThetaCM(); break;
+			case RxnThetaType::Lab: CalculateReactionThetaLab(); break;
+			case RxnThetaType::None: CalculateReactionThetaCM(); break; //default behavior
 		}
 	}
 	

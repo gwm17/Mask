@@ -16,7 +16,7 @@ namespace Mask {
 		void RunSystem() override;
 		std::vector<Nucleus>*GetNuclei() override;
 	
-		void SetDecay1Distribution(const std::string& filename) { m_step1Distribution.ReadDistributionFile(filename); }
+		virtual void SetDecay1Distribution(const std::string& filename) override { m_step1Distribution.ReadDistributionFile(filename); }
 	
 		int GetDecay1AngularMomentum() { return m_step1Distribution.GetL(); }
 		double GetDecay1BranchingRatio() { return m_step1Distribution.GetBranchingRatio(); }

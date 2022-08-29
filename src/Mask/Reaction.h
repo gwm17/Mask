@@ -11,6 +11,7 @@
 
 #include "Nucleus.h"
 #include "LayeredTarget.h"
+#include "RxnType.h"
 
 namespace Mask {
 
@@ -24,7 +25,7 @@ namespace Mask {
 
 		void BindNuclei(Nucleus* target, Nucleus* projectile, Nucleus* ejectile, Nucleus* residual);
 		void SetBeamKE(double bke);
-		void SetEjectileThetaType(int type);
+		void SetEjectileThetaType(RxnThetaType type);
 	
 		void SetLayeredTarget(LayeredTarget* targ) { m_layeredTarget = targ; };
 
@@ -61,12 +62,9 @@ namespace Mask {
 		double m_bke, m_theta, m_phi, m_ex;
 	
 		int m_rxnLayer;
-		int m_ejectThetaType; 
+		RxnThetaType m_ejectThetaType; 
 	
 		bool m_isDecay, m_isInit, m_isResidEloss;
-	
-		static constexpr int s_lab = 0;
-		static constexpr int s_centerOfMass = 1;
 	};
 
 }
