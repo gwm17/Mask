@@ -35,9 +35,9 @@ namespace Mask {
 		};
 
 		~MassLookup();
-		double FindMass(int Z, int A);
-		double FindMassU(int Z, int A) { return FindMass(Z, A)/u_to_mev; }
-		std::string FindSymbol(int Z, int A);
+		double FindMass(uint32_t Z, uint32_t A);
+		double FindMassU(uint32_t Z, uint32_t A) { return FindMass(Z, A)/u_to_mev; }
+		std::string FindSymbol(uint32_t Z, uint32_t A);
 	
 		static MassLookup& GetInstance() { return *s_instance; }
 	

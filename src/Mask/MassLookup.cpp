@@ -41,7 +41,7 @@ namespace Mask {
 	MassLookup::~MassLookup() {}
 	
 	//Returns nuclear mass in MeV
-	double MassLookup::FindMass(int Z, int A)
+	double MassLookup::FindMass(uint32_t Z, uint32_t A)
 	{
 		KeyPair key({Z, A});
 		auto data = massTable.find(key.GetID());
@@ -52,7 +52,7 @@ namespace Mask {
 	}
 	
 	//returns element symbol
-	std::string MassLookup::FindSymbol(int Z, int A)
+	std::string MassLookup::FindSymbol(uint32_t Z, uint32_t A)
 	{
 		KeyPair key({Z, A});
 		auto data = elementTable.find(key.GetID());

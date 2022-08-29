@@ -50,7 +50,7 @@ namespace Mask {
 		double detectedPhi = 0.0;
 	};
 
-	Nucleus CreateNucleus(int z, int a);
+	Nucleus CreateNucleus(uint32_t z, uint32_t a);
 
 	bool EnforceDictionaryLinked();
 

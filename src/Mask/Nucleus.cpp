@@ -2,7 +2,7 @@
 
 namespace Mask {
 
-    Nucleus CreateNucleus(int z, int a)
+    Nucleus CreateNucleus(uint32_t z, uint32_t a)
     {
         Nucleus nuc;
         nuc.Z = z;
