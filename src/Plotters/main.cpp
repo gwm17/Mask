@@ -9,6 +9,12 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    if(!Mask::EnforceDictionaryLinked())
+    {
+        std::cerr<<"This should be illegal!"<<std::endl;
+		return 1;
+    }
+
     RootPlotter plotter;
     plotter.Run(argv[1], argv[2]);
 }

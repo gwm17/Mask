@@ -13,6 +13,12 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	if(!Mask::EnforceDictionaryLinked())
+	{
+		std::cerr<<"This should be illegal!"<<std::endl;
+		return 1;
+	}
+
 	std::string inputname = argv[1];
 	std::string outputname = argv[2];
 	std::string statsname = argv[3];
