@@ -10,38 +10,41 @@ Written by G.W. McCann Aug. 2020
 */
 #include "MassLookup.h"
 #include "KinematicsExceptions.h"
+#include <sstream>
 
 namespace Mask {
 
-	
-	MassLookup::MassLookup() {
-	
+	MassLookup* MassLookup::s_instance = new MassLookup();
+
+	MassLookup::MassLookup()
+	{
 		std::ifstream massfile("etc/mass.txt");
-		if(massfile.is_open()) {
-			std::string junk, A, element;
-			int Z;
+		KeyPair key;
+		if(massfile.is_open())
+		{
+			std::string junk, element;
 			double atomicMassBig, atomicMassSmall, isotopicMass;
 			getline(massfile,junk);
 			getline(massfile,junk);
-			while(massfile>>junk) {
-				massfile>>Z>>A>>element>>atomicMassBig>>atomicMassSmall;
-				isotopicMass = (atomicMassBig + atomicMassSmall*1e-6 - Z*electron_mass)*u_to_mev;
-				std::string key = "("+std::to_string(Z)+","+A+")";
-				massTable[key] = isotopicMass;
-				elementTable[Z] = element;
+			while(massfile>>junk)
+			{
+				massfile>>key.Z>>key.A>>element>>atomicMassBig>>atomicMassSmall;
+				isotopicMass = (atomicMassBig + atomicMassSmall*1e-6 - key.Z*electron_mass)*u_to_mev;
+				massTable[key.GetID()] = isotopicMass;
+				elementTable[key.GetID()] = std::to_string(key.A) + element;
 			}
-		} else {
-			throw MassFileException();
 		}
+		else
+			throw MassFileException();
 	}
 	
-	MassLookup::~MassLookup() {
-	}
+	MassLookup::~MassLookup() {}
 	
 	//Returns nuclear mass in MeV
-	double MassLookup::FindMass(int Z, int A) {
-		std::string key = "("+std::to_string(Z)+","+std::to_string(A)+")";
-		auto data = massTable.find(key);
+	double MassLookup::FindMass(uint32_t Z, uint32_t A)
+	{
+		KeyPair key({Z, A});
+		auto data = massTable.find(key.GetID());
 		if(data == massTable.end())
 			throw MassException();
 	
@@ -49,13 +52,14 @@ namespace Mask {
 	}
 	
 	//returns element symbol
-	std::string MassLookup::FindSymbol(int Z, int A) {
-		auto data = elementTable.find(Z);
+	std::string MassLookup::FindSymbol(uint32_t Z, uint32_t A)
+	{
+		KeyPair key({Z, A});
+		auto data = elementTable.find(key.GetID());
 		if(data == elementTable.end())
 			throw MassException();
 	
-		std::string fullsymbol = std::to_string(A) + data->second;
-		return fullsymbol;
+		return data->second;
 	}
 
 }

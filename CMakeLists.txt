@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
+
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_BUILD_TYPE "Release")
+    message("Building release")
+else()
+    message("Building debug")
+endif()
+
 project(Mask)
 
 set(MASK_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
@@ -8,8 +16,10 @@ set(MASK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(ROOT REQUIRED COMPONENTS GenVector)
+
 add_subdirectory(src/vendor/catima)
 add_subdirectory(src/Mask)
 add_subdirectory(src/MaskApp)
 add_subdirectory(src/Detectors)
-add_subdirectory(src/Plotters/ROOT)
+add_subdirectory(src/Plotters)

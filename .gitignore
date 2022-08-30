@@ -9,14 +9,15 @@
 *.pcm
 *.o
 *.a
+*.so
 *.swp
-*.pickle
 .DS_Store
 Makefile
 *.make
-__pycache__
 .vscode/
 build/
+lib/
+bin/
 
 
 ###Keep this file###

@@ -1,76 +1,81 @@
 #include "DecaySystem.h"
 #include "RandomGenerator.h"
 
+#include <sstream>
+
 namespace Mask {
 
 	DecaySystem::DecaySystem() :
 		ReactionSystem()
 	{
-		nuclei.resize(3);
+		m_nuclei.resize(3);
 	}
 	
-	DecaySystem::DecaySystem(std::vector<int>& z, std::vector<int>& a) :
+	DecaySystem::DecaySystem(const std::vector<int>& z, const std::vector<int>& a) :
 		ReactionSystem()
 	{
-		nuclei.resize(3);
+		m_nuclei.resize(3);
 		SetNuclei(z, a);
 	}
 	
 	DecaySystem::~DecaySystem() {}
 	
-	bool DecaySystem::SetNuclei(std::vector<int>& z, std::vector<int>& a) {
-		if(z.size() != a.size() || z.size() != 2) {
+	bool DecaySystem::SetNuclei(const std::vector<int>& z, const std::vector<int>& a)
+	{
+		if(z.size() != a.size() || z.size() != 2)
 			return false;
-		}
 
-		step1.SetNuclei(z[0], a[0], 0, 0, z[1], a[1]);
+		int zr = z[0] - z[1];
+		int ar = a[0] - a[1];
+
+		m_nuclei[0] = CreateNucleus(z[0], a[0]); //target
+		m_nuclei[1] = CreateNucleus(z[1], a[1]); //breakup1
+		m_nuclei[2] = CreateNucleus(zr, ar); //breakup2
+
+		m_step1.BindNuclei(&(m_nuclei[0]), nullptr, &(m_nuclei[1]), &(m_nuclei[2]));
 		SetSystemEquation();
 		return true;
 	}
 
-	const std::vector<Nucleus>& DecaySystem::GetNuclei()
+	std::vector<Nucleus>* DecaySystem::GetNuclei()
 	{
-		nuclei[0] = step1.GetTarget();
-		nuclei[1] = step1.GetEjectile();
-		nuclei[2] = step1.GetResidual();
-
-		return nuclei;
+		return &m_nuclei;
 	}
 	
 	void DecaySystem::LinkTarget() {
-		step1.SetLayeredTarget(&target);
+		m_step1.SetLayeredTarget(&m_target);
 	
-		rxnLayer = target.FindLayerContaining(step1.GetTarget().GetZ(), step1.GetTarget().GetA());
-		if(rxnLayer != -1) {
-			step1.SetRxnLayer(rxnLayer);
-			target_set_flag = true;
-		} else {
+		m_rxnLayer = m_target.FindLayerContaining(m_nuclei[0].Z, m_nuclei[0].A);
+		if(m_rxnLayer != m_target.GetNumberOfLayers())
+		{
+			m_step1.SetRxnLayer(m_rxnLayer);
+			m_isTargetSet = true;
+		}
+		else
 			throw ReactionLayerException();
-		}
 	}
 	
-	void DecaySystem::SetSystemEquation() {
-		m_sys_equation = step1.GetTarget().GetIsotopicSymbol();
-		m_sys_equation += "-> ";
-		m_sys_equation += step1.GetEjectile().GetIsotopicSymbol();
-		m_sys_equation += "+";
-		m_sys_equation += step1.GetResidual().GetIsotopicSymbol();
+	void DecaySystem::SetSystemEquation()
+	{
+		std::stringstream stream;
+		stream << m_nuclei[0].isotopicSymbol << "->"
+			   << m_nuclei[1].isotopicSymbol << "+"
+			   << m_nuclei[2].isotopicSymbol;
+		m_sysEquation = stream.str();
 	}
 	
-	void DecaySystem::RunSystem() {
+	void DecaySystem::RunSystem()
+	{
 		//Link up the target if it hasn't been done yet
-		if(!target_set_flag) {
+		if(!m_isTargetSet)
 			LinkTarget();
-		}
 	
-		double rxnTheta = std::acos(decay1dist.GetRandomCosTheta());
+		double rxnTheta = std::acos(m_step1Distribution.GetRandomCosTheta());
 		double rxnPhi = (*m_phi1Range)(RandomGenerator::GetInstance().GetGenerator());
-		step1.SetPolarRxnAngle(rxnTheta);
-		step1.SetAzimRxnAngle(rxnPhi);
-	
-		step1.TurnOnResidualEloss();
-		step1.Calculate();
-
+		m_step1.SetPolarRxnAngle(rxnTheta);
+		m_step1.SetAzimRxnAngle(rxnPhi);
+		m_step1.SetResidualEnergyLoss(true);
+		m_step1.Calculate();
 	}
 
 }

@@ -1,5 +1,5 @@
 add_executable(MaskApp)
-target_include_directories(MaskApp PUBLIC ${MASK_INCLUDE_DIR})
+target_include_directories(MaskApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 target_sources(MaskApp PUBLIC
     main.cpp

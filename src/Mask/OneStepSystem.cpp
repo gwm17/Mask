@@ -1,68 +1,76 @@
 #include "OneStepSystem.h"
 #include "RandomGenerator.h"
 
+#include <sstream>
+
 namespace Mask {
 
 	OneStepSystem::OneStepSystem() :
 		ReactionSystem()
 	{
-		nuclei.resize(4);
+		m_nuclei.resize(4);
 	}
 	
-	OneStepSystem::OneStepSystem(std::vector<int>& z, std::vector<int>& a) :
+	OneStepSystem::OneStepSystem(const std::vector<int>& z, const std::vector<int>& a) :
 		ReactionSystem()
 	{
-		nuclei.resize(4);
+		m_nuclei.resize(4);
 		SetNuclei(z, a);
 	}
 	
 	OneStepSystem::~OneStepSystem() {}
 	
-	bool OneStepSystem::SetNuclei(std::vector<int>& z, std::vector<int>& a) {
-		if(z.size() != a.size() || z.size() != 3) {
+	bool OneStepSystem::SetNuclei(const std::vector<int>& z, const std::vector<int>& a)
+	{
+		if(z.size() != a.size() || z.size() != 3)
 			return false;
-		}
-	
-		step1.SetNuclei(z[0], a[0], z[1], a[1], z[2], a[2]);
+
+		int zr = z[0] + z[1] - z[2];
+		int ar = a[0] + a[1] - a[2];
+
+		m_nuclei[0] = CreateNucleus(z[0], a[0]); //target
+		m_nuclei[1] = CreateNucleus(z[1], a[1]); //projectile
+		m_nuclei[2] = CreateNucleus(z[2], a[2]); //ejectile
+		m_nuclei[3] = CreateNucleus(zr, ar); //residual
+
+		m_step1.BindNuclei(&(m_nuclei[0]), &(m_nuclei[1]), &(m_nuclei[2]), &(m_nuclei[3]));
 		SetSystemEquation();
 		return true;
 	}
 
-	const std::vector<Nucleus>& OneStepSystem::GetNuclei()
+	std::vector<Nucleus>* OneStepSystem::GetNuclei()
 	{
-		nuclei[0] = step1.GetTarget();
-		nuclei[1] = step1.GetProjectile();
-		nuclei[2] = step1.GetEjectile();
-		nuclei[3] = step1.GetResidual();
-
-		return nuclei;
+		return &m_nuclei;
 	}
 	
-	void OneStepSystem::LinkTarget() {
-		step1.SetLayeredTarget(&target);
+	void OneStepSystem::LinkTarget()
+	{
+		m_step1.SetLayeredTarget(&m_target);
 	
-		rxnLayer = target.FindLayerContaining(step1.GetTarget().GetZ(), step1.GetTarget().GetA());
-		if(rxnLayer != -1) {
-			step1.SetRxnLayer(rxnLayer);
-			target_set_flag = true;
-		} else {
-			throw ReactionLayerException();
+		m_rxnLayer = m_target.FindLayerContaining(m_nuclei[0].Z, m_nuclei[0].A);
+		if(m_rxnLayer != m_target.GetNumberOfLayers())
+		{
+			m_step1.SetRxnLayer(m_rxnLayer);
+			m_isTargetSet = true;
 		}
+		else
+			throw ReactionLayerException();
 	}
 	
-	void OneStepSystem::SetSystemEquation() {
-		m_sys_equation = step1.GetTarget().GetIsotopicSymbol();
-		m_sys_equation += "(";
-		m_sys_equation += step1.GetProjectile().GetIsotopicSymbol();
-		m_sys_equation += ", ";
-		m_sys_equation += step1.GetEjectile().GetIsotopicSymbol();
-		m_sys_equation += ")";
-		m_sys_equation += step1.GetResidual().GetIsotopicSymbol();
+	void OneStepSystem::SetSystemEquation()
+	{
+		std::stringstream stream;
+		stream << m_nuclei[0].isotopicSymbol << "("
+			   << m_nuclei[1].isotopicSymbol << ", "
+			   << m_nuclei[2].isotopicSymbol << ")"
+			   << m_nuclei[3].isotopicSymbol;
+		m_sysEquation = stream.str();
 	}
 	
 	void OneStepSystem::RunSystem() {
 		//Link up the target if it hasn't been done yet
-		if(!target_set_flag) {
+		if(!m_isTargetSet)
+		{
 			LinkTarget();
 		}
 	
@@ -72,13 +80,13 @@ namespace Mask {
 		double rxnPhi = (*m_phi1Range)(RandomGenerator::GetInstance().GetGenerator());
 		double residEx = (*m_exDist)(RandomGenerator::GetInstance().GetGenerator());
 		
-		step1.SetBeamKE(bke);
-		step1.SetPolarRxnAngle(rxnTheta);
-		step1.SetAzimRxnAngle(rxnPhi);
-		step1.SetExcitation(residEx);
+		m_step1.SetBeamKE(bke);
+		m_step1.SetPolarRxnAngle(rxnTheta);
+		m_step1.SetAzimRxnAngle(rxnPhi);
+		m_step1.SetExcitation(residEx);
 		
-		step1.TurnOnResidualEloss();
-		step1.Calculate();
+		m_step1.SetResidualEnergyLoss(true);
+		m_step1.Calculate();
 	}
 
 }
