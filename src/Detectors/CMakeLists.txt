@@ -4,18 +4,18 @@ target_include_directories(Detectors PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_
 target_sources(Detectors PUBLIC
     AnasenDeadChannelMap.cpp
     AnasenDeadChannelMap.h
-    AnasenEfficiency.cpp
-    AnasenEfficiency.h
+    AnasenArray.cpp
+    AnasenArray.h
     main.cpp
-    DetectorEfficiency.h
+    DetectorArray.h
     QQQDetector.cpp
     QQQDetector.h
     SabreDeadChannelMap.cpp
     SabreDeadChannelMap.h
     SabreDetector.cpp
     SabreDetector.h
-    SabreEfficiency.cpp
-    SabreEfficiency.h
+    SabreArray.cpp
+    SabreArray.h
     SX3Detector.cpp
     SX3Detector.h
 )

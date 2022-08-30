@@ -1,23 +1,23 @@
-#ifndef ANASEN_EFFICIENCY_H
-#define ANASEN_EFFICIENCY_H
+#ifndef ANASEN_ARRAY_H
+#define ANASEN_ARRAY_H
 
 #include <string>
 
-#include "DetectorEfficiency.h"
+#include "DetectorArray.h"
 #include "SX3Detector.h"
 #include "QQQDetector.h"
 #include "Target.h"
 #include "Nucleus.h"
 #include "AnasenDeadChannelMap.h"
 
-class AnasenEfficiency : public DetectorEfficiency
+class AnasenArray : public DetectorArray
 {
 public:
-	AnasenEfficiency();
-	~AnasenEfficiency();
-	void CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) override;
-	void DrawDetectorSystem(const std::string& filename) override;
-	double RunConsistencyCheck() override;
+	AnasenArray();
+	~AnasenArray();
+	virtual void CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) override;
+	virtual void DrawDetectorSystem(const std::string& filename) override;
+	virtual double RunConsistencyCheck() override;
 	inline void SetDeadChannelMap(const std::string& filename) { dmap.LoadMapfile(filename); }
 
 private:
@@ -27,7 +27,8 @@ private:
 	DetectorResult IsAnasen(Mask::Nucleus& nucleus);
 	void CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts);
 
-	std::vector<StripDetector> m_Ring1, m_Ring2;
+	std::vector<SX3Detector> m_Ring1;
+	std::vector<SX3Detector> m_Ring2;
 	std::vector<QQQDetector> m_forwardQQQs;
 	std::vector<QQQDetector> m_backwardQQQs;
 

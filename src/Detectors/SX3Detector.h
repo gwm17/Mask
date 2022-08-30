@@ -19,19 +19,19 @@
 #include "Math/RotationZ.h"
 #include "Mask/RandomGenerator.h"
 
-struct StripHit
+struct SX3Hit
 {
 	int front_strip_index=-1;
 	int back_strip_index=-1;
 	double front_ratio=0.0;
 };
 
-class StripDetector
+class SX3Detector
 {
 public:
   
-	StripDetector(double centerPhi, double centerZ, double centerRho);
-	~StripDetector();
+	SX3Detector(double centerPhi, double centerZ, double centerRho);
+	~SX3Detector();
 	const ROOT::Math::XYZPoint& GetFrontStripCoordinates(int stripch, int corner) const { return m_frontStripCoords[stripch][corner]; }
 	const ROOT::Math::XYZPoint& GetBackStripCoordinates(int stripch, int corner) const { return m_backStripCoords[stripch][corner]; }
 	const ROOT::Math::XYZPoint& GetRotatedFrontStripCoordinates(int stripch, int corner) const 
@@ -47,7 +47,7 @@ public:
 	void SetPixelSmearing(bool isSmearing) { m_isSmearing = isSmearing; }
 
 	ROOT::Math::XYZPoint GetHitCoordinates(int front_stripch, double front_strip_ratio);
-	StripHit GetChannelRatio(double theta, double phi);
+	SX3Hit GetChannelRatio(double theta, double phi);
 
 private:
 	bool ValidChannel(int f) { return ((f >= 0 && f < s_nStrips) ? true : false); };

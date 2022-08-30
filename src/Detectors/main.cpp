@@ -1,5 +1,5 @@
-#include "SabreEfficiency.h"
-#include "AnasenEfficiency.h"
+#include "SabreArray.h"
+#include "AnasenArray.h"
 #include "KinematicsExceptions.h"
 #include <iostream>
 #include <string>
@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 	std::string statsname = argv[3];
 
 	
-	SabreEfficiency sabre;
+	SabreArray sabre;
 	std::string mapfile = "./etc/sabreDeadChannels_May2022.txt";
 	sabre.SetDeadChannelMap(mapfile);
 	sabre.CalculateEfficiency(inputname, outputname, statsname);
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 	
 
 	/*
- 	AnasenEfficiency anasen;
+ 	AnasenArray anasen;
  	std::string mapfile = "./etc/AnasenDeadChannels.txt";
  	anasen.SetDeadChannelMap(mapfile);
  	anasen.CalculateEfficiency(inputname, outputname, statsname);

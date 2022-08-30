@@ -1,4 +1,4 @@
-#include "SabreEfficiency.h"
+#include "SabreArray.h"
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -7,8 +7,8 @@
 #include "TTree.h"
 
 
-SabreEfficiency::SabreEfficiency() : 
-	DetectorEfficiency(), m_deadlayerEloss({14}, {28}, {1}, s_deadlayerThickness), 
+SabreArray::SabreArray() : 
+	DetectorArray(), m_deadlayerEloss({14}, {28}, {1}, s_deadlayerThickness), 
 	m_detectorEloss({14}, {28}, {1}, s_detectorThickness), m_degraderEloss({73}, {181}, {1}, s_degraderThickness)
 {
 
@@ -29,9 +29,9 @@ SabreEfficiency::SabreEfficiency() :
 	m_activeDetectors[4] = false;
 }
 
-SabreEfficiency::~SabreEfficiency() {}
+SabreArray::~SabreArray() {}
 
-void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname)
+void SabreArray::CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname)
 {
 	std::cout<<"----------SABRE Efficiency Calculation----------"<<std::endl;
 	std::cout<<"Loading in output from kinematics simulation: "<<inputname<<std::endl;
@@ -186,7 +186,7 @@ void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const st
 	std::cout<<"---------------------------------------------"<<std::endl;
 }
 
-void SabreEfficiency::DrawDetectorSystem(const std::string& filename)
+void SabreArray::DrawDetectorSystem(const std::string& filename)
 {
 	std::ofstream output(filename);
 
@@ -231,7 +231,7 @@ void SabreEfficiency::DrawDetectorSystem(const std::string& filename)
  	output.close();
 }
 
-double SabreEfficiency::RunConsistencyCheck()
+double SabreArray::RunConsistencyCheck()
 {
 	double theta, phi;
 	double npoints = 5.0*16.0*4.0;
@@ -260,7 +260,7 @@ double SabreEfficiency::RunConsistencyCheck()
 }
 
 /*Returns if detected, as well as total energy deposited in SABRE*/
-DetectorResult SabreEfficiency::IsSabre(Mask::Nucleus& nucleus)
+DetectorResult SabreArray::IsSabre(Mask::Nucleus& nucleus)
 {
 	DetectorResult observation;
 	if(nucleus.GetKE() <= s_energyThreshold)
@@ -300,7 +300,7 @@ DetectorResult SabreEfficiency::IsSabre(Mask::Nucleus& nucleus)
 	return observation;
 }
 
-void SabreEfficiency::CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts)
+void SabreArray::CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts)
 {
 	if (data.size() == 3 && data[1].isDetected && data[2].isDetected)
 	{

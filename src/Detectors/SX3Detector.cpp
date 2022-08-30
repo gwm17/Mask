@@ -15,7 +15,7 @@
 											y
 */
 
-StripDetector::StripDetector(double centerPhi, double centerZ, double centerRho) :
+SX3Detector::SX3Detector(double centerPhi, double centerZ, double centerRho) :
 	m_centerPhi(centerPhi), m_centerZ(centerZ), m_centerRho(centerRho), m_norm(1.0,0.0,0.0), m_uniformFraction(0.0, 1.0), m_isSmearing(false)
 {
 	m_zRotation.SetAngle(m_centerPhi);
@@ -35,9 +35,9 @@ StripDetector::StripDetector(double centerPhi, double centerZ, double centerRho)
 	
 }
 
-StripDetector::~StripDetector() {}
+SX3Detector::~SX3Detector() {}
 
-void StripDetector::CalculateCorners()
+void SX3Detector::CalculateCorners()
 {
 	double y_min, y_max, z_min, z_max; 
 	for (int s=0; s<s_nStrips; s++)
@@ -75,7 +75,7 @@ void StripDetector::CalculateCorners()
 	}
 }
 
-ROOT::Math::XYZPoint StripDetector::GetHitCoordinates(int front_stripch, double front_strip_ratio)
+ROOT::Math::XYZPoint SX3Detector::GetHitCoordinates(int front_stripch, double front_strip_ratio)
 {
 
 	if (!ValidChannel(front_stripch) || !ValidRatio(front_strip_ratio))
@@ -95,10 +95,10 @@ ROOT::Math::XYZPoint StripDetector::GetHitCoordinates(int front_stripch, double 
 
 }
 
-StripHit StripDetector::GetChannelRatio(double theta, double phi)
+SX3Hit SX3Detector::GetChannelRatio(double theta, double phi)
 {
 
-	StripHit hit;
+	SX3Hit hit;
 	while (phi < 0)
 		phi += 2*M_PI;
 

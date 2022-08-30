@@ -1,5 +1,5 @@
-#ifndef DETECTOREFFICIENCY_H
-#define DETECTOREFFICIENCY_H
+#ifndef DETECTOR_ARRAY_H
+#define DETECTOR_ARRAY_H
 
 #include <string>
 #include <cmath>
@@ -14,18 +14,18 @@ struct DetectorResult
 	std::string det_name = "";
 };
 
-class DetectorEfficiency
+class DetectorArray
 {
 public:
-	DetectorEfficiency() {};
-	virtual ~DetectorEfficiency() {};
+	DetectorArray() {};
+	virtual ~DetectorArray() {};
 
 	virtual void CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) = 0;
 	virtual void DrawDetectorSystem(const std::string& filename) = 0;
 	virtual double RunConsistencyCheck() = 0;
 
 protected:
-	inline bool IsDoubleEqual(double x, double y) { return std::fabs(x-y) < s_epsilon ? true : false; };
+	bool IsDoubleEqual(double x, double y) { return std::fabs(x-y) < s_epsilon ? true : false; };
 
 	static constexpr double s_epsilon = 1.0e-6;
 };

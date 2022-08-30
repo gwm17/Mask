@@ -1,17 +1,17 @@
-#ifndef SABREEFFICIENCY_H
-#define SABREEFFICIENCY_H
+#ifndef SABRE_ARRAY_H
+#define SABRE_ARRAY_H
 
-#include "DetectorEfficiency.h"
+#include "DetectorArray.h"
 #include "SabreDetector.h"
 #include "Target.h"
 #include "SabreDeadChannelMap.h"
 #include "Mask/Nucleus.h"
 
-class SabreEfficiency : public DetectorEfficiency
+class SabreArray : public DetectorArray
 {
 public:
-	SabreEfficiency();
-	~SabreEfficiency();
+	SabreArray();
+	~SabreArray();
     void SetDeadChannelMap(const std::string& filename) { m_deadMap.LoadMapfile(filename); };
 	void CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) override;
     void DrawDetectorSystem(const std::string& filename) override;
