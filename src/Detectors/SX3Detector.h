@@ -1,5 +1,5 @@
-#ifndef STRIP_DETECTOR_H
-#define STRIP_DETECTOR_H
+#ifndef SX3_DETECTOR_H
+#define SX3_DETECTOR_H
 
 // +z is along beam axis
 // +y is vertically "downward" in the lab frame
@@ -30,7 +30,7 @@ class StripDetector
 {
 public:
   
-	StripDetector(int ns, double len, double wid, double cphi, double cz, double crho);
+	StripDetector(double centerPhi, double centerZ, double centerRho);
 	~StripDetector();
 	const ROOT::Math::XYZPoint& GetFrontStripCoordinates(int stripch, int corner) const { return m_frontStripCoords[stripch][corner]; }
 	const ROOT::Math::XYZPoint& GetBackStripCoordinates(int stripch, int corner) const { return m_backStripCoords[stripch][corner]; }
@@ -50,17 +50,9 @@ public:
 	StripHit GetChannelRatio(double theta, double phi);
 
 private:
-	bool ValidChannel(int f) { return ((f >= 0 && f < m_nStrips) ? true : false); };
+	bool ValidChannel(int f) { return ((f >= 0 && f < s_nStrips) ? true : false); };
 	bool ValidRatio(double r) { return ((r >= -1 && r <= 1) ? true : false); };
 	void CalculateCorners();
-
-	int m_nStrips;
-	static constexpr int s_nCorners = 4;
-
-	double m_stripLength; //common to all strips, hence total
-	double m_totalWidth;
-	double m_frontStripWidth; //assuming equal widths
-	double m_backStripLength; //assuming equal widths
 
 	double m_centerPhi; //assuming det centered above x-axis (corresponds to zero phi)
 	double m_centerZ;
@@ -76,6 +68,15 @@ private:
 	std::uniform_real_distribution<double> m_uniformFraction;
 
 	bool m_isSmearing;
+
+	//Units in meters
+	static constexpr double s_nStrips = 4; //Same for front and back
+	static constexpr double s_nCorners = 4;
+	static constexpr double s_totalLength = 0.075; //length of front strips
+	static constexpr double s_backStripLength = s_totalLength / s_nStrips;
+	static constexpr double s_totalWidth = 0.04; //width of back strips
+	static constexpr double s_frontStripWidth = s_totalWidth / s_nStrips;
+	static constexpr double s_deg2rad = M_PI/180.0;
 
 };
 

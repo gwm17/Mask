@@ -16,8 +16,8 @@ target_sources(Detectors PUBLIC
     SabreDetector.h
     SabreEfficiency.cpp
     SabreEfficiency.h
-    StripDetector.cpp
-    StripDetector.h
+    SX3Detector.cpp
+    SX3Detector.h
 )
 
 target_link_libraries(Detectors

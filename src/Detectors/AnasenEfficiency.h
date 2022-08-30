@@ -4,7 +4,7 @@
 #include <string>
 
 #include "DetectorEfficiency.h"
-#include "StripDetector.h"
+#include "SX3Detector.h"
 #include "QQQDetector.h"
 #include "Target.h"
 #include "Nucleus.h"
@@ -39,15 +39,11 @@ private:
 	static constexpr int s_nSX3PerBarrel = 12;
 	static constexpr int s_nQQQ = 4;
 	static constexpr double s_sx3Length = 0.075;
-	static constexpr double s_sx3Width = 0.04;
 	static constexpr double s_barrelGap = 0.0254;
 	static constexpr double s_sx3FrameGap = 0.049; //0.049 is base gap due to frames
 	static constexpr double s_barrel1Z = s_sx3Length/2.0 + s_sx3FrameGap + s_barrelGap/2.0;
 	static constexpr double s_barrel2Z = (-1.0)*(s_barrelGap/2.0 + s_sx3Length/2.0);
 	static constexpr double s_qqqZ = 0.0125 + s_sx3Length + s_sx3FrameGap + s_barrelGap/2.0;
-	static constexpr double s_qqqInnerR = 0.0501;
-	static constexpr double s_qqqOuterR = 0.0990;
-	static constexpr double s_qqqDeltaPhi = 1.52119;
 	static constexpr double s_qqqZList[4] = {s_qqqZ, s_qqqZ, s_qqqZ, s_qqqZ};
 	static constexpr double s_qqqPhiList[4] = {5.49779, 0.785398, 2.35619, 3.92699};
 	static constexpr double s_barrelRhoList[12] = {0.0890601, 0.0889871, 0.0890354, 0.0890247, 0.0890354, 0.0890354, 0.0890247,

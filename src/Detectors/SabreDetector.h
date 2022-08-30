@@ -65,7 +65,7 @@ class SabreDetector {
 public:
 
 	SabreDetector();
-	SabreDetector(int detID, double Rin, double Rout, double deltaPhi_flat, double phiCentral, double tiltFromVert, double zdist, double xdist=0, double ydist=0);
+	SabreDetector(int detID, double phiCentral, double tiltFromVert, double zdist, double xdist=0, double ydist=0);
 	~SabreDetector();
 
 	/*Return coordinates of the corners of each ring/wedge in SABRE*/
@@ -84,9 +84,6 @@ public:
 	int GetDetectorID() { return m_detectorID; }
 
 private:
-
-	
-
 	void CalculateCorners();
 
 	/*Performs the transformation to the tilted,rotated,translated frame of the SABRE detector*/
@@ -109,9 +106,9 @@ private:
 	/*Determine if a hit is within the bulk detector*/
 	bool IsInside(double r, double phi)
 	{ 
-		double phi_1 = m_deltaPhiFlat/2.0;
-		double phi_2 = M_PI*2.0 - m_deltaPhiFlat/2.0;
-		return (((r > m_innerR && r < m_outerR) || CheckPositionEqual(r, m_innerR) || CheckPositionEqual(r, m_outerR)) 
+		double phi_1 = s_deltaPhiTotal/2.0;
+		double phi_2 = M_PI*2.0 - s_deltaPhiTotal/2.0;
+		return (((r > s_innerR && r < s_outerR) || CheckPositionEqual(r, s_innerR) || CheckPositionEqual(r, s_outerR)) 
 				&& (phi > phi_2 || phi < phi_1 || CheckAngleEqual(phi, phi_1) || CheckAngleEqual(phi, phi_2)));
 	};
 
@@ -121,57 +118,43 @@ private:
 	*/
 	bool IsRing(double r, int ringch)
 	{
-		double ringtop = m_innerR + m_deltaRFlatRing*(ringch + 1);
-		double ringbottom = m_innerR + m_deltaRFlatRing*(ringch);
+		double ringtop = s_innerR + s_deltaR*(ringch + 1);
+		double ringbottom = s_innerR + s_deltaR*(ringch);
 		return (r>ringbottom && r<ringtop); 
 	};
 
 	inline bool IsRingTopEdge(double r, int ringch)
 	{
-		double ringtop = m_innerR + m_deltaRFlatRing*(ringch + 1);
+		double ringtop = s_innerR + s_deltaR*(ringch + 1);
 		return CheckPositionEqual(r, ringtop); 
 	};
 
 	inline bool IsRingBottomEdge(double r, int ringch)
 	{
-		double ringbottom = m_innerR + m_deltaRFlatRing*(ringch);
+		double ringbottom = s_innerR + s_deltaR*(ringch);
 		return CheckPositionEqual(r, ringbottom); 
 	};
 
 	inline bool IsWedge(double phi, int wedgech)
 	{
-		double wedgetop = -m_deltaPhiFlat/2.0 + m_deltaPhiFlatWedge*(wedgech+1);
-		double wedgebottom = -m_deltaPhiFlat/2.0 + m_deltaPhiFlatWedge*(wedgech);
+		double wedgetop = -s_deltaPhiTotal/2.0 + s_deltaPhi*(wedgech+1);
+		double wedgebottom = -s_deltaPhiTotal/2.0 + s_deltaPhi*(wedgech);
 		return ((phi>wedgebottom && phi<wedgetop));
 	};
 
 	inline bool IsWedgeTopEdge(double phi, int wedgech)
 	{
-		double wedgetop = -m_deltaPhiFlat/2.0 + m_deltaPhiFlatWedge*(wedgech+1);
+		double wedgetop = -s_deltaPhiTotal/2.0 + s_deltaPhi*(wedgech+1);
 		return CheckAngleEqual(phi, wedgetop);
 	}
 
 	inline bool IsWedgeBottomEdge(double phi, int wedgech)
 	{
-		double wedgebottom = -m_deltaPhiFlat/2.0 + m_deltaPhiFlatWedge*(wedgech);
+		double wedgebottom = -s_deltaPhiTotal/2.0 + s_deltaPhi*(wedgech);
 		return CheckAngleEqual(phi, wedgebottom);
 	}
 
-	/*Class constants*/
-	static constexpr int s_nRings = 16;
-	static constexpr int s_nWedges = 8;
-	static constexpr double s_deg2rad = M_PI/180.0;
-	/*These are implicitly the width of the spacing between detector active strips*/
-	static constexpr double s_positionTol = 0.0001; //0.1 mm position tolerance
-	static constexpr double s_angularTol = 0.1*M_PI/180.0; // 0.1 degree angular tolerance
-
 	/*Class data*/
-	double m_outerR;
-	double m_innerR;
-	double m_deltaRFlat;
-	double m_deltaRFlatRing;
-	double m_deltaPhiFlat;
-	double m_deltaPhiFlatWedge;
 	double m_centerPhi;
 	double m_tilt;
 	ROOT::Math::Translation3D m_translation;
@@ -183,6 +166,18 @@ private:
 	std::vector<std::vector<ROOT::Math::XYZPoint>> m_flatRingCoords, m_flatWedgeCoords;
 	std::vector<std::vector<ROOT::Math::XYZPoint>> m_tiltRingCoords, m_tiltWedgeCoords;
 
+	/*Class constants*/
+	static constexpr double s_deg2rad = M_PI/180.0;
+	static constexpr int s_nRings = 16;
+	static constexpr int s_nWedges = 8;
+	static constexpr double s_outerR = 0.1351;
+	static constexpr double s_innerR = 0.0326;
+	static constexpr double s_deltaR = (s_outerR - s_innerR) / s_nRings;
+	static constexpr double s_deltaPhiTotal = 54.4 * s_deg2rad;
+	static constexpr double s_deltaPhi = (s_deltaPhiTotal / s_nWedges);
+	/*These are implicitly the width of the spacing between detector active strips*/
+	static constexpr double s_positionTol = 0.0001; //0.1 mm position tolerance
+	static constexpr double s_angularTol = 0.1*M_PI/180.0; // 0.1 degree angular tolerance
 };
 
 

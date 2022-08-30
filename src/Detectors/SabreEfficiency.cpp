@@ -13,7 +13,7 @@ SabreEfficiency::SabreEfficiency() :
 {
 
 	for(int i=0; i<s_nDets; i++)
-		m_detectors.emplace_back(i, s_innerR, s_outerR, s_deltaPhi*s_deg2rad, s_centerPhiList[i]*s_deg2rad, s_tilt*s_deg2rad, s_zOffset);
+		m_detectors.emplace_back(i, s_centerPhiList[i]*s_deg2rad, s_tilt*s_deg2rad, s_zOffset);
 	//Only 0, 1, 4 valid in degrader land
 	m_degradedDetectors[0] = true;
 	m_degradedDetectors[1] = true;

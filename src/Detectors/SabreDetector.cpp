@@ -53,8 +53,7 @@
 #include "SabreDetector.h"
 
 SabreDetector::SabreDetector() :
-m_outerR(0.1351), m_innerR(0.0326), m_deltaPhiFlat(54.4*s_deg2rad), m_centerPhi(0.0), m_tilt(0.0), 
-	m_translation(0.,0.,0.), m_norm(0,0,1.0), m_detectorID(-1)
+m_centerPhi(0.0), m_tilt(0.0), m_translation(0.,0.,0.), m_norm(0,0,1.0), m_detectorID(-1)
 {
 	m_yRotation.SetAngle(m_tilt);
 	m_zRotation.SetAngle(m_centerPhi);
@@ -73,17 +72,11 @@ m_outerR(0.1351), m_innerR(0.0326), m_deltaPhiFlat(54.4*s_deg2rad), m_centerPhi(
 		m_tiltWedgeCoords[i].resize(4);
 	}
 
-	m_deltaRFlat = m_outerR - m_innerR;
-	m_deltaRFlatRing = m_deltaRFlat/s_nRings;
-	m_deltaPhiFlatWedge = m_deltaPhiFlat/s_nWedges;
-
 	CalculateCorners();
 }
 
-SabreDetector::SabreDetector(int detID, double Rin, double Rout, double deltaPhi_flat, double phiCentral, 
-							 double tiltFromVert, double zdist, double xdist, double ydist) :
-	m_outerR(Rout), m_innerR(Rin), m_deltaPhiFlat(deltaPhi_flat), m_centerPhi(phiCentral), m_tilt(tiltFromVert), 
-	m_translation(xdist, ydist, zdist), m_norm(0,0,1.0), m_detectorID(detID)
+SabreDetector::SabreDetector(int detID, double phiCentral, double tiltFromVert, double zdist, double xdist, double ydist) :
+	m_centerPhi(phiCentral), m_tilt(tiltFromVert), m_translation(xdist, ydist, zdist), m_norm(0,0,1.0), m_detectorID(detID)
 {
 	m_yRotation.SetAngle(m_tilt);
 	m_zRotation.SetAngle(m_centerPhi);
@@ -104,10 +97,6 @@ SabreDetector::SabreDetector(int detID, double Rin, double Rout, double deltaPhi
 		m_tiltWedgeCoords[i].resize(4);
 	}
 
-	m_deltaRFlat = m_outerR - m_innerR;
-	m_deltaRFlatRing = m_deltaRFlat/s_nRings;
-	m_deltaPhiFlatWedge = m_deltaPhiFlat/s_nWedges;
-
 	CalculateCorners();
 }
 
@@ -123,23 +112,23 @@ void SabreDetector::CalculateCorners()
 	//Generate flat ring corner coordinates
 	for(int i=0; i<s_nRings; i++)
 	{
-		x0 = (m_innerR + m_deltaRFlatRing*(i+1))*std::cos(-m_deltaPhiFlat/2.0);
-		y0 = (m_innerR + m_deltaRFlatRing*(i+1))*std::sin(-m_deltaPhiFlat/2.0);
+		x0 = (s_innerR + s_deltaR*(i+1))*std::cos(-s_deltaPhiTotal/2.0);
+		y0 = (s_innerR + s_deltaR*(i+1))*std::sin(-s_deltaPhiTotal/2.0);
 		z0 = 0.0;
 		m_flatRingCoords[i][0].SetXYZ(x0, y0, z0);
 
-		x1 = (m_innerR + m_deltaRFlatRing*(i))*std::cos(-m_deltaPhiFlat/2.0);
-		y1 = (m_innerR + m_deltaRFlatRing*(i))*std::sin(-m_deltaPhiFlat/2.0);
+		x1 = (s_innerR + s_deltaR*(i))*std::cos(-s_deltaPhiTotal/2.0);
+		y1 = (s_innerR + s_deltaR*(i))*std::sin(-s_deltaPhiTotal/2.0);
 		z1 = 0.0;
 		m_flatRingCoords[i][1].SetXYZ(x1, y1, z1);
 
-		x2 = (m_innerR + m_deltaRFlatRing*(i))*std::cos(m_deltaPhiFlat/2.0);
-		y2 = (m_innerR + m_deltaRFlatRing*(i))*std::sin(m_deltaPhiFlat/2.0);
+		x2 = (s_innerR + s_deltaR*(i))*std::cos(s_deltaPhiTotal/2.0);
+		y2 = (s_innerR + s_deltaR*(i))*std::sin(s_deltaPhiTotal/2.0);
 		z2 = 0.0;
 		m_flatRingCoords[i][2].SetXYZ(x2, y2, z2);
 
-		x3 = (m_innerR + m_deltaRFlatRing*(i+1))*std::cos(m_deltaPhiFlat/2.0);
-		y3 = (m_innerR + m_deltaRFlatRing*(i+1))*std::sin(m_deltaPhiFlat/2.0);
+		x3 = (s_innerR + s_deltaR*(i+1))*std::cos(s_deltaPhiTotal/2.0);
+		y3 = (s_innerR + s_deltaR*(i+1))*std::sin(s_deltaPhiTotal/2.0);
 		z3 = 0.0;
 		m_flatRingCoords[i][3].SetXYZ(x3, y3, z3);
 	}
@@ -147,23 +136,23 @@ void SabreDetector::CalculateCorners()
 	//Generate flat wedge corner coordinates
 	for(int i=0; i<s_nWedges; i++)
 	{
-		x0 = m_outerR * std::cos(-m_deltaPhiFlat/2.0 + i*m_deltaPhiFlatWedge);
-		y0 = m_outerR * std::sin(-m_deltaPhiFlat/2.0 + i*m_deltaPhiFlatWedge);
+		x0 = s_outerR * std::cos(-s_deltaPhiTotal/2.0 + i*s_deltaPhi);
+		y0 = s_outerR * std::sin(-s_deltaPhiTotal/2.0 + i*s_deltaPhi);
 		z0 = 0.0;
 		m_flatWedgeCoords[i][0].SetXYZ(x0, y0, z0);
 
-		x1 = m_innerR * std::cos(-m_deltaPhiFlat/2.0 + i*m_deltaPhiFlatWedge);
-		y1 = m_innerR * std::sin(-m_deltaPhiFlat/2.0 + i*m_deltaPhiFlatWedge);
+		x1 = s_innerR * std::cos(-s_deltaPhiTotal/2.0 + i*s_deltaPhi);
+		y1 = s_innerR * std::sin(-s_deltaPhiTotal/2.0 + i*s_deltaPhi);
 		z1 = 0.0;
 		m_flatWedgeCoords[i][1].SetXYZ(x1, y1, z1);
 
-		x2 = m_innerR * std::cos(-m_deltaPhiFlat/2.0 + (i+1)*m_deltaPhiFlatWedge);
-		y2 = m_innerR * std::sin(-m_deltaPhiFlat/2.0 + (i+1)*m_deltaPhiFlatWedge);
+		x2 = s_innerR * std::cos(-s_deltaPhiTotal/2.0 + (i+1)*s_deltaPhi);
+		y2 = s_innerR * std::sin(-s_deltaPhiTotal/2.0 + (i+1)*s_deltaPhi);
 		z2 = 0.0;
 		m_flatWedgeCoords[i][2].SetXYZ(x2, y2, z2);
 
-		x3 = m_outerR * std::cos(-m_deltaPhiFlat/2.0 + (i+1)*m_deltaPhiFlatWedge);
-		y3 = m_outerR * std::sin(-m_deltaPhiFlat/2.0 + (i+1)*m_deltaPhiFlatWedge);
+		x3 = s_outerR * std::cos(-s_deltaPhiTotal/2.0 + (i+1)*s_deltaPhi);
+		y3 = s_outerR * std::sin(-s_deltaPhiTotal/2.0 + (i+1)*s_deltaPhi);
 		z3 = 0.0;
 		m_flatWedgeCoords[i][3].SetXYZ(x3, y3, z3);
 	}
@@ -322,8 +311,8 @@ ROOT::Math::XYZPoint SabreDetector::GetHitCoordinates(int ringch, int wedgech)
 	if(!CheckRingChannel(ringch) || !CheckWedgeChannel(wedgech))
 		return ROOT::Math::XYZPoint();
 
-	double r_center  = m_innerR + (0.5+ringch)*m_deltaRFlatRing;
-	double phi_center = -m_deltaPhiFlat/2.0 + (0.5+wedgech)*m_deltaPhiFlatWedge;
+	double r_center  = s_innerR + (0.5+ringch)*s_deltaR;
+	double phi_center = -s_deltaPhiTotal/2.0 + (0.5+wedgech)*s_deltaPhi;
 	double x = r_center*std::cos(phi_center);
 	double y = r_center*std::sin(phi_center);
 	double z = 0;

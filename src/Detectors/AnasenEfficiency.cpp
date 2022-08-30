@@ -11,16 +11,16 @@ AnasenEfficiency::AnasenEfficiency() :
 {
 	for(int i=0; i<s_nSX3PerBarrel; i++)
 	{
-		m_Ring1.emplace_back(4, s_sx3Length, s_sx3Width, s_barrelPhiList[i], s_barrel1Z, s_barrelRhoList[i]);
+		m_Ring1.emplace_back(s_barrelPhiList[i], s_barrel1Z, s_barrelRhoList[i]);
 		m_Ring1[i].SetPixelSmearing(true);
-		m_Ring2.emplace_back(4, s_sx3Length, s_sx3Width, s_barrelPhiList[i], s_barrel2Z, s_barrelRhoList[i]);
+		m_Ring2.emplace_back(s_barrelPhiList[i], s_barrel2Z, s_barrelRhoList[i]);
 		m_Ring2[i].SetPixelSmearing(true);
 	}
 	for(int i=0; i<s_nQQQ; i++)
 	{
-		m_forwardQQQs.emplace_back(s_qqqInnerR, s_qqqOuterR, s_qqqDeltaPhi, s_qqqPhiList[i], s_qqqZList[i]);
+		m_forwardQQQs.emplace_back(s_qqqPhiList[i], s_qqqZList[i]);
 		m_forwardQQQs[i].SetSmearing(true);
-		m_backwardQQQs.emplace_back(s_qqqInnerR, s_qqqOuterR, s_qqqDeltaPhi, s_qqqPhiList[i], (-1.0)*s_qqqZList[i]);
+		m_backwardQQQs.emplace_back(s_qqqPhiList[i], (-1.0)*s_qqqZList[i]);
 		m_backwardQQQs[i].SetSmearing(true);
 	}
 }
