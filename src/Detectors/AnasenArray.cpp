@@ -1,4 +1,4 @@
-#include "AnasenEfficiency.h"
+#include "AnasenArray.h"
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -6,29 +6,29 @@
 #include "TFile.h"
 #include "TTree.h"
 
-AnasenEfficiency::AnasenEfficiency() :
-	DetectorEfficiency(), m_detectorEloss({14}, {28}, {1}, s_detectorThickness)
+AnasenArray::AnasenArray() :
+	DetectorArray(), m_detectorEloss({14}, {28}, {1}, s_detectorThickness)
 {
 	for(int i=0; i<s_nSX3PerBarrel; i++)
 	{
-		m_Ring1.emplace_back(4, s_sx3Length, s_sx3Width, s_barrelPhiList[i], s_barrel1Z, s_barrelRhoList[i]);
+		m_Ring1.emplace_back(s_barrelPhiList[i], s_barrel1Z, s_barrelRhoList[i]);
 		m_Ring1[i].SetPixelSmearing(true);
-		m_Ring2.emplace_back(4, s_sx3Length, s_sx3Width, s_barrelPhiList[i], s_barrel2Z, s_barrelRhoList[i]);
+		m_Ring2.emplace_back(s_barrelPhiList[i], s_barrel2Z, s_barrelRhoList[i]);
 		m_Ring2[i].SetPixelSmearing(true);
 	}
 	for(int i=0; i<s_nQQQ; i++)
 	{
-		m_forwardQQQs.emplace_back(s_qqqInnerR, s_qqqOuterR, s_qqqDeltaPhi, s_qqqPhiList[i], s_qqqZList[i]);
+		m_forwardQQQs.emplace_back(s_qqqPhiList[i], s_qqqZList[i]);
 		m_forwardQQQs[i].SetSmearing(true);
-		m_backwardQQQs.emplace_back(s_qqqInnerR, s_qqqOuterR, s_qqqDeltaPhi, s_qqqPhiList[i], (-1.0)*s_qqqZList[i]);
+		m_backwardQQQs.emplace_back(s_qqqPhiList[i], (-1.0)*s_qqqZList[i]);
 		m_backwardQQQs[i].SetSmearing(true);
 	}
 }
 
-AnasenEfficiency::~AnasenEfficiency() {}
+AnasenArray::~AnasenArray() {}
 
 
-void AnasenEfficiency::DrawDetectorSystem(const std::string& filename)
+void AnasenArray::DrawDetectorSystem(const std::string& filename)
 {
 	std::ofstream output(filename);
 
@@ -135,7 +135,7 @@ void AnasenEfficiency::DrawDetectorSystem(const std::string& filename)
 	output.close();
 }
 
-double AnasenEfficiency::RunConsistencyCheck()
+double AnasenArray::RunConsistencyCheck()
 {
 	std::vector<ROOT::Math::XYZPoint> r1_points;
 	std::vector<ROOT::Math::XYZPoint> r2_points;
@@ -230,7 +230,7 @@ double AnasenEfficiency::RunConsistencyCheck()
 
 }
 
-DetectorResult AnasenEfficiency::IsRing1(Mask::Nucleus& nucleus)
+DetectorResult AnasenArray::IsRing1(Mask::Nucleus& nucleus)
 {
 	DetectorResult observation;
 	double thetaIncident;
@@ -255,7 +255,7 @@ DetectorResult AnasenEfficiency::IsRing1(Mask::Nucleus& nucleus)
 	return observation;
 }
 
-DetectorResult AnasenEfficiency::IsRing2(Mask::Nucleus& nucleus)
+DetectorResult AnasenArray::IsRing2(Mask::Nucleus& nucleus)
 {
 	DetectorResult observation;
 	double thetaIncident;
@@ -280,7 +280,7 @@ DetectorResult AnasenEfficiency::IsRing2(Mask::Nucleus& nucleus)
 	return observation;
 }
 
-DetectorResult AnasenEfficiency::IsQQQ(Mask::Nucleus& nucleus)
+DetectorResult AnasenArray::IsQQQ(Mask::Nucleus& nucleus)
 {
 	DetectorResult observation;
 	double thetaIncident;
@@ -324,7 +324,7 @@ DetectorResult AnasenEfficiency::IsQQQ(Mask::Nucleus& nucleus)
 	return observation;
 }
 
-DetectorResult AnasenEfficiency::IsAnasen(Mask::Nucleus& nucleus)
+DetectorResult AnasenArray::IsAnasen(Mask::Nucleus& nucleus)
 {
 	DetectorResult result;
 	if(nucleus.GetKE() <= s_energyThreshold)
@@ -339,7 +339,7 @@ DetectorResult AnasenEfficiency::IsAnasen(Mask::Nucleus& nucleus)
 	return result;
 }
 
-void AnasenEfficiency::CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts)
+void AnasenArray::CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts)
 {
 	if (data.size() == 3 && data[1].isDetected && data[2].isDetected)
 	{
@@ -417,11 +417,11 @@ void AnasenEfficiency::CountCoincidences(const std::vector<Mask::Nucleus>& data,
 	}
 }
 
-void AnasenEfficiency::CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) {
+void AnasenArray::CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) {
 
 	if(!dmap.IsValid())
 	{
-		std::cerr<<"Invalid Dead Channel Map at AnasenEfficiency::CalculateEfficiency()! If you want to run with all possible";
+		std::cerr<<"Invalid Dead Channel Map at AnasenArray::CalculateEfficiency()! If you want to run with all possible";
 		std::cerr<<"channels active, simply load an empty file."<<std::endl;
 		return;
 	}
@@ -460,7 +460,7 @@ void AnasenEfficiency::CalculateEfficiency(const std::string& inputname, const s
 		case 8: coinc_counts.resize(11, 0); break;
 		default:
 		{
-			std::cerr<<"Bad reaction type at AnasenEfficiency::CalculateEfficiency (given value: "<<counts.size()<<"). Quiting..."<<std::endl;
+			std::cerr<<"Bad reaction type at AnasenArray::CalculateEfficiency (given value: "<<counts.size()<<"). Quiting..."<<std::endl;
 			input->Close();
 			output->Close();
 			stats.close();

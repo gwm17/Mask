@@ -20,6 +20,6 @@ find_package(ROOT REQUIRED COMPONENTS GenVector)
 
 add_subdirectory(src/vendor/catima)
 add_subdirectory(src/Mask)
-add_subdirectory(src/MaskApp)
+add_subdirectory(src/Kinematics)
 add_subdirectory(src/Detectors)
 add_subdirectory(src/Plotters)

@@ -1,4 +1,4 @@
-#include "SabreEfficiency.h"
+#include "SabreArray.h"
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -7,13 +7,13 @@
 #include "TTree.h"
 
 
-SabreEfficiency::SabreEfficiency() : 
-	DetectorEfficiency(), m_deadlayerEloss({14}, {28}, {1}, s_deadlayerThickness), 
+SabreArray::SabreArray() : 
+	DetectorArray(), m_deadlayerEloss({14}, {28}, {1}, s_deadlayerThickness), 
 	m_detectorEloss({14}, {28}, {1}, s_detectorThickness), m_degraderEloss({73}, {181}, {1}, s_degraderThickness)
 {
 
 	for(int i=0; i<s_nDets; i++)
-		m_detectors.emplace_back(i, s_innerR, s_outerR, s_deltaPhi*s_deg2rad, s_centerPhiList[i]*s_deg2rad, s_tilt*s_deg2rad, s_zOffset);
+		m_detectors.emplace_back(i, s_centerPhiList[i]*s_deg2rad, s_tilt*s_deg2rad, s_zOffset);
 	//Only 0, 1, 4 valid in degrader land
 	m_degradedDetectors[0] = true;
 	m_degradedDetectors[1] = true;
@@ -29,9 +29,9 @@ SabreEfficiency::SabreEfficiency() :
 	m_activeDetectors[4] = false;
 }
 
-SabreEfficiency::~SabreEfficiency() {}
+SabreArray::~SabreArray() {}
 
-void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname)
+void SabreArray::CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname)
 {
 	std::cout<<"----------SABRE Efficiency Calculation----------"<<std::endl;
 	std::cout<<"Loading in output from kinematics simulation: "<<inputname<<std::endl;
@@ -186,7 +186,7 @@ void SabreEfficiency::CalculateEfficiency(const std::string& inputname, const st
 	std::cout<<"---------------------------------------------"<<std::endl;
 }
 
-void SabreEfficiency::DrawDetectorSystem(const std::string& filename)
+void SabreArray::DrawDetectorSystem(const std::string& filename)
 {
 	std::ofstream output(filename);
 
@@ -221,8 +221,6 @@ void SabreEfficiency::DrawDetectorSystem(const std::string& filename)
  		}
  	}
 
- 	output<<"SABRE Geometry File -- Coordinates for Detectors"<<std::endl;
-	output<<"Edges: x y z"<<std::endl;
 	for(unsigned int i=0; i<ringxs.size(); i++)
 		output<<ringxs[i]<<" "<<ringys[i]<<" "<<ringzs[i]<<std::endl;
 	for(unsigned int i=0; i<wedgexs.size(); i++)
@@ -231,7 +229,7 @@ void SabreEfficiency::DrawDetectorSystem(const std::string& filename)
  	output.close();
 }
 
-double SabreEfficiency::RunConsistencyCheck()
+double SabreArray::RunConsistencyCheck()
 {
 	double theta, phi;
 	double npoints = 5.0*16.0*4.0;
@@ -250,6 +248,7 @@ double SabreEfficiency::RunConsistencyCheck()
  					if(channels.first != -1)
 					{
  						count++;
+						break;
  					}
  				}
  			}
@@ -260,7 +259,7 @@ double SabreEfficiency::RunConsistencyCheck()
 }
 
 /*Returns if detected, as well as total energy deposited in SABRE*/
-DetectorResult SabreEfficiency::IsSabre(Mask::Nucleus& nucleus)
+DetectorResult SabreArray::IsSabre(Mask::Nucleus& nucleus)
 {
 	DetectorResult observation;
 	if(nucleus.GetKE() <= s_energyThreshold)
@@ -279,7 +278,6 @@ DetectorResult SabreEfficiency::IsSabre(Mask::Nucleus& nucleus)
 		if(m_deadMap.IsDead(detector.GetDetectorID(), channel.first, 0) || m_deadMap.IsDead(detector.GetDetectorID(), channel.second, 1))
 				break; //dead channel check
 
-		observation.detectFlag = true;
 		observation.direction = detector.GetTrajectoryCoordinates(nucleus.vec4.Theta(), nucleus.vec4.Phi());
 		thetaIncident = std::acos(observation.direction.Dot(detector.GetNormTilted())/(observation.direction.R()));
 
@@ -293,6 +291,7 @@ DetectorResult SabreEfficiency::IsSabre(Mask::Nucleus& nucleus)
 
 		observation.det_name = "SABRE"+std::to_string(detector.GetDetectorID());
 		observation.energy_deposited = m_detectorEloss.GetEnergyLossTotal(nucleus.Z, nucleus.A, ke, M_PI - thetaIncident);
+		observation.detectFlag = true;
 		return observation;
 	}
 
@@ -300,7 +299,7 @@ DetectorResult SabreEfficiency::IsSabre(Mask::Nucleus& nucleus)
 	return observation;
 }
 
-void SabreEfficiency::CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts)
+void SabreArray::CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts)
 {
 	if (data.size() == 3 && data[1].isDetected && data[2].isDetected)
 	{

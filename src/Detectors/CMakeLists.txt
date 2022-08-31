@@ -1,29 +1,27 @@
-add_executable(DetectEff)
-target_include_directories(DetectEff PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/..)
+add_executable(Detectors)
+target_include_directories(Detectors PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
-target_sources(DetectEff PUBLIC
+target_sources(Detectors PUBLIC
     AnasenDeadChannelMap.cpp
     AnasenDeadChannelMap.h
-    AnasenEfficiency.cpp
-    AnasenEfficiency.h
+    AnasenArray.cpp
+    AnasenArray.h
     main.cpp
-    DetectorEfficiency.h
+    DetectorArray.h
     QQQDetector.cpp
     QQQDetector.h
     SabreDeadChannelMap.cpp
     SabreDeadChannelMap.h
     SabreDetector.cpp
     SabreDetector.h
-    SabreEfficiency.cpp
-    SabreEfficiency.h
-    StripDetector.cpp
-    StripDetector.h
+    SabreArray.cpp
+    SabreArray.h
+    SX3Detector.cpp
+    SX3Detector.h
 )
 
-target_link_libraries(DetectEff
-    MaskDict
+target_link_libraries(Detectors
     Mask
-    catima
 )
 
-set_target_properties(DetectEff PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${MASK_BINARY_DIR})
+set_target_properties(Detectors PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${MASK_BINARY_DIR})

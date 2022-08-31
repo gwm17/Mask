@@ -12,7 +12,6 @@ target_sources(RootPlot PUBLIC
 )
 
 target_link_libraries(RootPlot
-    MaskDict
     Mask
     ${ROOT_LIBRARIES}
 )

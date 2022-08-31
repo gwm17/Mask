@@ -1,11 +1,8 @@
 #include "QQQDetector.h"
 
-QQQDetector::QQQDetector(double R_in, double R_out, double deltaPhi, double phiCentral, double z, double x, double y) :
-	m_innerR(R_in), m_outerR(R_out), m_deltaPhi(deltaPhi), m_centralPhi(phiCentral), m_translation(x,y,z), m_norm(0.0,0.0,1.0),
-	m_uniformFraction(0.0, 1.0), m_isSmearing(false)
+QQQDetector::QQQDetector(double phiCentral, double zOffset, double xOffset, double yOffset) :
+	m_centralPhi(phiCentral), m_translation(xOffset,yOffset,zOffset), m_norm(0.0,0.0,1.0), m_uniformFraction(0.0, 1.0), m_isSmearing(false)
 {
-	m_deltaR = (m_outerR - m_innerR)/s_nRings;
-	m_deltaPhiWedge = m_deltaPhi/s_nWedges;
 	m_zRotation.SetAngle(m_centralPhi);
 	m_ringCoords.resize(s_nRings);
 	m_wedgeCoords.resize(s_nWedges);
@@ -28,23 +25,23 @@ void QQQDetector::CalculateCorners()
 	//Generate flat ring corner coordinates
 	for(int i=0; i<s_nRings; i++)
 	{
-		x0 = (m_innerR + m_deltaR*(i+1))*std::cos(-m_deltaPhi/2.0);
-		y0 = (m_innerR + m_deltaR*(i+1))*std::sin(-m_deltaPhi/2.0);
+		x0 = (s_innerR + s_deltaR*(i+1))*std::cos(-s_deltaPhiTotal/2.0);
+		y0 = (s_innerR + s_deltaR*(i+1))*std::sin(-s_deltaPhiTotal/2.0);
 		z0 = 0.0;
 		m_ringCoords[i][0].SetXYZ(x0, y0, z0);
 
-		x1 = (m_innerR + m_deltaR*(i))*std::cos(-m_deltaPhi/2.0);
-		y1 = (m_innerR + m_deltaR*(i))*std::sin(-m_deltaPhi/2.0);
+		x1 = (s_innerR + s_deltaR*(i))*std::cos(-s_deltaPhiTotal/2.0);
+		y1 = (s_innerR + s_deltaR*(i))*std::sin(-s_deltaPhiTotal/2.0);
 		z1 = 0.0;
 		m_ringCoords[i][1].SetXYZ(x1, y1, z1);
 
-		x2 = (m_innerR + m_deltaR*(i))*std::cos(m_deltaPhi/2.0);
-		y2 = (m_innerR + m_deltaR*(i))*std::sin(m_deltaPhi/2.0);
+		x2 = (s_innerR + s_deltaR*(i))*std::cos(s_deltaPhiTotal/2.0);
+		y2 = (s_innerR + s_deltaR*(i))*std::sin(s_deltaPhiTotal/2.0);
 		z2 = 0.0;
 		m_ringCoords[i][2].SetXYZ(x2, y2, z2);
 
-		x3 = (m_innerR + m_deltaR*(i+1))*std::cos(m_deltaPhi/2.0);
-		y3 = (m_innerR + m_deltaR*(i+1))*std::sin(m_deltaPhi/2.0);
+		x3 = (s_innerR + s_deltaR*(i+1))*std::cos(s_deltaPhiTotal/2.0);
+		y3 = (s_innerR + s_deltaR*(i+1))*std::sin(s_deltaPhiTotal/2.0);
 		z3 = 0.0;
 		m_ringCoords[i][3].SetXYZ(x3, y3, z3);
 	}
@@ -52,23 +49,23 @@ void QQQDetector::CalculateCorners()
 	//Generate flat wedge corner coordinates
 	for(int i=0; i<s_nWedges; i++)
 	{
-		x0 = m_outerR * std::cos(-m_deltaPhi/2.0 + i*m_deltaPhiWedge);
-		y0 = m_outerR * std::sin(-m_deltaPhi/2.0 + i*m_deltaPhiWedge);
+		x0 = s_outerR * std::cos(-s_deltaPhiTotal/2.0 + i*s_deltaPhi);
+		y0 = s_outerR * std::sin(-s_deltaPhiTotal/2.0 + i*s_deltaPhi);
 		z0 = 0.0;
 		m_wedgeCoords[i][0].SetXYZ(x0, y0, z0);
 
-		x1 = m_innerR * std::cos(-m_deltaPhi/2.0 + i*m_deltaPhiWedge);
-		y1 = m_innerR * std::sin(-m_deltaPhi/2.0 + i*m_deltaPhiWedge);
+		x1 = s_innerR * std::cos(-s_deltaPhiTotal/2.0 + i*s_deltaPhi);
+		y1 = s_innerR * std::sin(-s_deltaPhiTotal/2.0 + i*s_deltaPhi);
 		z1 = 0.0;
 		m_wedgeCoords[i][1].SetXYZ(x1, y1, z1);
 
-		x2 = m_innerR * std::cos(-m_deltaPhi/2.0 + (i+1)*m_deltaPhiWedge);
-		y2 = m_innerR * std::sin(-m_deltaPhi/2.0 + (i+1)*m_deltaPhiWedge);
+		x2 = s_innerR * std::cos(-s_deltaPhiTotal/2.0 + (i+1)*s_deltaPhi);
+		y2 = s_innerR * std::sin(-s_deltaPhiTotal/2.0 + (i+1)*s_deltaPhi);
 		z2 = 0.0;
 		m_wedgeCoords[i][2].SetXYZ(x2, y2, z2);
 
-		x3 = m_outerR * std::cos(-m_deltaPhi/2.0 + (i+1)*m_deltaPhiWedge);
-		y3 = m_outerR * std::sin(-m_deltaPhi/2.0 + (i+1)*m_deltaPhiWedge);
+		x3 = s_outerR * std::cos(-s_deltaPhiTotal/2.0 + (i+1)*s_deltaPhi);
+		y3 = s_outerR * std::sin(-s_deltaPhiTotal/2.0 + (i+1)*s_deltaPhi);
 		z3 = 0.0;
 		m_wedgeCoords[i][3].SetXYZ(x3, y3, z3);
 	}
@@ -156,13 +153,13 @@ ROOT::Math::XYZPoint QQQDetector::GetHitCoordinates(int ringch, int wedgech)
 	double r_center, phi_center;
 	if(m_isSmearing)
 	{
-		r_center  = m_innerR + (m_uniformFraction(Mask::RandomGenerator::GetInstance().GetGenerator())+ringch)*m_deltaR;
-		phi_center = -m_deltaPhi/2.0 + (m_uniformFraction(Mask::RandomGenerator::GetInstance().GetGenerator())+wedgech)*m_deltaPhiWedge;
+		r_center  = s_innerR + (m_uniformFraction(Mask::RandomGenerator::GetInstance().GetGenerator())+ringch)*s_deltaR;
+		phi_center = -s_deltaPhiTotal/2.0 + (m_uniformFraction(Mask::RandomGenerator::GetInstance().GetGenerator())+wedgech)*s_deltaPhi;
 	}
 	else
 	{
-		r_center  = m_innerR + (0.5+ringch)*m_deltaR;
-		phi_center = -m_deltaPhi/2.0 + (0.5+wedgech)*m_deltaPhiWedge;
+		r_center  = s_innerR + (0.5+ringch)*s_deltaR;
+		phi_center = -s_deltaPhiTotal/2.0 + (0.5+wedgech)*s_deltaPhi;
 	}
 	double x = r_center*std::cos(phi_center);
 	double y = r_center*std::sin(phi_center);
