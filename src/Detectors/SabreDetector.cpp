@@ -194,8 +194,9 @@ ROOT::Math::XYZPoint SabreDetector::GetTrajectoryCoordinates(double theta, doubl
 	if(m_translation.Vect().X() != 0.0 || m_translation.Vect().Y() != 0.0)
 		return ROOT::Math::XYZPoint();
 
+	double tilt = -1.0*m_tilt;
 	//Calculate the *potential* phi in the flat detector
-	double phi_numerator = std::cos(m_tilt)*(std::sin(phi)*std::cos(m_centerPhi) - std::sin(m_centerPhi)*std::cos(phi));
+	double phi_numerator = std::cos(tilt)*(std::sin(phi)*std::cos(m_centerPhi) - std::sin(m_centerPhi)*std::cos(phi));
 	double phi_denominator = std::cos(m_centerPhi)*std::cos(phi) + std::sin(m_centerPhi)*std::sin(phi);
 	double phi_flat = std::atan2(phi_numerator, phi_denominator);
 	if(phi_flat < 0)
@@ -203,13 +204,13 @@ ROOT::Math::XYZPoint SabreDetector::GetTrajectoryCoordinates(double theta, doubl
 
 	//Calculate the *potential* R in the flat detector
 	double r_numerator = m_translation.Vect().Z()*std::cos(phi)*std::sin(theta);
-	double r_denominator = std::cos(phi_flat)*std::cos(m_centerPhi)*std::cos(m_tilt)*std::cos(theta) -
+	double r_denominator = std::cos(phi_flat)*std::cos(m_centerPhi)*std::cos(tilt)*std::cos(theta) -
 						   std::sin(phi_flat)*std::sin(m_centerPhi)*std::cos(theta) -
-						   std::cos(phi_flat)*std::sin(m_tilt)*std::cos(phi)*std::sin(theta);
+						   std::cos(phi_flat)*std::sin(tilt)*std::cos(phi)*std::sin(theta);
 	double r_flat = r_numerator/r_denominator;
 
 	//Calculate the distance from the origin to the hit on the detector
-	double R_to_detector = (r_flat*std::cos(phi_flat)*std::sin(m_tilt) + m_translation.Vect().Z())/std::cos(theta);
+	double R_to_detector = (r_flat*std::cos(phi_flat)*std::sin(tilt) + m_translation.Vect().Z())/std::cos(theta);
 	double xhit = R_to_detector*std::sin(theta)*std::cos(phi);
 	double yhit = R_to_detector*std::sin(theta)*std::sin(phi);
 	double zhit = R_to_detector*std::cos(theta);
@@ -244,8 +245,9 @@ std::pair<int, int> SabreDetector::GetTrajectoryRingWedge(double theta, double p
 	if(m_translation.Vect().X() != 0.0 || m_translation.Vect().Y() != 0.0)
 		return std::make_pair(-1, -1);
 
+	double tilt = -1.0*m_tilt;
 	//Calculate the *potential* phi in the flat detector
-	double phi_numerator = std::cos(m_tilt)*(std::sin(phi)*std::cos(m_centerPhi) - std::sin(m_centerPhi)*std::cos(phi));
+	double phi_numerator = std::cos(tilt)*(std::sin(phi)*std::cos(m_centerPhi) - std::sin(m_centerPhi)*std::cos(phi));
 	double phi_denominator = std::cos(m_centerPhi)*std::cos(phi) + std::sin(m_centerPhi)*std::sin(phi);
 	double phi_flat = std::atan2(phi_numerator, phi_denominator);
 	if(phi_flat < 0)
@@ -253,14 +255,10 @@ std::pair<int, int> SabreDetector::GetTrajectoryRingWedge(double theta, double p
 
 	//Calculate the *potential* R in the flat detector
 	double r_numerator = m_translation.Vect().Z()*std::cos(phi)*std::sin(theta);
-	double r_denominator = std::cos(phi_flat)*std::cos(m_centerPhi)*std::cos(m_tilt)*std::cos(theta) -
+	double r_denominator = std::cos(phi_flat)*std::cos(m_centerPhi)*std::cos(tilt)*std::cos(theta) -
 						   std::sin(phi_flat)*std::sin(m_centerPhi)*std::cos(theta) -
-						   std::cos(phi_flat)*std::sin(m_tilt)*std::cos(phi)*std::sin(theta);
+						   std::cos(phi_flat)*std::sin(tilt)*std::cos(phi)*std::sin(theta);
 	double r_flat = r_numerator/r_denominator;
-
-	//Calculate the distance from the origin to the hit on the detector
-	//double R_to_detector = (r_flat*std::cos(phi_flat)*std::sin(m_tilt) + m_translation.GetZ())/std::cos(theta);
-
 
 	//Check to see if our flat coords fall inside the flat detector
 	if(IsInside(r_flat, phi_flat))

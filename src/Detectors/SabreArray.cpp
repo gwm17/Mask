@@ -248,6 +248,7 @@ double SabreArray::RunConsistencyCheck()
  					if(channels.first != -1)
 					{
  						count++;
+						break;
  					}
  				}
  			}

@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 	std::string mapfile = "./etc/sabreDeadChannels_May2022.txt";
 	sabre.SetDeadChannelMap(mapfile);
 	sabre.CalculateEfficiency(inputname, outputname, statsname);
-	//std::cout<<"Running consistency check(1=success): "<<sabre.RunConsistencyCheck()<<std::endl;
+	//std::cout<<"Running consistency check(0=success): "<<sabre.RunConsistencyCheck()<<std::endl;
 	//sabre.DrawDetectorSystem("/data1/gwm17/10B3He/Feb2021/simulation/SABREGeo.txt");
 	
 
