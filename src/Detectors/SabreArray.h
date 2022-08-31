@@ -32,7 +32,7 @@ private:
     bool m_degradedDetectors[5];
 
 	//Sabre constants
-    static constexpr double s_tilt = 40.0;
+    static constexpr double s_tilt = -40.0;
     static constexpr double s_zOffset = -0.1245;
     static constexpr int s_nDets = 5;
     static constexpr double s_centerPhiList[s_nDets] = {306.0, 18.0, 234.0, 162.0, 90.0};

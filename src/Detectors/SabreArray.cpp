@@ -221,8 +221,6 @@ void SabreArray::DrawDetectorSystem(const std::string& filename)
  		}
  	}
 
- 	output<<"SABRE Geometry File -- Coordinates for Detectors"<<std::endl;
-	output<<"Edges: x y z"<<std::endl;
 	for(unsigned int i=0; i<ringxs.size(); i++)
 		output<<ringxs[i]<<" "<<ringys[i]<<" "<<ringzs[i]<<std::endl;
 	for(unsigned int i=0; i<wedgexs.size(); i++)
@@ -279,7 +277,6 @@ DetectorResult SabreArray::IsSabre(Mask::Nucleus& nucleus)
 		if(m_deadMap.IsDead(detector.GetDetectorID(), channel.first, 0) || m_deadMap.IsDead(detector.GetDetectorID(), channel.second, 1))
 				break; //dead channel check
 
-		observation.detectFlag = true;
 		observation.direction = detector.GetTrajectoryCoordinates(nucleus.vec4.Theta(), nucleus.vec4.Phi());
 		thetaIncident = std::acos(observation.direction.Dot(detector.GetNormTilted())/(observation.direction.R()));
 
@@ -293,6 +290,7 @@ DetectorResult SabreArray::IsSabre(Mask::Nucleus& nucleus)
 
 		observation.det_name = "SABRE"+std::to_string(detector.GetDetectorID());
 		observation.energy_deposited = m_detectorEloss.GetEnergyLossTotal(nucleus.Z, nucleus.A, ke, M_PI - thetaIncident);
+		observation.detectFlag = true;
 		return observation;
 	}
 

@@ -13,11 +13,6 @@ static double FullPhi(double phi)
 RootPlotter::RootPlotter()
 {
 	TH1::AddDirectory(kFALSE);
-	//Enforce dictionary linking
-	if(Mask::EnforceDictionaryLinked())
-	{
-		std::cout<<"Dictionary Linked"<<std::endl;
-	}
 }
 
 RootPlotter::~RootPlotter() {}
