@@ -13,7 +13,7 @@ namespace Mask {
 	}
 	
 	AngularDistribution::AngularDistribution(const std::string& file) :
-		m_branchingRatio(1.0), m_L(0), m_isIsotropic(true)
+		m_uniformCosineDist(-1.0, 1.0), m_branchingRatio(1.0), m_L(0), m_isIsotropic(true)
 	{
 		ReadDistributionFile(file);
 	}

@@ -10,7 +10,7 @@ namespace Mask {
 	MaskApp::MaskApp() :
 		m_system(nullptr)
 	{
-		std::cout<<"----------GWM Kinematics Simulation----------"<<std::endl;
+		std::cout<<"----------Monte Carlo Simulation of Kinematics----------"<<std::endl;
 	}
 	
 	MaskApp::~MaskApp() 
@@ -29,40 +29,87 @@ namespace Mask {
 		}
 	
 		std::string junk;
-		getline(input, junk);
+		std::getline(input, junk);
 		input>>junk>>m_outputName;
-	
-		std::vector<int> avec, zvec, svec;
-		int z, a, s;
-		getline(input, junk);
-		getline(input, junk);
+		std::getline(input, junk);
+		std::getline(input, junk);
+		input>>junk>>m_nsamples;
 
+		std::vector<StepParameters> params;
+		int z, a;
 		while(input>>junk)
 		{
-			if(junk == "begin_nuclei(Z,A)")
+			if(junk == "begin_chain")
 				continue;
-			else if (junk == "end_nuclei(Z,A)")
+			else if (junk == "end_chain")
 				break;
-			else
+			else if(junk == "begin_step")
 			{
-				z = std::stoi(junk);
-				input>>a;
-				zvec.push_back(z);
-				avec.push_back(a);
+				StepParameters currentParams;
+				input >> junk >> junk;
+				currentParams.rxnType = StringToRxnType(junk);
+				if(currentParams.rxnType == RxnType::Reaction)
+				{
+					input >> junk;
+					for(int i=0; i<3; i++)
+					{
+						input >> z >> a;
+						currentParams.Z.push_back(z);
+						currentParams.A.push_back(a);
+					}
+					input >> junk;
+					input >> junk >> currentParams.meanBeamEnergy;
+					input >> junk >> currentParams.sigmaBeamEnergy;
+					input >> junk >> junk;
+					currentParams.thetaType = StringToRxnThetaType(junk);
+					input >> junk >> currentParams.thetaMin;
+					input >> junk >> currentParams.thetaMax;
+					input >> junk >> currentParams.phiMin;
+					input >> junk >> currentParams.phiMax;
+					input >> junk >> currentParams.meanResidualEx;
+					input >> junk >> currentParams.sigmaResidualEx;
+					params.push_back(currentParams);
+				}
+				else if(currentParams.rxnType == RxnType::Decay)
+				{
+					input >> junk;
+					for(int i=0; i<2; i++)
+					{
+						input >> z >> a;
+						currentParams.Z.push_back(z);
+						currentParams.A.push_back(a);
+					}
+					input >> junk;
+					input >> junk >> currentParams.phiMin;
+					input >> junk >> currentParams.phiMax;
+					input >> junk >> currentParams.meanResidualEx;
+					input >> junk >> currentParams.sigmaResidualEx;
+					input >> junk >> currentParams.angularDistFile;
+					params.push_back(currentParams);
+				}
+				else
+				{
+					std::cerr << "Invalid reaction information at MaskApp::LoadConfig!" << std::endl;
+					return false;
+				}
 			}
 		}
 
-		m_system = CreateSystem(zvec, avec);
-		if(m_system == nullptr)
+		m_system = CreateSystem(params);
+		if(m_system == nullptr || !m_system->IsValid())
 		{
+			std::cerr<<"Param size: "<<params.size()<<std::endl;
 			std::cerr<<"Failure to parse reaction system... configuration not loaded."<<std::endl;
 			return false;
 		}
+		std::getline(input, junk);
+		std::getline(input, junk);
 
+		LayeredTarget target;
 		int nlayers;
 		double thickness;
-		getline(input, junk);
-		getline(input, junk);
+		std::vector<int> avec, zvec, svec;
+		int s;
 		input>>junk>>nlayers;
 		for(int i=0; i<nlayers; i++) 
 		{
@@ -80,42 +127,26 @@ namespace Mask {
 				input>>z>>a>>s;
 				zvec.push_back(z); avec.push_back(a); svec.push_back(s);
 			}
-			m_system->AddTargetLayer(zvec, avec, svec, thickness);
+			target.AddLayer(zvec, avec, svec, thickness);
 			input>>junk;
 		}
+		m_system->SetLayeredTarget(target);
+
+		std::cout<<"Outputing data to file: "<<m_outputName<<std::endl;
 		std::cout<<"Reaction equation: "<<GetSystemName()<<std::endl;
-	
-		double par1, par2;
-		std::string dfile1, dfile2;
-		std::string thetaTypeString;
-		getline(input, junk);
-		getline(input, junk);
-	
-		input>>junk>>m_nsamples;
-		input>>junk>>par1>>junk>>par2;
-		m_system->SetBeamDistro(par1, par2);
-		input>>junk>>thetaTypeString;
-		m_system->SetReactionThetaType(StringToRxnThetaType(thetaTypeString));
-		
-		input>>junk>>par1>>junk>>par2;
-		m_system->SetTheta1Range(par1, par2);
-		input>>junk>>par1>>junk>>par2;
-		m_system->SetPhi1Range(par1, par2);
-		input>>junk>>par1>>junk>>par2;
-		m_system->SetExcitationDistro(par1, par2);
-		input>>junk>>dfile1;
-		input>>junk>>dfile2;
-		m_system->SetDecay1Distribution(dfile1);
-		m_system->SetDecay2Distribution(dfile2);
-	
 		std::cout<<"Number of samples: "<<GetNumberOfSamples()<<std::endl;
 	
 		return true;
 	}
 	
-	bool MaskApp::SaveConfig(const std::string& filename) { return true; }
+	//Not implemented... yet!
+	bool MaskApp::SaveConfig(const std::string& filename)
+	{ 
+		return true;
+	}
 	
-	void MaskApp::Run() {
+	void MaskApp::Run()
+	{
 		std::cout<<"Running simulation..."<<std::endl;
 		if(m_system == nullptr) 
 		{

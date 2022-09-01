@@ -1,12 +1,38 @@
 ----------Data Information----------
 OutputFile: /media/data/gwm17/mask_tests/10B3Hea_16800keV_5Lia_74B.root
 ----------Reaction Information----------
-begin_nuclei(Z,A)
-	5	10
-	2	3
-	2	4
-	2	4
-end_nuclei(Z,A)
+NumberOfSamples: 100000
+begin_chain
+	begin_step
+		Type: Reaction
+		begin_nuclei
+			5 10
+			2 3
+			2 4
+		end_nuclei
+		BeamEnergyMean(MeV): 24.0
+		BeamEnergySigma(MeV): 0.0
+		ThetaType: Lab
+		ThetaMin(deg): 15.0
+		ThetaMax(deg): 15.0
+		PhiMin(deg): 0.0
+		PhMax(deg): 0.0
+		ResidualExcitationMean(MeV): 16.8
+		ResidualExcitationSigma(MeV): 0.023
+	end_step
+	begin_step
+		Type: Decay
+		begin_nuclei
+			5 9
+			2 4
+		end_nuclei
+		PhiMin(deg): 0.0
+		PhMax(deg): 360.0
+		ResidualExcitationMean(MeV): 0.0
+		ResidualExcitationSigma(MeV): 0.0
+		AngularDistributionFile: ./etc/isotropic_dist.txt
+	end_step
+end_chain
 ----------Target Information----------
 NumberOfLayers: 1
 begin_layer
@@ -15,13 +41,4 @@ begin_layer
 		element	5 10 1
 	end_elements
 end_layer
-----------Sampling Information----------
-NumberOfSamples: 1000000
-BeamMeanEnergy(MeV): 24.0 BeamEnergySigma(MeV): 0.0
-EjectileThetaType(0=Lab,1=CM): 0
-EjectileThetaMin(deg): 15.0 EjectileThetaMax(deg): 15.0
-EjectilePhiMin(deg): 0.0 EjectilePhiMax(deg): 0.0
-ResidualExMean(MeV): 16.8 ResidualExSigma(MeV): 0.023
-Decay1_DistributionFile: ./etc/isotropic_dist.txt
-Decay2_DistributionFile: ./etc/isotropic_dist.txt
 --------------------------------------

@@ -12,75 +12,69 @@
 #include "Reaction.h"
 #include "KinematicsExceptions.h"
 #include "RxnType.h"
+#include "AngularDistribution.h"
 #include <vector>
 #include <random>
 
 namespace Mask {
+
+	struct StepParameters
+	{
+		RxnType rxnType = RxnType::None;
+		std::vector<int> Z;
+		std::vector<int> A;
+		double meanBeamEnergy = -1.0;
+		double sigmaBeamEnergy = -1.0;
+		RxnThetaType thetaType = RxnThetaType::None;
+		double thetaMin = -1.0;
+		double thetaMax = -1.0;
+		double phiMin = -1.0;
+		double phiMax = -1.0;
+		double meanResidualEx = -1.0;
+		double sigmaResidualEx = -1.0;
+		std::string angularDistFile;
+	};
 
 	class ReactionSystem
 	{
 	public:
 		ReactionSystem();
 		virtual ~ReactionSystem();
-	
-		virtual bool SetNuclei(const std::vector<int>& z, const std::vector<int>& a) = 0;
-		virtual void RunSystem() = 0;
-		virtual std::vector<Nucleus>* GetNuclei() = 0;
-		virtual void SetReactionThetaType(RxnThetaType type) {}
-		virtual void SetDecay1Distribution(const std::string& filename) {}
-		virtual void SetDecay2Distribution(const std::string& filename) {}
-	
-		void AddTargetLayer(const std::vector<int>& zt, const std::vector<int>& at, const std::vector<int>& stoich, double thickness);
-	
-		/*Set sampling parameters*/
-		void SetBeamDistro(double mean, double sigma)
-		{
-			if(m_beamDist)
-				delete m_beamDist;
-			m_beamDist = new std::normal_distribution<double>(mean, sigma); 
-		}
-	
-		void SetTheta1Range(double min, double max)
-		{ 
-			if(m_theta1Range)
-				delete m_theta1Range;
-			m_theta1Range = new std::uniform_real_distribution<double>(std::cos(min*s_deg2rad), std::cos(max*s_deg2rad)); 
-		}
-	
-		void SetPhi1Range(double min, double max)
-		{
-			if(m_phi1Range)
-				delete m_phi1Range;
-			m_phi1Range = new std::uniform_real_distribution<double>(min*s_deg2rad, max*s_deg2rad); 
-		}
-	
-		void SetExcitationDistro(double mean, double sigma)
-		{
-			if(m_exDist)
-				delete m_exDist;
-			m_exDist = new std::normal_distribution<double>(mean, sigma); 
-		}
 
+		virtual void SetLayeredTarget(const LayeredTarget& target) = 0;
+		virtual void RunSystem() = 0;
+
+		std::vector<Nucleus>* GetNuclei() { return &m_nuclei; }
 		const std::string& GetSystemEquation() const { return m_sysEquation; }
-	
+		bool IsValid() const { return m_isValid; }
+
 	protected:
-		virtual void LinkTarget() = 0;
 		virtual void SetSystemEquation() = 0;
+
+		void AddBeamDistribution(double mean, double sigma);
+		void AddThetaRange(double min, double max);
+		void AddPhiRange(double min, double max);
+		void AddExcitationDistribution(double mean, double sigma);
+		void AddDecayAngularDistribution(const std::string& filename);
 		
 		LayeredTarget m_target;
 	
 		//Sampling information
-		std::normal_distribution<double> *m_beamDist, *m_exDist;
-		std::uniform_real_distribution<double> *m_theta1Range, *m_phi1Range; 
-	
+		std::vector<std::normal_distribution<double>> m_beamDistributions, m_exDistributions;
+		std::vector<std::uniform_real_distribution<double>> m_thetaRanges, m_phiRanges;
+		std::vector<AngularDistribution> m_decayAngularDistributions;
+
 		bool m_isTargetSet;
+		bool m_isValid;
+
 		std::size_t m_rxnLayer;
 		std::string m_sysEquation;
 		std::vector<Nucleus> m_nuclei;
+
 		static constexpr double s_deg2rad = M_PI/180.0;
 	};
 
-	ReactionSystem* CreateSystem(const std::vector<int>& z, const std::vector<int>& a);
+	ReactionSystem* CreateSystem(const std::vector<StepParameters>& params);
 }
 
 #endif
