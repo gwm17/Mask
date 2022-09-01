@@ -5,51 +5,56 @@
 
 namespace Mask {
 
-	OneStepSystem::OneStepSystem() :
+	OneStepSystem::OneStepSystem(const std::vector<StepParameters>& params) :
 		ReactionSystem()
 	{
 		m_nuclei.resize(4);
-	}
-	
-	OneStepSystem::OneStepSystem(const std::vector<int>& z, const std::vector<int>& a) :
-		ReactionSystem()
-	{
-		m_nuclei.resize(4);
-		SetNuclei(z, a);
+		Init(params);
 	}
 	
 	OneStepSystem::~OneStepSystem() {}
 	
-	bool OneStepSystem::SetNuclei(const std::vector<int>& z, const std::vector<int>& a)
+	void OneStepSystem::Init(const std::vector<StepParameters>& params)
 	{
-		if(z.size() != a.size() || z.size() != 3)
-			return false;
+		if(params.size() != 1 || params[0].rxnType != RxnType::Reaction ||
+		   params[0].Z.size() != 3 || params[0].A.size() != 3)
+		{
+			m_isValid = false;
+			std::cerr << "Invalid parameters at OneStepSystem::Init(), does not match OneStep signature!" << std::endl;
+			return;
+		}
 
-		int zr = z[0] + z[1] - z[2];
-		int ar = a[0] + a[1] - a[2];
+		const StepParameters& step1Params = params[0];
 
-		m_nuclei[0] = CreateNucleus(z[0], a[0]); //target
-		m_nuclei[1] = CreateNucleus(z[1], a[1]); //projectile
-		m_nuclei[2] = CreateNucleus(z[2], a[2]); //ejectile
+		//Set nuclei
+
+		int zr = step1Params.Z[0] + step1Params.Z[1] - step1Params.Z[2];
+		int ar = step1Params.A[0] + step1Params.A[1] - step1Params.A[2];
+
+		m_nuclei[0] = CreateNucleus(step1Params.Z[0], step1Params.A[0]); //target
+		m_nuclei[1] = CreateNucleus(step1Params.Z[1], step1Params.A[1]); //projectile
+		m_nuclei[2] = CreateNucleus(step1Params.Z[2], step1Params.A[2]); //ejectile
 		m_nuclei[3] = CreateNucleus(zr, ar); //residual
 
 		m_step1.BindNuclei(&(m_nuclei[0]), &(m_nuclei[1]), &(m_nuclei[2]), &(m_nuclei[3]));
 		SetSystemEquation();
-		return true;
-	}
 
-	std::vector<Nucleus>* OneStepSystem::GetNuclei()
-	{
-		return &m_nuclei;
+		//Set sampling parameters
+
+		AddBeamDistribution(step1Params.meanBeamEnergy, step1Params.sigmaBeamEnergy);
+		m_step1.SetEjectileThetaType(step1Params.thetaType);
+		AddThetaRange(step1Params.thetaMin, step1Params.thetaMax);
+		AddPhiRange(step1Params.phiMin, step1Params.phiMax);
+		AddExcitationDistribution(step1Params.meanResidualEx, step1Params.sigmaResidualEx);
 	}
 	
-	void OneStepSystem::LinkTarget()
+	void OneStepSystem::SetLayeredTarget(const LayeredTarget& target)
 	{
-		m_step1.SetLayeredTarget(&m_target);
-	
+		m_target = target;
 		m_rxnLayer = m_target.FindLayerContaining(m_nuclei[0].Z, m_nuclei[0].A);
 		if(m_rxnLayer != m_target.GetNumberOfLayers())
 		{
+			m_step1.SetLayeredTarget(&m_target);
 			m_step1.SetRxnLayer(m_rxnLayer);
 			m_isTargetSet = true;
 		}
@@ -67,18 +72,14 @@ namespace Mask {
 		m_sysEquation = stream.str();
 	}
 	
-	void OneStepSystem::RunSystem() {
-		//Link up the target if it hasn't been done yet
-		if(!m_isTargetSet)
-		{
-			LinkTarget();
-		}
-	
+	void OneStepSystem::RunSystem()
+	{
 		//Sample parameters
-		double bke = (*m_beamDist)(RandomGenerator::GetInstance().GetGenerator());
-		double rxnTheta = std::acos((*m_theta1Range)(RandomGenerator::GetInstance().GetGenerator()));
-		double rxnPhi = (*m_phi1Range)(RandomGenerator::GetInstance().GetGenerator());
-		double residEx = (*m_exDist)(RandomGenerator::GetInstance().GetGenerator());
+		std::mt19937& gen = RandomGenerator::GetInstance().GetGenerator();
+		double bke = (m_beamDistributions[0])(gen);
+		double rxnTheta = std::acos((m_thetaRanges[0])(gen));
+		double rxnPhi = (m_phiRanges[0])(gen);
+		double residEx = (m_exDistributions[0])(gen);
 		
 		m_step1.SetBeamKE(bke);
 		m_step1.SetPolarRxnAngle(rxnTheta);

@@ -9,30 +9,17 @@ namespace Mask {
 	class TwoStepSystem : public ReactionSystem
 	{
 	public:
-		TwoStepSystem();
-		TwoStepSystem(const std::vector<int>& z, const std::vector<int>& a);
+		TwoStepSystem(const std::vector<StepParameters>& params);
 		~TwoStepSystem();
-		bool SetNuclei(const std::vector<int>& z, const std::vector<int>& a) override;
-		void RunSystem() override;
-		std::vector<Nucleus>* GetNuclei() override;
-	
-		virtual void SetDecay1Distribution(const std::string& filename) override { m_step2Distribution.ReadDistributionFile(filename); };
-	
-		virtual void SetReactionThetaType(RxnThetaType type) override { m_step1.SetEjectileThetaType(type); };
 
-		int GetDecay1AngularMomentum() { return m_step2Distribution.GetL(); };
-		double GetDecay1BranchingRatio() { return m_step2Distribution.GetBranchingRatio(); };
+		virtual void SetLayeredTarget(const LayeredTarget& target) override;
+		virtual void RunSystem() override;
 	
 	private:
-		void LinkTarget() override;
+		void Init(const std::vector<StepParameters>& params);
 		void SetSystemEquation() override;
 
-		std::uniform_real_distribution<double> m_phi2Range;
-		
 		Reaction m_step1, m_step2;
-	
-		AngularDistribution m_step2Distribution;
-	
 	};
 
 }

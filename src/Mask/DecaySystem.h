@@ -6,29 +6,20 @@
 
 namespace Mask {
 
-	class DecaySystem: public ReactionSystem {
+	class DecaySystem: public ReactionSystem
+	{
 	public:
-		DecaySystem();
-		DecaySystem(const std::vector<int>& z, const std::vector<int>& a);
+		DecaySystem(const std::vector<StepParameters>& params);
 		~DecaySystem();
 	
-		bool SetNuclei(const std::vector<int>& z, const std::vector<int>& a) override;
-		void RunSystem() override;
-		std::vector<Nucleus>*GetNuclei() override;
-	
-		virtual void SetDecay1Distribution(const std::string& filename) override { m_step1Distribution.ReadDistributionFile(filename); }
-	
-		int GetDecay1AngularMomentum() { return m_step1Distribution.GetL(); }
-		double GetDecay1BranchingRatio() { return m_step1Distribution.GetBranchingRatio(); }
+		virtual void SetLayeredTarget(const LayeredTarget& target) override;
+		virtual void RunSystem() override;
 	
 	private:
-		void LinkTarget() override;
+		void Init(const std::vector<StepParameters>& params);
 		void SetSystemEquation() override;
 	
 		Reaction m_step1;
-	
-		AngularDistribution m_step1Distribution;
-		
 	};
 
 }

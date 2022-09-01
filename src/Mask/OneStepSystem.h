@@ -5,24 +5,20 @@
 
 namespace Mask {
 
-	class OneStepSystem: public ReactionSystem {
+	class OneStepSystem: public ReactionSystem
+	{
 	public:
-		OneStepSystem();
-		OneStepSystem(const std::vector<int>& z, const std::vector<int>& a);
+		OneStepSystem(const std::vector<StepParameters>& params);
 		~OneStepSystem();
 	
-		bool SetNuclei(const std::vector<int>& z, const std::vector<int>& a) override;
+		virtual void SetLayeredTarget(const LayeredTarget& target) override;
 		void RunSystem() override;
-		std::vector<Nucleus>* GetNuclei() override;
-	
-		virtual void SetReactionThetaType(RxnThetaType type) override { m_step1.SetEjectileThetaType(type); };
 	
 	private:
-		void LinkTarget() override;
+		void Init(const std::vector<StepParameters>& params);
 		void SetSystemEquation() override;
 	
 		Reaction m_step1;
-	
 	};
 
 }

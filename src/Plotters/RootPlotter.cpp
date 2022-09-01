@@ -75,18 +75,18 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc)
 	std::string angdist_name = sym + modifier +"_angDist";
 	std::string angdist_title = angdist_name+";cos#right(#theta_{CM}#left);counts";
 	
-	MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.vec4.Theta()*s_rad2deg, nuc.GetKE(), 2);
-	MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), FullPhi(nuc.vec4.Phi())*s_rad2deg, nuc.GetKE(), 4);
-	MyFill(th_vs_ph_name.c_str(), th_vs_ph_title.c_str(), nuc.vec4.Theta()*s_rad2deg, FullPhi(nuc.vec4.Phi())*s_rad2deg, 2);
-	MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
-	MyFill(angdist_name.c_str(), angdist_title.c_str(),20,-1.0,1.0,std::cos(nuc.thetaCM));
+	MyFill(ke_vs_th_name, ke_vs_th_title, nuc.vec4.Theta()*s_rad2deg, nuc.GetKE(), 2);
+	MyFill(ke_vs_ph_name, ke_vs_ph_title, FullPhi(nuc.vec4.Phi())*s_rad2deg, nuc.GetKE(), 4);
+	MyFill(th_vs_ph_name, th_vs_ph_title, nuc.vec4.Theta()*s_rad2deg, FullPhi(nuc.vec4.Phi())*s_rad2deg, 2);
+	MyFill(ex_name, ex_title, 260, -1.0, 25, nuc.GetExcitationEnergy());
+	MyFill(angdist_name, angdist_title, 20, -1.0, 1.0, std::cos(nuc.thetaCM));
 	if(nuc.isDetected)
 	{
-		MyFill(ke_vs_th_name.c_str(), ke_vs_th_title.c_str(), nuc.vec4.Theta()*s_rad2deg, nuc.detectedKE, 2);
-		MyFill(ke_vs_ph_name.c_str(), ke_vs_ph_title.c_str(), FullPhi(nuc.vec4.Phi())*s_rad2deg, nuc.detectedKE, 4);
-		MyFill(th_vs_ph_name.c_str(), th_vs_ph_title.c_str(), nuc.vec4.Theta()*s_rad2deg, FullPhi(nuc.vec4.Phi())*s_rad2deg, 2);
-		MyFill(ex_name.c_str(),ex_title.c_str(),260,-1.0,25,nuc.GetExcitationEnergy());
-		MyFill(angdist_name.c_str(), angdist_title.c_str(),20,-1.0,1.0,std::cos(nuc.thetaCM));
+		MyFill(ke_vs_th_name, ke_vs_th_title, nuc.vec4.Theta()*s_rad2deg, nuc.detectedKE, 2);
+		MyFill(ke_vs_ph_name, ke_vs_ph_title, FullPhi(nuc.vec4.Phi())*s_rad2deg, nuc.detectedKE, 4);
+		MyFill(th_vs_ph_name, th_vs_ph_title, nuc.vec4.Theta()*s_rad2deg, FullPhi(nuc.vec4.Phi())*s_rad2deg, 2);
+		MyFill(ex_name, ex_title, 260, -1.0, 25, nuc.GetExcitationEnergy());
+		MyFill(angdist_name, angdist_title, 20, -1.0, 1.0, std::cos(nuc.thetaCM));
 	}
 	
 }

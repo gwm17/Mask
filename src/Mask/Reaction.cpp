@@ -187,14 +187,15 @@ namespace Mask {
 	//Calculate in CM, where decay is isotropic
 	void Reaction::CalculateDecay()
 	{
-		double Q = m_target->vec4.M() - m_ejectile->groundStateMass - m_residual->groundStateMass;
+		double residualMass = m_residual->groundStateMass + m_ex;
+		double Q = m_target->vec4.M() - m_ejectile->groundStateMass - residualMass;
 		if(Q < 0)
 			throw QValueException();
 	
 		ROOT::Math::Boost boost(m_target->vec4.BoostToCM());
 		m_target->vec4 = boost*m_target->vec4;
 		double ejectE_cm = (m_ejectile->groundStateMass*m_ejectile->groundStateMass - 
-						   m_residual->groundStateMass*m_residual->groundStateMass + m_target->vec4.E()*m_target->vec4.E()) /
+						   residualMass*residualMass + m_target->vec4.E()*m_target->vec4.E()) /
 					       (2.0*m_target->vec4.E());
 		double ejectP_cm = std::sqrt(ejectE_cm*ejectE_cm - m_ejectile->groundStateMass*m_ejectile->groundStateMass);
 	
