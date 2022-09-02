@@ -10,12 +10,15 @@ namespace Mask {
 	public:
 		~RandomGenerator();
 		std::mt19937& GetGenerator() { return rng; }
-		static RandomGenerator& GetInstance() { return *s_instance; }
+		static RandomGenerator& GetInstance()
+		{
+			static thread_local RandomGenerator s_instance;
+			return s_instance;
+		}
 
 	private:
 		RandomGenerator();
 		
-		static RandomGenerator* s_instance;
 		std::mt19937 rng;
 	};
 

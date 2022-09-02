@@ -50,7 +50,13 @@ target_sources(Mask PRIVATE
     ThreeStepSystem.h
     TwoStepSystem.cpp
     TwoStepSystem.h
+    ThreadPool.h
+    FileWriter.h
+    FileWriter.cpp
 )
 
-target_link_libraries(Mask catima MaskDict ${ROOT_LIBRARIES})
+set(THREADS_PREFER_PTHREAD_FLAG On)
+find_package(Threads REQUIRED)
+
+target_link_libraries(Mask catima MaskDict ${ROOT_LIBRARIES} Threads::Threads)
 set_target_properties(Mask PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${MASK_LIBRARY_DIR})

@@ -24,6 +24,7 @@ int main(int argc, char** argv)
 			return 1;
 		}
 		calculator.Run();
+		//calculator.RunSingleThread();
 	}
 	catch(const std::exception& e)
 	{
