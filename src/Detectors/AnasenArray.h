@@ -6,8 +6,8 @@
 #include "DetectorArray.h"
 #include "SX3Detector.h"
 #include "QQQDetector.h"
-#include "Target.h"
-#include "Nucleus.h"
+#include "Mask/Target.h"
+#include "Mask/Nucleus.h"
 #include "AnasenDeadChannelMap.h"
 
 class AnasenArray : public DetectorArray
@@ -15,17 +15,15 @@ class AnasenArray : public DetectorArray
 public:
 	AnasenArray();
 	~AnasenArray();
-	virtual void CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) override;
+	virtual DetectorResult IsDetected(const Mask::Nucleus& nucleus);
 	virtual void DrawDetectorSystem(const std::string& filename) override;
 	virtual double RunConsistencyCheck() override;
-	inline void SetDeadChannelMap(const std::string& filename) { dmap.LoadMapfile(filename); }
+	virtual void SetDeadChannelMap(const std::string& filename) override { dmap.LoadMapfile(filename); }
 
 private:
-	DetectorResult IsRing1(Mask::Nucleus& nucleus);
-	DetectorResult IsRing2(Mask::Nucleus& nucleus);
-	DetectorResult IsQQQ(Mask::Nucleus& nucleus);
-	DetectorResult IsAnasen(Mask::Nucleus& nucleus);
-	void CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts);
+	DetectorResult IsRing1(const Mask::Nucleus& nucleus);
+	DetectorResult IsRing2(const Mask::Nucleus& nucleus);
+	DetectorResult IsQQQ(const Mask::Nucleus& nucleus);
 
 	std::vector<SX3Detector> m_Ring1;
 	std::vector<SX3Detector> m_Ring2;

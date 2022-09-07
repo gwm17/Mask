@@ -19,15 +19,15 @@ namespace Mask {
         FileWriter(const std::string& filename, const std::string& treename);
         ~FileWriter();
 
-        bool IsOpen() const { return m_file->IsOpen(); }
+        bool IsOpen() const { return m_file == nullptr ? false : m_file->IsOpen(); }
         bool IsTree() const { return m_tree == nullptr ? false : true; }
 
         std::size_t GetQueueSize() const { return m_queueSize; } //Implicitly thread-safe
 
         void PushData(const std::vector<Nucleus>& data); //Thread-safe
-        bool Write(); //Not thread safe!
+        bool Write(); //Not completely thread-safe, should only be used by main application loop (acess to queue is safe, but all else not)
 
-        void Open(const std::string& filename, const std::string& treename);
+        void Open(const std::string& filename, const std::string& treename); //Not thread safe!
         void Close(); //Not thread safe!
 
     private:

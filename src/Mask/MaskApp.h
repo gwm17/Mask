@@ -36,8 +36,9 @@ namespace Mask {
 		uint32_t m_nthreads;
 
 		std::vector<ReactionSystem*> m_systemList; //One system for each thread
+		std::vector<uint64_t> m_chunkSamples;
 		FileWriter m_fileWriter;
-		std::unique_ptr<ThreadPool> m_resources;
+		std::unique_ptr<ThreadPool<ReactionSystem*, uint64_t>> m_resources;
 	
 	};
 

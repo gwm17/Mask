@@ -1,0 +1,45 @@
+----------Data Information----------
+OutputFile: /media/data/gwm17/mask_tests/10B3Hea_16800keV_5Lia_74B.root
+NumberOfThreads: 6
+----------Reaction Information----------
+NumberOfSamples: 1000000
+begin_chain
+	begin_step
+		Type: Reaction
+		begin_nuclei
+			5 10
+			2 3
+			2 4
+		end_nuclei
+		BeamEnergyMean(MeV): 24.0
+		BeamEnergySigma(MeV): 0.0
+		ThetaType: Lab
+		ThetaMin(deg): 15.0
+		ThetaMax(deg): 15.0
+		PhiMin(deg): 0.0
+		PhMax(deg): 0.0
+		ResidualExcitationMean(MeV): 16.8
+		ResidualExcitationSigma(MeV): 0.023
+	end_step
+	begin_step
+		Type: Decay
+		begin_nuclei
+			5 9
+			2 4
+		end_nuclei
+		PhiMin(deg): 0.0
+		PhMax(deg): 360.0
+		ResidualExcitationMean(MeV): 0.0
+		ResidualExcitationSigma(MeV): 0.0
+		AngularDistributionFile: ./etc/isotropic_dist.txt
+	end_step
+end_chain
+----------Target Information----------
+NumberOfLayers: 1
+begin_layer
+	Thickness(ug/cm^2): 74
+	begin_elements (Z, A, Stoich.)
+		element	5 10 1
+	end_elements
+end_layer
+--------------------------------------

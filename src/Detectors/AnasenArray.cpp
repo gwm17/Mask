@@ -230,7 +230,7 @@ double AnasenArray::RunConsistencyCheck()
 
 }
 
-DetectorResult AnasenArray::IsRing1(Mask::Nucleus& nucleus)
+DetectorResult AnasenArray::IsRing1(const Mask::Nucleus& nucleus)
 {
 	DetectorResult observation;
 	double thetaIncident;
@@ -255,7 +255,7 @@ DetectorResult AnasenArray::IsRing1(Mask::Nucleus& nucleus)
 	return observation;
 }
 
-DetectorResult AnasenArray::IsRing2(Mask::Nucleus& nucleus)
+DetectorResult AnasenArray::IsRing2(const Mask::Nucleus& nucleus)
 {
 	DetectorResult observation;
 	double thetaIncident;
@@ -280,7 +280,7 @@ DetectorResult AnasenArray::IsRing2(Mask::Nucleus& nucleus)
 	return observation;
 }
 
-DetectorResult AnasenArray::IsQQQ(Mask::Nucleus& nucleus)
+DetectorResult AnasenArray::IsQQQ(const Mask::Nucleus& nucleus)
 {
 	DetectorResult observation;
 	double thetaIncident;
@@ -324,7 +324,7 @@ DetectorResult AnasenArray::IsQQQ(Mask::Nucleus& nucleus)
 	return observation;
 }
 
-DetectorResult AnasenArray::IsAnasen(Mask::Nucleus& nucleus)
+DetectorResult AnasenArray::IsDetected(const Mask::Nucleus& nucleus)
 {
 	DetectorResult result;
 	if(nucleus.GetKE() <= s_energyThreshold)
@@ -337,236 +337,4 @@ DetectorResult AnasenArray::IsAnasen(Mask::Nucleus& nucleus)
 	if(!result.detectFlag)
 		result = IsQQQ(nucleus);
 	return result;
-}
-
-void AnasenArray::CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts)
-{
-	if (data.size() == 3 && data[1].isDetected && data[2].isDetected)
-	{
-		counts[0]++;
-	}
-	else if (data.size() == 4 && data[2].isDetected && data[3].isDetected)
-	{
-		counts[0]++;
-	}
-	else if(data.size() == 6)
-	{
-		if(data[2].isDetected && data[4].isDetected) 
-		{
-			counts[0]++;
-		}
-		if(data[2].isDetected && data[5].isDetected)
-		{
-			counts[1]++;
-		}
-		if(data[4].isDetected && data[5].isDetected)
-		{
-			counts[2]++;
-		}
-		if(data[2].isDetected && data[4].isDetected && data[5].isDetected)
-		{
-			counts[3]++;
-		}
-	}
-	else if(data.size() == 8)
-	{
-		if(data[2].isDetected && data[4].isDetected) 
-		{
-			counts[0]++;
-		}
-		if(data[2].isDetected && data[6].isDetected)
-		{
-			counts[1]++;
-		}
-		if(data[2].isDetected && data[7].isDetected)
-		{
-			counts[2]++;
-		}
-		if(data[4].isDetected && data[6].isDetected)
-		{
-			counts[3]++;
-		}
-		if(data[4].isDetected && data[7].isDetected)
-		{
-			counts[4]++;
-		}
-		if(data[6].isDetected && data[7].isDetected)
-		{
-			counts[5]++;
-		}
-		if(data[2].isDetected && data[4].isDetected && data[6].isDetected)
-		{
-			counts[6]++;
-		}
-		if(data[2].isDetected && data[4].isDetected && data[7].isDetected)
-		{
-			counts[7]++;
-		}
-		if(data[2].isDetected && data[6].isDetected && data[7].isDetected)
-		{
-			counts[8]++;
-		}
-		if(data[4].isDetected && data[6].isDetected && data[7].isDetected)
-		{
-			counts[9]++;
-		}
-		if(data[2].isDetected && data[4].isDetected && data[6].isDetected && data[7].isDetected)
-		{
-			counts[10]++;
-		}
-	}
-}
-
-void AnasenArray::CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) {
-
-	if(!dmap.IsValid())
-	{
-		std::cerr<<"Invalid Dead Channel Map at AnasenArray::CalculateEfficiency()! If you want to run with all possible";
-		std::cerr<<"channels active, simply load an empty file."<<std::endl;
-		return;
-	}
-
-	std::cout<<"----------ANASEN Efficiency Calculation----------"<<std::endl;
-	std::cout<<"Loading in output from kinematics simulation: "<<inputname<<std::endl;
-	std::cout<<"Running efficiency calculation..."<<std::endl;
-
-	TFile* input = TFile::Open(inputname.c_str(), "READ");
-	TFile* output = TFile::Open(outputname.c_str(), "RECREATE");
-	std::ofstream stats(statsname);
-	stats<<std::setprecision(5);
-
-	TTree* intree = (TTree*) input->Get("SimTree");
-	std::vector<Mask::Nucleus>* dataHandle = new std::vector<Mask::Nucleus>();
-	intree->SetBranchAddress("nuclei", &dataHandle);
-
-	output->cd();
-	TTree* outtree = new TTree("SimTree", "SimTree");
-	outtree->Branch("nuclei", dataHandle);
-
-	input->cd();
-
-	stats<<"Efficiency statistics for data from "<<inputname<<" using the ANASEN geometry"<<std::endl;
-	stats<<"Given in order of target=0, projectile=1, ejectile=2, residual=3, .... etc."<<std::endl;
-
-	intree->GetEntry(1);
-	std::vector<int> counts;
-	std::vector<int> coinc_counts;
-	counts.resize(dataHandle->size());
-	switch(counts.size())
-	{
-		case 3: coinc_counts.resize(1, 0); break;
-		case 4: coinc_counts.resize(1, 0); break;
-		case 6: coinc_counts.resize(4, 0); break;
-		case 8: coinc_counts.resize(11, 0); break;
-		default:
-		{
-			std::cerr<<"Bad reaction type at AnasenArray::CalculateEfficiency (given value: "<<counts.size()<<"). Quiting..."<<std::endl;
-			input->Close();
-			output->Close();
-			stats.close();
-			return;
-		}
-	}
-
-	uint64_t nentries = intree->GetEntries();
-	uint64_t percent5 = nentries*0.05;
-	uint64_t count = 0;
-	uint64_t npercent = 0;
-
-	Mask::Nucleus nucleus;
-	for(uint64_t i=0; i<nentries; i++)
-	{
-		intree->GetEntry(i);
-		if(++count == percent5)
-		{//Show progress every 5%
-			npercent++;
-			count = 0;
-			std::cout<<"\rPercent completed: "<<npercent*5<<"%"<<std::flush;
-		}
-
-		for(std::size_t j=0; j<dataHandle->size(); j++)
-		{
-			Mask::Nucleus& nucleus = (*dataHandle)[j];
-			DetectorResult result = IsAnasen(nucleus);
-			if(result.detectFlag)
-			{
-				nucleus.isDetected = true;
-				nucleus.detectedKE = result.energy_deposited;
-				nucleus.detectedTheta = result.direction.Theta();
-				nucleus.detectedPhi = result.direction.Phi();
-				counts[j]++;
-			}
-		}
-
-		CountCoincidences(*dataHandle, coinc_counts);
-
-		outtree->Fill();
-	}
-	input->Close();
-	output->cd();
-	outtree->Write(outtree->GetName(), TObject::kOverwrite);
-	output->Close();
-
-	delete dataHandle;
-
-	stats<<std::setw(10)<<"Index"<<"|"<<std::setw(10)<<"Efficiency"<<std::endl;
-	stats<<"---------------------"<<std::endl;
-	for(unsigned int i=0; i<counts.size(); i++)
-	{
-		stats<<std::setw(10)<<i<<"|"<<std::setw(10)<<((double)counts[i]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-	}
-	stats<<"Coincidence Efficiency"<<std::endl;
-	stats<<"---------------------"<<std::endl;
-	if(dataHandle->size() == 3)
-	{
-		stats<<std::setw(10)<<"1 + 2"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-	}
-	else if(dataHandle->size() == 4)
-	{
-		stats<<std::setw(10)<<"2 + 3"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-	}
-	else if(dataHandle->size() == 6)
-	{
-		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[1]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"4 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[2]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 4 + 5"<<"|"<<std::setw(10)<<((double)coinc_counts[3]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-	}
-	else if(dataHandle->size() == 8)
-	{
-		stats<<std::setw(10)<<"2 + 4"<<"|"<<std::setw(10)<<((double)coinc_counts[0]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[1]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[2]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"4 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[3]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"4 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[4]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[5]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 4 + 6"<<"|"<<std::setw(10)<<((double)coinc_counts[6]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 4 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[7]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[8]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"4 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[9]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-		stats<<std::setw(10)<<"2 + 4 + 6 + 7"<<"|"<<std::setw(10)<<((double)coinc_counts[10]/nentries)<<std::endl;
-		stats<<"---------------------"<<std::endl;
-	}
-	stats.close();
-
-	std::cout<<std::endl;
-	std::cout<<"Complete."<<std::endl;
-	std::cout<<"---------------------------------------------"<<std::endl;
 }

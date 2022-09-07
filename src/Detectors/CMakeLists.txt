@@ -18,6 +18,9 @@ target_sources(Detectors PUBLIC
     SabreArray.h
     SX3Detector.cpp
     SX3Detector.h
+    DetectorApp.h
+    DetectorApp.cpp
+    DetectorArray.cpp
 )
 
 target_link_libraries(Detectors

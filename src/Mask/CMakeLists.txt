@@ -53,6 +53,8 @@ target_sources(Mask PRIVATE
     ThreadPool.h
     FileWriter.h
     FileWriter.cpp
+    FileReader.h
+    FileReader.cpp
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG On)

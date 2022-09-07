@@ -39,8 +39,15 @@ namespace Mask {
 		input>>junk>>m_nsamples;
 
 		std::cout<<"Allocating resources... Asking for " << m_nthreads << " threads...";
-		m_resources = std::make_unique<ThreadPool>(m_nthreads);
+		m_resources = std::make_unique<ThreadPool<ReactionSystem*, uint64_t>>(m_nthreads);
 		std::cout<<" Complete."<<std::endl;
+
+		//Little bit of integer division mangling to make sure we do the total number of samples
+    	uint64_t quotient = m_nsamples / m_nthreads;
+    	uint64_t remainder = m_nsamples % m_nthreads;
+    	m_chunkSamples.push_back(quotient + remainder);
+    	for(uint64_t i=1; i<m_nthreads; i++)
+        	m_chunkSamples.push_back(quotient);
 
 		std::cout<<"Outputing data to file: " << m_outputName <<std::endl;
 		m_fileWriter.Open(m_outputName, "SimTree");
@@ -174,12 +181,27 @@ namespace Mask {
 		std::cout<<"Running simulation..."<<std::endl;
 		if(m_systemList.size() != m_nthreads)
 		{
+			std::cerr << "System list not equal to number of threads" << std::endl;
 			return;
 		}
 
 		//Give our thread pool some tasks
-		for(auto system : m_systemList)
-			m_resources->PushJob({std::bind(&MaskApp::RunChunk, std::ref(*this), std::placeholders::_1), system});
+		for(std::size_t i=0; i<m_systemList.size(); i++)
+		{
+			//bind a lambda to the job, taking in a ReactionSystem, and then provide a reaction system as the tuple arguments.
+			m_resources->PushJob({[this](ReactionSystem* system, uint64_t chunkSamples) 
+				{
+					if(system == nullptr)
+						return;
+
+					for(uint64_t i=0; i<chunkSamples; i++)
+					{
+						system->RunSystem();
+						m_fileWriter.PushData(*(system->GetNuclei()));
+					}
+				}, 
+			{m_systemList[i], m_chunkSamples[i]}});
+		}
 
 		uint64_t count = 0;
 		double percent = 0.05;
@@ -241,20 +263,6 @@ namespace Mask {
 		std::cout<<std::endl;
 		std::cout<<"Complete."<<std::endl;
 		std::cout<<"---------------------------------------------"<<std::endl;
-	}
-
-	void MaskApp::RunChunk(ReactionSystem* system)
-	{
-		if(system == nullptr)
-			return;
-
-		uint64_t samples = m_nsamples / m_nthreads;
-
-		for(uint64_t i=0; i<samples; i++)
-		{
-			system->RunSystem();
-			m_fileWriter.PushData(*(system->GetNuclei()));
-		}
 	}
 
 }

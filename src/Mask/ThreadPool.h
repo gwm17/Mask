@@ -20,16 +20,19 @@
 
 namespace Mask {
 
-	using JobFunction = std::function<void(ReactionSystem*)>;
-	struct Job
-	{
-		JobFunction func;
-		ReactionSystem* argument;
-	};
-
+	template<typename... Types>
 	class ThreadPool
 	{
 	public:
+
+		using JobFunction = std::function<void(Types...)>;
+		struct Job
+		{
+			JobFunction func;
+			std::tuple<Types...> argument;
+		};
+
+
 		ThreadPool(uint32_t nthreads) :
 			m_isStopped(false), m_numberRunning(0), m_queueSize(0), m_initShutdown(false)
 		{
@@ -94,7 +97,7 @@ namespace Mask {
 				m_numberRunning++;
 				m_queueSize--;
 
-				job.func(job.argument);
+				std::apply(job.func, job.argument);
 				m_numberRunning--;
 			}
 			
