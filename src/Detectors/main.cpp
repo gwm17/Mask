@@ -1,5 +1,4 @@
-#include "SabreArray.h"
-#include "AnasenArray.h"
+#include "DetectorApp.h"
 #include "KinematicsExceptions.h"
 #include <iostream>
 #include <string>
@@ -7,7 +6,7 @@
 int main(int argc, char** argv)
 {
 
-	if(argc != 4)
+	if(argc != 2)
 	{
 		std::cerr<<"Incorrect number of commandline arguments! Returning."<<std::endl;
 		return 1;
@@ -19,26 +18,21 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	std::string inputname = argv[1];
-	std::string outputname = argv[2];
-	std::string statsname = argv[3];
+	try
+	{
+		DetectorApp app;
+		if(!app.LoadConfig(argv[1]))
+		{
+			std::cerr << "Unable to load config file " << argv[1] << ". Shutting down." << std::endl;
+			return 1;
+		}
 
-	
-	SabreArray sabre;
-	std::string mapfile = "./etc/sabreDeadChannels_May2022.txt";
-	sabre.SetDeadChannelMap(mapfile);
-	sabre.CalculateEfficiency(inputname, outputname, statsname);
-	//std::cout<<"Running consistency check(0=success): "<<sabre.RunConsistencyCheck()<<std::endl;
-	//sabre.DrawDetectorSystem("/data1/gwm17/10B3He/Feb2021/simulation/SABREGeo.txt");
-	
-
-	/*
- 	AnasenArray anasen;
- 	std::string mapfile = "./etc/AnasenDeadChannels.txt";
- 	anasen.SetDeadChannelMap(mapfile);
- 	anasen.CalculateEfficiency(inputname, outputname, statsname);
- 	//std::cout<<"Running consistency check(1=success): "<<anasen.RunConsistencyCheck()<<std::endl;
- 	//anasen.DrawDetectorSystem("/data1/gwm17/TRIUMF_7Bed/simulation/ANASENGeo_centered_target_targetGap_BackQQQ_fixedZ.txt");
-	*/
+		app.Run();
+	}
+	catch(std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return 1;
+	}
 	return 0;
 }

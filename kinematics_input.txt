@@ -1,7 +1,8 @@
 ----------Data Information----------
 OutputFile: /media/data/gwm17/mask_tests/10B3Hea_16800keV_5Lia_74B.root
+NumberOfThreads: 6
 ----------Reaction Information----------
-NumberOfSamples: 100000
+NumberOfSamples: 1000000
 begin_chain
 	begin_step
 		Type: Reaction

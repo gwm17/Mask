@@ -3,7 +3,7 @@
 
 #include "DetectorArray.h"
 #include "SabreDetector.h"
-#include "Target.h"
+#include "Mask/Target.h"
 #include "SabreDeadChannelMap.h"
 #include "Mask/Nucleus.h"
 
@@ -12,14 +12,12 @@ class SabreArray : public DetectorArray
 public:
 	SabreArray();
 	~SabreArray();
-    void SetDeadChannelMap(const std::string& filename) { m_deadMap.LoadMapfile(filename); };
-	void CalculateEfficiency(const std::string& inputname, const std::string& outputname, const std::string& statsname) override;
+    virtual void SetDeadChannelMap(const std::string& filename) override { m_deadMap.LoadMapfile(filename); };
+	virtual DetectorResult IsDetected(const Mask::Nucleus& nucleus) override;
     void DrawDetectorSystem(const std::string& filename) override;
     double RunConsistencyCheck() override;
 
 private:
-	DetectorResult IsSabre(Mask::Nucleus& nucleus);
-    void CountCoincidences(const std::vector<Mask::Nucleus>& data, std::vector<int>& counts);
 
 	std::vector<SabreDetector> m_detectors;
     

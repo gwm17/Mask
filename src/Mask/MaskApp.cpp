@@ -8,7 +8,7 @@
 namespace Mask {
 
 	MaskApp::MaskApp() :
-		m_system(nullptr)
+		m_system(nullptr), m_resources(nullptr)
 	{
 		std::cout<<"----------Monte Carlo Simulation of Kinematics----------"<<std::endl;
 	}
@@ -16,6 +16,8 @@ namespace Mask {
 	MaskApp::~MaskApp() 
 	{
 		delete m_system;
+		for(std::size_t i=0; i<m_systemList.size(); i++)
+			delete m_systemList[i];
 	}
 	
 	bool MaskApp::LoadConfig(const std::string& filename) 
@@ -31,9 +33,24 @@ namespace Mask {
 		std::string junk;
 		std::getline(input, junk);
 		input>>junk>>m_outputName;
+		input>>junk>>m_nthreads;
 		std::getline(input, junk);
 		std::getline(input, junk);
 		input>>junk>>m_nsamples;
+
+		std::cout<<"Allocating resources... Asking for " << m_nthreads << " threads...";
+		m_resources = std::make_unique<ThreadPool<ReactionSystem*, uint64_t>>(m_nthreads);
+		std::cout<<" Complete."<<std::endl;
+
+		//Little bit of integer division mangling to make sure we do the total number of samples
+    	uint64_t quotient = m_nsamples / m_nthreads;
+    	uint64_t remainder = m_nsamples % m_nthreads;
+    	m_chunkSamples.push_back(quotient + remainder);
+    	for(uint64_t i=1; i<m_nthreads; i++)
+        	m_chunkSamples.push_back(quotient);
+
+		std::cout<<"Outputing data to file: " << m_outputName <<std::endl;
+		m_fileWriter.Open(m_outputName, "SimTree");
 
 		std::vector<StepParameters> params;
 		int z, a;
@@ -98,10 +115,20 @@ namespace Mask {
 		m_system = CreateSystem(params);
 		if(m_system == nullptr || !m_system->IsValid())
 		{
-			std::cerr<<"Param size: "<<params.size()<<std::endl;
 			std::cerr<<"Failure to parse reaction system... configuration not loaded."<<std::endl;
 			return false;
 		}
+
+		for(uint32_t i=0; i<m_nthreads; i++)
+		{
+			m_systemList.push_back(CreateSystem(params));
+			if(m_systemList.back() == nullptr || !m_systemList.back()->IsValid())
+			{
+				std::cerr<<"Failure to parse reaction system... configuration not loaded."<<std::endl;
+				return false;
+			}
+		}
+
 		std::getline(input, junk);
 		std::getline(input, junk);
 
@@ -132,9 +159,13 @@ namespace Mask {
 		}
 		m_system->SetLayeredTarget(target);
 
-		std::cout<<"Outputing data to file: "<<m_outputName<<std::endl;
-		std::cout<<"Reaction equation: "<<GetSystemName()<<std::endl;
-		std::cout<<"Number of samples: "<<GetNumberOfSamples()<<std::endl;
+		for(auto system : m_systemList)
+		{
+			system->SetLayeredTarget(target);
+		}
+
+		std::cout<<"Reaction equation: "<<m_system->GetSystemEquation()<<std::endl;
+		std::cout<<"Number of samples: "<<m_nsamples<<std::endl;
 	
 		return true;
 	}
@@ -144,8 +175,59 @@ namespace Mask {
 	{ 
 		return true;
 	}
-	
+
 	void MaskApp::Run()
+	{
+		std::cout<<"Running simulation..."<<std::endl;
+		if(m_systemList.size() != m_nthreads)
+		{
+			std::cerr << "System list not equal to number of threads" << std::endl;
+			return;
+		}
+
+		//Give our thread pool some tasks
+		for(std::size_t i=0; i<m_systemList.size(); i++)
+		{
+			//bind a lambda to the job, taking in a ReactionSystem, and then provide a reaction system as the tuple arguments.
+			m_resources->PushJob({[this](ReactionSystem* system, uint64_t chunkSamples) 
+				{
+					if(system == nullptr)
+						return;
+
+					for(uint64_t i=0; i<chunkSamples; i++)
+					{
+						system->RunSystem();
+						m_fileWriter.PushData(*(system->GetNuclei()));
+					}
+				}, 
+			{m_systemList[i], m_chunkSamples[i]}});
+		}
+
+		uint64_t count = 0;
+		double percent = 0.05;
+		uint64_t flushVal = m_nsamples*percent;
+		uint64_t flushCount = 0;
+		while(true)
+		{
+			if(count == flushVal)
+			{
+				count = 0;
+				++flushCount;
+				std::cout<<"\rPercent of data written to disk: "<<percent*flushCount*100<<"%"<<std::flush;
+			}
+
+			if(m_resources->IsFinished() && m_fileWriter.GetQueueSize() == 0)
+				break;
+			else if(m_fileWriter.Write())
+				++count;
+		}
+
+		std::cout<<std::endl;
+		std::cout<<"Complete."<<std::endl;
+		std::cout<<"---------------------------------------------"<<std::endl;
+	}
+	
+	void MaskApp::RunSingleThread()
 	{
 		std::cout<<"Running simulation..."<<std::endl;
 		if(m_system == nullptr) 
@@ -158,11 +240,11 @@ namespace Mask {
 		tree->Branch("nuclei", m_system->GetNuclei());
 	
 		//For progress tracking
-		uint32_t percent5 = 0.05*m_nsamples;
-		uint32_t count = 0;
-		uint32_t npercent = 0;
+		uint64_t percent5 = 0.05*m_nsamples;
+		uint64_t count = 0;
+		uint64_t npercent = 0;
 	
-		for(uint32_t i=0; i<m_nsamples; i++) 
+		for(uint64_t i=0; i<m_nsamples; i++) 
 		{
 			if(++count == percent5) 
 			{
