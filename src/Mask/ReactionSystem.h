@@ -63,6 +63,7 @@ namespace Mask {
 		std::vector<std::normal_distribution<double>> m_beamDistributions, m_exDistributions;
 		std::vector<std::uniform_real_distribution<double>> m_thetaRanges, m_phiRanges;
 		std::vector<AngularDistribution> m_decayAngularDistributions;
+		std::uniform_real_distribution<double> m_rxnDepthDist;
 
 		bool m_isTargetSet;
 		bool m_isValid;

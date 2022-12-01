@@ -39,7 +39,7 @@ private:
     static constexpr double s_detectorThickness = 500 * 1e-4 * 2.3926 * 1e6; // ug/cm^2 (500 um thick * density)
     static constexpr double s_degraderThickness = 70.0 * 1.0e-4 * 16.69 * 1e6; //tantalum degrader (70 um thick) 
 
-    static constexpr double s_energyThreshold = 0.25; //in MeV
+    static constexpr double s_energyThreshold = 0.2; //in MeV
 
 };
 

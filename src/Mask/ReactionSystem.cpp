@@ -10,7 +10,7 @@
 namespace Mask {
 
 	ReactionSystem::ReactionSystem() :
-		m_isTargetSet(false), m_isValid(true), m_rxnLayer(0), m_sysEquation("")
+		m_isTargetSet(false), m_isValid(true), m_rxnLayer(0), m_sysEquation(""), m_rxnDepthDist(0.0, 1.0)
 	{
 	}
 	
