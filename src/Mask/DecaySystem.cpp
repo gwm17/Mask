@@ -73,7 +73,9 @@ namespace Mask {
 		double rxnTheta = m_decayAngularDistributions[0].GetRandomCosTheta();
 		double rxnPhi = m_phiRanges[0](gen);
 		double ex = m_exDistributions[0](gen);
+		double rxnDepth = m_rxnDepthDist(gen);
 
+		m_step1.SetReactionDepth(rxnDepth);
 		m_step1.SetPolarRxnAngle(rxnTheta);
 		m_step1.SetAzimRxnAngle(rxnPhi);
 		m_step1.SetExcitation(ex);

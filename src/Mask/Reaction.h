@@ -32,6 +32,7 @@ namespace Mask {
 		void SetPolarRxnAngle(double theta) { m_theta = theta; };
 		void SetAzimRxnAngle(double phi) { m_phi = phi; };
 		void SetExcitation(double ex) { m_ex = ex; };
+		void SetReactionDepth(double depth) { m_rxnDepth = depth; }
 
 		void BindTarget(Nucleus* nuc) { m_target = nuc; };
 		void BindProjectile(Nucleus* nuc) { m_projectile = nuc; };
@@ -59,7 +60,7 @@ namespace Mask {
 
 		LayeredTarget* m_layeredTarget; //not owned by Reaction
 	
-		double m_bke, m_theta, m_phi, m_ex;
+		double m_bke, m_theta, m_phi, m_ex, m_rxnDepth;
 	
 		int m_rxnLayer;
 		RxnThetaType m_ejectThetaType; 

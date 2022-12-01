@@ -105,12 +105,15 @@ namespace Mask {
 		double decay1Phi = m_phiRanges[1](gen);
 		double residEx = (m_exDistributions[0])(gen);
 		double decay2Ex = m_exDistributions[1](gen);
-	
+		double rxnDepth = (m_rxnDepthDist(gen));
+		
+		m_step1.SetReactionDepth(rxnDepth);
 		m_step1.SetBeamKE(bke);
 		m_step1.SetPolarRxnAngle(rxnTheta);
 		m_step1.SetAzimRxnAngle(rxnPhi);
 		m_step1.SetExcitation(residEx);
 	
+		m_step2.SetReactionDepth(rxnDepth);
 		m_step2.SetPolarRxnAngle(decay1Theta);
 		m_step2.SetAzimRxnAngle(decay1Phi);
 		m_step2.SetExcitation(decay2Ex);

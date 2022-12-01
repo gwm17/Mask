@@ -27,9 +27,9 @@ namespace Mask {
 		LayeredTarget();
 		~LayeredTarget();
 		void AddLayer(const std::vector<int>& Z, const std::vector<int>& A, const std::vector<int>& stoich, double thickness);
-		double GetProjectileEnergyLoss(int zp, int ap, double startEnergy, std::size_t rxnLayer, double angle);
-		double GetEjectileEnergyLoss(int ze, int ae, double startEnergy, std::size_t rxnLayer, double angle);
-		double GetEjectileReverseEnergyLoss(int ze, int ae, double startEnergy, std::size_t rxnLayer, double angle);
+		double GetProjectileEnergyLoss(int zp, int ap, double startEnergy, std::size_t rxnLayer, double angle, double rxnDepth);
+		double GetEjectileEnergyLoss(int ze, int ae, double startEnergy, std::size_t rxnLayer, double angle, double rxnDepth);
+		double GetEjectileReverseEnergyLoss(int ze, int ae, double startEnergy, std::size_t rxnLayer, double angle, double rxnDepth);
 		std::size_t FindLayerContaining(int Z, int A);
 		std::size_t GetNumberOfLayers() { return m_layers.size(); }
 		void SetName(std::string& n) { m_name = n; }
@@ -39,7 +39,6 @@ namespace Mask {
 	private:
 		std::vector<Target> m_layers;
 		std::string m_name;
-		std::uniform_real_distribution<double> m_fractionalDepthDistribution;
 	};
 
 }

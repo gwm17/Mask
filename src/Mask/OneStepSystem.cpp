@@ -80,7 +80,9 @@ namespace Mask {
 		double rxnTheta = std::acos((m_thetaRanges[0])(gen));
 		double rxnPhi = (m_phiRanges[0])(gen);
 		double residEx = (m_exDistributions[0])(gen);
+		double rxnDepth = (m_rxnDepthDist(gen));
 		
+		m_step1.SetReactionDepth(rxnDepth);
 		m_step1.SetBeamKE(bke);
 		m_step1.SetPolarRxnAngle(rxnTheta);
 		m_step1.SetAzimRxnAngle(rxnPhi);
