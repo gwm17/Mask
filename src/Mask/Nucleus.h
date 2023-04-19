@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include "Math/Vector4D.h"
+#include "Math/Point3D.h"
 #include "MassLookup.h"
 
 namespace Mask {
@@ -48,6 +49,8 @@ namespace Mask {
 		double detectedKE = 0.0;
 		double detectedTheta = 0.0;
 		double detectedPhi = 0.0;
+
+		ROOT::Math::XYZPoint detectedPos = ROOT::Math::XYZPoint(0., 0., 0.);
 	};
 
 	Nucleus CreateNucleus(uint32_t z, uint32_t a);

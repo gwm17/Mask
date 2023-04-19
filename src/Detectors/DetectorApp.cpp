@@ -110,6 +110,7 @@ void DetectorApp::Run()
                             nucleus.detectedKE = result.energy_deposited;
                             nucleus.detectedTheta = result.direction.Theta();
                             nucleus.detectedPhi = result.direction.Phi();
+                            nucleus.detectedPos = result.direction;
                         }
                     }
 		            m_fileWriter.PushData(data);

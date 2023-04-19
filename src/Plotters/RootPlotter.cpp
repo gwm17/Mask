@@ -59,21 +59,33 @@ void RootPlotter::Run(const std::string& inputname, const std::string& outputnam
 
 void RootPlotter::FillData(const Mask::Nucleus& nuc)
 {
-	std::string modifier = "";
-	if(nuc.isDetected)
-		modifier = "detected";
+	std::string mod = "detected";
 
 	std::string sym = nuc.isotopicSymbol;
-	std::string ke_vs_th_name = sym + modifier + "_ke_vs_theta";
+	std::string ke_vs_th_name = sym + "_ke_vs_theta";
 	std::string ke_vs_th_title = ke_vs_th_name + ";#theta_{lab} (degrees);Kinetic Energy (MeV)";
-	std::string ke_vs_ph_name = sym + modifier + "_ke_vs_phi";
+	std::string ke_vs_th_name_det = sym + mod + "_ke_vs_theta";
+	std::string ke_vs_th_title_det = ke_vs_th_name + ";#theta_{lab} (degrees);Kinetic Energy (MeV)";
+	std::string ke_vs_ph_name = sym + "_ke_vs_phi";
 	std::string ke_vs_ph_title = ke_vs_ph_name + ";#phi_{lab} (degrees);Kinetic Energy (MeV)";
-	std::string th_vs_ph_name = sym + modifier + "_theta_vs_phi";
+	std::string ke_vs_ph_name_det = sym + mod + "_ke_vs_phi";
+	std::string ke_vs_ph_title_det = ke_vs_ph_name + ";#phi_{lab} (degrees);Kinetic Energy (MeV)";
+	std::string th_vs_ph_name = sym + "_theta_vs_phi";
 	std::string th_vs_ph_title = th_vs_ph_name + ";#theta_{lab};#phi_{lab}";
-	std::string ex_name = sym + modifier + "_ex";
+	std::string th_vs_ph_name_det = sym + mod + "_theta_vs_phi";
+	std::string th_vs_ph_title_det = th_vs_ph_name + ";#theta_{lab};#phi_{lab}";
+	std::string ex_name = sym + "_ex";
 	std::string ex_title = ex_name + ";E_{ex} (MeV);counts";
-	std::string angdist_name = sym + modifier +"_angDist";
+	std::string ex_name_det = sym + mod + "_ex";
+	std::string ex_title_det = ex_name + ";E_{ex} (MeV);counts";
+	std::string angdist_name = sym +"_angDist";
 	std::string angdist_title = angdist_name+";cos#right(#theta_{CM}#left);counts";
+	std::string angdist_name_det = sym + mod +"_angDist";
+	std::string angdist_title_det = angdist_name+";cos#right(#theta_{CM}#left);counts";
+	std::string hist_ke_th_name = sym + "_hist_ke_vs_theta";
+	std::string hist_ke_th_title = hist_ke_th_name + ";#theta_{lab};Kinetic Energy (MeV)";
+	std::string hist_ke_th_name_det = sym + mod + "_hist_ke_vs_theta";
+	std::string hist_ke_th_title_det = hist_ke_th_name + ";#theta_{lab};Kinetic Energy (MeV)";
 	
 	MyFill(ke_vs_th_name, ke_vs_th_title, nuc.vec4.Theta()*s_rad2deg, nuc.GetKE(), 2);
 	MyFill(ke_vs_ph_name, ke_vs_ph_title, FullPhi(nuc.vec4.Phi())*s_rad2deg, nuc.GetKE(), 4);
@@ -82,11 +94,12 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc)
 	MyFill(angdist_name, angdist_title, 20, -1.0, 1.0, std::cos(nuc.thetaCM));
 	if(nuc.isDetected)
 	{
-		MyFill(ke_vs_th_name, ke_vs_th_title, nuc.vec4.Theta()*s_rad2deg, nuc.detectedKE, 2);
-		MyFill(ke_vs_ph_name, ke_vs_ph_title, FullPhi(nuc.vec4.Phi())*s_rad2deg, nuc.detectedKE, 4);
-		MyFill(th_vs_ph_name, th_vs_ph_title, nuc.vec4.Theta()*s_rad2deg, FullPhi(nuc.vec4.Phi())*s_rad2deg, 2);
-		MyFill(ex_name, ex_title, 260, -1.0, 25, nuc.GetExcitationEnergy());
-		MyFill(angdist_name, angdist_title, 20, -1.0, 1.0, std::cos(nuc.thetaCM));
+		MyFill(ke_vs_th_name_det, ke_vs_th_title_det, nuc.vec4.Theta()*s_rad2deg, nuc.detectedKE, 2);
+		MyFill(ke_vs_ph_name_det, ke_vs_ph_title_det, FullPhi(nuc.vec4.Phi())*s_rad2deg, nuc.detectedKE, 4);
+		MyFill(th_vs_ph_name_det, th_vs_ph_title_det, nuc.vec4.Theta()*s_rad2deg, FullPhi(nuc.vec4.Phi())*s_rad2deg, 2);
+		MyFill(ex_name_det, ex_title_det, 260, -1.0, 25, nuc.GetExcitationEnergy());
+		MyFill(angdist_name_det, angdist_title_det, 20, -1.0, 1.0, std::cos(nuc.thetaCM));
+		MyFill(hist_ke_th_name_det, hist_ke_th_title_det, 180, 0.0, 180.0, 400, 0.0, 20.0, nuc.vec4.Theta()*s_rad2deg, nuc.detectedKE);
 	}
 	
 }

@@ -229,7 +229,6 @@ namespace Mask {
 		m_residual->vec4 = m_target->vec4 - m_ejectile->vec4;
 	
 		//energy loss for the *light* break up nucleus
-		double keorig = m_ejectile->GetKE();
 		double ejectKE = m_ejectile->GetKE() - 
 					m_layeredTarget->GetEjectileEnergyLoss(m_ejectile->Z, m_ejectile->A, m_ejectile->GetKE(), m_rxnLayer, m_ejectile->vec4.Theta(), m_rxnDepth);
 		if(ejectKE > 0.0)
