@@ -141,5 +141,7 @@ void DetectorApp::Run()
 		else if(m_fileWriter.Write())
 				++count;
 	}
+
+    std::cout << std::endl;
 	
 }

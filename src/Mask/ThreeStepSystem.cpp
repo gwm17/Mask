@@ -56,8 +56,8 @@ namespace Mask {
 		m_nuclei[3] = CreateNucleus(zr, ar); //residual
 		m_nuclei[4] = CreateNucleus(step2Params.Z[1], step2Params.A[1]); //breakup1
 		m_nuclei[5] = CreateNucleus(zb2, ab2); //breakup2
-		m_nuclei[5] = CreateNucleus(step3Params.Z[1], step3Params.A[1]); //breakup3
-		m_nuclei[5] = CreateNucleus(zb4, ab4); //breakup4
+		m_nuclei[6] = CreateNucleus(step3Params.Z[1], step3Params.A[1]); //breakup3
+		m_nuclei[7] = CreateNucleus(zb4, ab4); //breakup4
 
 		m_step1.BindNuclei(&(m_nuclei[0]), &(m_nuclei[1]), &(m_nuclei[2]), &(m_nuclei[3]));
 		m_step2.BindNuclei(&(m_nuclei[3]), nullptr, &(m_nuclei[4]), &(m_nuclei[5]));

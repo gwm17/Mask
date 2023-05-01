@@ -92,7 +92,8 @@ void RootPlotter::FillData(const Mask::Nucleus& nuc)
 	MyFill(th_vs_ph_name, th_vs_ph_title, nuc.vec4.Theta()*s_rad2deg, FullPhi(nuc.vec4.Phi())*s_rad2deg, 2);
 	MyFill(ex_name, ex_title, 260, -1.0, 25, nuc.GetExcitationEnergy());
 	MyFill(angdist_name, angdist_title, 20, -1.0, 1.0, std::cos(nuc.thetaCM));
-	if(nuc.isDetected)
+	MyFill(hist_ke_th_name, hist_ke_th_title, 180, 0.0, 180.0, 400, 0.0, 20.0, nuc.vec4.Theta()*s_rad2deg, nuc.GetKE());
+	if(nuc.isDetected && nuc.detectedKE > 0.25)
 	{
 		MyFill(ke_vs_th_name_det, ke_vs_th_title_det, nuc.vec4.Theta()*s_rad2deg, nuc.detectedKE, 2);
 		MyFill(ke_vs_ph_name_det, ke_vs_ph_title_det, FullPhi(nuc.vec4.Phi())*s_rad2deg, nuc.detectedKE, 4);
