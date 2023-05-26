@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "Nucleus.h"
+#include "Target.h"
 
 #include <TH1.h>
 #include <TH2.h>
@@ -20,7 +21,8 @@ public:
 	void Run(const std::string& inputname, const std::string& outputname);
 	
 private:
-	void FillData(const Mask::Nucleus& nuc);
+	void FillData(const Mask::Nucleus& nuc, int i);
+	void Correlations(const std::vector<Mask::Nucleus>& event);
 	void MyFill(const std::string& name, const std::string& title, int bins, float min, float max, double val);
 	void MyFill(const std::string& name, const std::string& title, int binsx, float minx, float maxx, int binsy, float miny, float maxy, 
 				double valx, double valy);
@@ -29,6 +31,7 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<TObject>> m_map;
 
 	static constexpr double s_rad2deg = 180.0/M_PI;
+	Mask::Target m_target;
 };
 
 #endif

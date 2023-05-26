@@ -256,6 +256,27 @@ namespace Mask {
 		}
 	}
 
+	bool Reaction::CheckReactionThreshold(double beamEnergy, double residEx)
+	{
+		double Q = m_target->groundStateMass + m_projectile->groundStateMass -
+				   (m_ejectile->groundStateMass + m_residual->groundStateMass + residEx);
+		double Ethresh = -Q*(m_ejectile->groundStateMass+m_residual->groundStateMass) / 
+						 (m_ejectile->groundStateMass + m_residual->groundStateMass - m_projectile->groundStateMass);
+		if (beamEnergy < Ethresh)
+			return false;
+		else
+			return true;
+	}
+
+	bool Reaction::CheckDecayThreshold(double targetEx, double residEx)
+	{
+		double Q = m_target->groundStateMass + targetEx - 
+				  (m_ejectile->groundStateMass + m_residual->groundStateMass + residEx);
+		if ( Q < 0.0)
+			return false;
+		else
+			return true;
+	}
 }
 
 

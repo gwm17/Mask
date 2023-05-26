@@ -92,35 +92,59 @@ namespace Mask {
 			   << m_nuclei[5].isotopicSymbol;
 		m_sysEquation = stream.str();
 	}
+
+	TwoStepParameters TwoStepSystem::SampleParameters()
+	{
+		TwoStepParameters params;
+		std::mt19937& gen = RandomGenerator::GetInstance().GetGenerator();
+		params.beamEnergy = (m_beamDistributions[0])(gen);
+		params.rxnTheta = std::acos((m_thetaRanges[0])(gen));
+		params.rxnPhi = (m_phiRanges[0])(gen);
+		params.cosdecay1Theta = m_decayAngularDistributions[0].GetRandomCosTheta();
+		params.decay1Theta = std::acos(params.cosdecay1Theta);
+		params.decay1Phi = m_phiRanges[1](gen);
+		params.residEx = (m_exDistributions[0])(gen);
+		params.decay2Ex = m_exDistributions[1](gen);
+		params.rxnDepth = (m_rxnDepthDist(gen));
+		return params;
+	}
 	
 	void TwoStepSystem::RunSystem()
 	{
 		//Sample parameters
-		std::mt19937& gen = RandomGenerator::GetInstance().GetGenerator();
-		double bke = (m_beamDistributions[0])(gen);
-		double rxnTheta = std::acos((m_thetaRanges[0])(gen));
-		double rxnPhi = (m_phiRanges[0])(gen);
-		double decay1costheta = m_decayAngularDistributions[0].GetRandomCosTheta();
-		double decay1Theta = std::acos(decay1costheta);
-		double decay1Phi = m_phiRanges[1](gen);
-		double residEx = (m_exDistributions[0])(gen);
-		double decay2Ex = m_exDistributions[1](gen);
-		double rxnDepth = (m_rxnDepthDist(gen));
+		// std::mt19937& gen = RandomGenerator::GetInstance().GetGenerator();
+		// double bke = (m_beamDistributions[0])(gen);
+		// double rxnTheta = std::acos((m_thetaRanges[0])(gen));
+		// double rxnPhi = (m_phiRanges[0])(gen);
+		// double decay1costheta = m_decayAngularDistributions[0].GetRandomCosTheta();
+		// double decay1Theta = std::acos(decay1costheta);
+		// double decay1Phi = m_phiRanges[1](gen);
+		// double residEx = (m_exDistributions[0])(gen);
+		// double decay2Ex = m_exDistributions[1](gen);
+		// double rxnDepth = (m_rxnDepthDist(gen));
+
+		TwoStepParameters params;
+		do
+		{
+			params = SampleParameters();
+		}
+		while(!(m_step1.CheckReactionThreshold(params.beamEnergy, params.residEx) 
+				&& m_step2.CheckDecayThreshold(params.residEx, params.decay2Ex)));
 		
-		m_step1.SetReactionDepth(rxnDepth);
-		m_step1.SetBeamKE(bke);
-		m_step1.SetPolarRxnAngle(rxnTheta);
-		m_step1.SetAzimRxnAngle(rxnPhi);
-		m_step1.SetExcitation(residEx);
+		m_step1.SetReactionDepth(params.rxnDepth);
+		m_step1.SetBeamKE(params.beamEnergy);
+		m_step1.SetPolarRxnAngle(params.rxnTheta);
+		m_step1.SetAzimRxnAngle(params.rxnPhi);
+		m_step1.SetExcitation(params.residEx);
 	
-		m_step2.SetReactionDepth(rxnDepth);
-		m_step2.SetPolarRxnAngle(decay1Theta);
-		m_step2.SetAzimRxnAngle(decay1Phi);
-		m_step2.SetExcitation(decay2Ex);
+		m_step2.SetReactionDepth(params.rxnDepth);
+		m_step2.SetPolarRxnAngle(params.decay1Theta);
+		m_step2.SetAzimRxnAngle(params.decay1Phi);
+		m_step2.SetExcitation(params.decay2Ex);
 		
 		m_step1.Calculate();
 	
-		if(decay1costheta == -10)
+		if(params.cosdecay1Theta == -10)
 		{
 			m_nuclei[4].vec4.SetPxPyPzE(0., 0., 0., m_nuclei[4].groundStateMass);
 			m_nuclei[5].vec4.SetPxPyPzE(0., 0., 0., m_nuclei[5].groundStateMass);

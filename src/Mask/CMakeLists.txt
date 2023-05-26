@@ -55,6 +55,8 @@ target_sources(Mask PRIVATE
     FileWriter.cpp
     FileReader.h
     FileReader.cpp
+    CoupledThreeStepSystem.h
+    CoupledThreeStepSystem.cpp
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG On)

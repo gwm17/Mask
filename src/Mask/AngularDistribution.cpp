@@ -79,7 +79,7 @@ namespace Mask {
 		//Renormalize distribution such that total prob is 1.0.
 		//Test branching ratio to see if we "make" a decay particle,
 		//then use re-normalized distribution to pick an angle. 
-		if(m_constants[0] < 0.5)
+		if(m_constants[0] != 0.5)
 		{
 			double norm = 0.5/m_constants[0];
 			for(auto& value : m_constants)
@@ -113,6 +113,16 @@ namespace Mask {
 		while(test > probability);
 	
 		return costheta;
+	}
+
+	double AngularDistribution::GetProbability(double cosTheta)
+	{
+		double prob = 0.0;
+		for (std::size_t i=0; i<m_constants.size(); i++)
+		{
+			prob += m_constants[i] * P_l(i*2, cosTheta);
+		}
+		return prob;
 	}
 
 }

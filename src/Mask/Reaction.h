@@ -42,6 +42,9 @@ namespace Mask {
 		void SetRxnLayer(std::size_t layer) { m_rxnLayer = layer; };
 		void SetResidualEnergyLoss(bool isEloss) { m_isResidEloss = isEloss; };
 
+		bool CheckReactionThreshold(double beamEnergy, double residualEx);
+		bool CheckDecayThreshold(double targetEx, double residualEx);
+
 		bool IsDecay() const { return m_isDecay; };
 
 		std::size_t GetRxnLayer() const { return m_rxnLayer; };

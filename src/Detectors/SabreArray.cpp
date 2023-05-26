@@ -20,6 +20,12 @@ SabreArray::SabreArray() :
 	m_degradedDetectors[2] = false;
 	m_degradedDetectors[3] = false;
 	m_degradedDetectors[4] = true;
+    //No degraded detectors
+	// m_degradedDetectors[0] = false;
+	// m_degradedDetectors[1] = false;
+	// m_degradedDetectors[2] = false;
+	// m_degradedDetectors[3] = false;
+	// m_degradedDetectors[4] = false;
 
 	//Choose who to look at right now. Usually switch on or off degraded/non-degraded.
 	m_activeDetectors[0] = false;
