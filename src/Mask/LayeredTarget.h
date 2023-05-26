@@ -31,9 +31,9 @@ namespace Mask {
 		double GetEjectileEnergyLoss(int ze, int ae, double startEnergy, std::size_t rxnLayer, double angle, double rxnDepth);
 		double GetEjectileReverseEnergyLoss(int ze, int ae, double startEnergy, std::size_t rxnLayer, double angle, double rxnDepth);
 		std::size_t FindLayerContaining(int Z, int A);
-		std::size_t GetNumberOfLayers() { return m_layers.size(); }
+		std::size_t GetNumberOfLayers() const { return m_layers.size(); }
 		void SetName(std::string& n) { m_name = n; }
-		const Target& GetLayerInfo(int index) { return m_layers[index]; }
+		const Target& GetLayerInfo(int index) const { return m_layers[index]; }
 		const std::string& GetName() { return m_name; }
 	
 	private:

@@ -40,7 +40,7 @@ namespace Mask {
 	
 		if(!input.is_open())
 		{
-			std::cerr<<"Unable to open distribution file. All values reset to default."<<std::endl;
+			std::cerr << "Unable to open distribution file. All values reset to default." << std::endl;
 			m_L=0;
 			m_branchingRatio=1.0;
 			m_constants.clear();
@@ -59,8 +59,8 @@ namespace Mask {
 	
 		if(m_constants.size() != ((std::size_t) l+1))
 		{
-			std::cerr<<"Unexpected number of constants for given angular momentum! Expected "<<l+1<<" and given "<<m_constants.size()<<std::endl;
-			std::cerr<<"Setting all values to default."<<std::endl;
+			std::cerr << "Unexpected number of constants for given angular momentum! Expected " << l+1 << " and given " << m_constants.size() << std::endl;
+			std::cerr << "Setting all values to default." << std::endl;
 			m_L=0;
 			m_branchingRatio=1.0;
 			m_constants.clear();
@@ -73,9 +73,6 @@ namespace Mask {
 		m_branchingRatio = m_constants[0]*2.0;
 		m_L = l;
 
-		std::cout<<"Angular distribution from "<<file<<" branching ratio: "<<m_branchingRatio<<std::endl;
-		std::cout<<"Angular distribution from "<<file<<" L: "<<m_L<<std::endl;
-	
 		//Renormalize distribution such that total prob is 1.0.
 		//Test branching ratio to see if we "make" a decay particle,
 		//then use re-normalized distribution to pick an angle. 

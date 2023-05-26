@@ -1,3 +1,6 @@
 [submodule "src/vendor/catima"]
 	path = src/vendor/catima
 	url = https://github.com/gwm17/catima.git
+[submodule "src/vendor/yaml-cpp"]
+	path = src/vendor/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

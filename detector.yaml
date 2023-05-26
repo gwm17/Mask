@@ -1,0 +1,5 @@
+InputDataFile: /media/data/gwm17/mask_tests/temp.root
+OutputDataFile: /media/data/gwm17/mask_tests/temp_det.root
+DeadChannelFile: etc/sabreDeadChannels_May2022.txt
+NumberOfThreads: 5
+ArrayType: Sabre

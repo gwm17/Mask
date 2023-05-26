@@ -17,6 +17,7 @@ public:
     ~DetectorApp();
 
     bool LoadConfig(const std::string& filename);
+    bool ParseConfig(const std::string& filename);
     
     void Run();
 

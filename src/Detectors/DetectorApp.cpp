@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "yaml-cpp/yaml.h"
+
 DetectorApp::DetectorApp() :
     m_resources(nullptr)
 {
@@ -11,6 +13,65 @@ DetectorApp::~DetectorApp()
 {
     for(std::size_t i=0; i<m_detectorList.size(); i++)
         delete m_detectorList[i];
+}
+
+bool DetectorApp::ParseConfig(const std::string& filename)
+{
+    std::cout<<"----------Detector Efficiency Calculation----------"<<std::endl;
+    YAML::Node data;
+    try
+    {
+        data = YAML::LoadFile(filename);
+    }
+    catch (YAML::ParserException& e)
+    {
+        std::cerr << "Could not load config file " << filename  << " with error: " << e.what() << std::endl;
+        return false;
+    }
+
+    m_inputFileName = data["InputDataFile"].as<std::string>();
+    m_outputFileName = data["OutputDataFile"].as<std::string>();
+    m_deadChannelFileName = data["DeadChannelFile"].as<std::string>();
+    m_nthreads = data["NumberOfThreads"].as<uint64_t>();
+    ArrayType type = StringToArrayType(data["ArrayType"].as<std::string>());
+
+    std::cout << "Creating " << m_nthreads << " detector arrays..." << std::endl;
+    for(uint64_t i=0; i<m_nthreads; i++)
+    {
+        m_detectorList.push_back(CreateDetectorArray(type));
+        if(m_deadChannelFileName != "None")
+            m_detectorList.back()->SetDeadChannelMap(m_deadChannelFileName);
+    }
+
+    std::cout << "Allocating " << m_nthreads << " threads..." << std::endl;
+    m_resources = std::make_unique<Mask::ThreadPool<DetectorArray*, uint64_t>>(m_nthreads);
+
+    std::cout << "Opening input data file " << m_inputFileName << "..." << std::endl;
+    m_fileReader.Open(m_inputFileName, "SimTree");
+    if(!m_fileReader.IsOpen() || !m_fileReader.IsTree())
+    {
+        std::cerr << "Unable to open input data file " << m_inputFileName << std::endl;
+        return false;
+    }
+    m_nentries = m_fileReader.GetSize();
+    std::cout << "Detected " << m_nentries << " events in the file..." << std::endl;
+
+    //Little bit of integer division mangling to make sure we read every event in file
+    uint64_t quotient = m_nentries / m_nthreads;
+    uint64_t remainder = m_nentries % m_nthreads;
+    m_chunkSamples.push_back(quotient + remainder);
+    for(uint64_t i=1; i<m_nthreads; i++)
+        m_chunkSamples.push_back(quotient);
+
+    std::cout << "Opening output data file " << m_outputFileName << std::endl;
+    m_fileWriter.Open(m_outputFileName, "SimTree");
+    if(!m_fileWriter.IsOpen() || !m_fileWriter.IsTree())
+    {
+        std::cerr << "Unable to open output data file " << m_outputFileName << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 bool DetectorApp::LoadConfig(const std::string& filename)

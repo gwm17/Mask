@@ -1,0 +1,49 @@
+OutputFile: /media/data/gwm17/mask_tests/temp.root
+Threads: 5
+ReactionSamples: 1000000
+ReactionChain:
+  - Type: Reaction
+    Reactants:
+      - Z: 5
+        A: 10
+      - Z: 2
+        A: 3
+      - Z: 2
+        A: 4
+    BeamEnergyMean(MeV): 24.0
+    BeamEnergySigma(MeV): 0.0
+    ThetaType: Lab
+    ThetaMin(deg): 15.0
+    ThetaMax(deg): 15.0
+    PhiMin(deg): 0.0
+    PhiMax(deg): 0.0
+    ResidualExcitationMean(MeV): 16.798
+    ResidualExcitationSigma(MeV): 0.033
+  - Type: Decay
+    Reactants:
+      - Z: 5
+        A: 9
+      - Z: 2
+        A: 4
+    PhiMin(deg): 0.0
+    PhiMax(deg): 360.0
+    ResidualExcitationMean(MeV): 0.0
+    ResidualExcitationSigma(MeV): 0.522
+    AngularDistributionFile: ./etc/isotropic_dist.txt
+  - Type: Decay
+    Reactants:
+      - Z: 3
+        A: 5
+      - Z: 2
+        A: 4
+    PhiMin(deg): 0.0
+    PhiMax(deg): 360.0
+    ResidualExcitationMean(MeV): 0.0
+    ResidualExcitationSigma(MeV): 0.0
+    AngularDistributionFile: ./etc/isotropic_dist.txt
+TargetLayers:
+  - Thickness(ug/cm^2): 74
+    Elements:
+      - Z: 5
+        A: 10
+        S: 1

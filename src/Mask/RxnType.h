@@ -37,6 +37,17 @@ namespace Mask {
 			return RxnType::None;
 	}
 
+	static std::string RxnTypeToString(RxnType type)
+	{
+		switch(type)
+		{
+			case RxnType::Decay: return "Decay";
+			case RxnType::Reaction: return "Reaction";
+			case RxnType::None: return "None";
+			default: return "None";
+		}
+	}
+
 	static RxnThetaType StringToRxnThetaType(const std::string& type)
 	{
 		if(type == "CenterOfMass")
@@ -50,6 +61,17 @@ namespace Mask {
 		else
 		{
 			return RxnThetaType::None;
+		}
+	}
+
+	static std::string RxnThetaTypeToString(RxnThetaType type)
+	{
+		switch(type)
+		{
+			case RxnThetaType::CenterOfMass: return "CenterOfMass";
+			case RxnThetaType::Lab: return "Lab";
+			case RxnThetaType::None: return "None";
+			default: return "None";
 		}
 	}
 }

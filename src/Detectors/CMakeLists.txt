@@ -1,5 +1,9 @@
 add_executable(Detectors)
-target_include_directories(Detectors PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/..)
+target_include_directories(Detectors PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR} 
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/yaml-cpp/include/
+)
 
 target_sources(Detectors PUBLIC
     AnasenDeadChannelMap.cpp

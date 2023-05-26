@@ -14,6 +14,15 @@
 
 namespace Mask {
 
+	struct AppParameters
+	{
+		std::string outputFileName = "";
+		uint64_t nSamples = 0;
+		uint32_t nThreads = 1;
+		std::vector<StepParameters> chainParams;
+		LayeredTarget target;
+	};
+
 	class MaskApp
 	{
 	public:
@@ -23,17 +32,9 @@ namespace Mask {
 		bool SaveConfig(const std::string& filename);
 
 		void Run();
-		void RunSingleThread();
 
 	private:
-		void RunChunk(ReactionSystem* system);
-
-		ReactionSystem* m_system;
-
-		std::string m_outputName;
-		RxnType m_rxnType;
-		uint64_t m_nsamples;
-		uint32_t m_nthreads;
+		AppParameters m_params;
 
 		std::vector<ReactionSystem*> m_systemList; //One system for each thread
 		std::vector<uint64_t> m_chunkSamples;
