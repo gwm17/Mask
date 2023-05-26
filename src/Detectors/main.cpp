@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 	try
 	{
 		DetectorApp app;
-		if(!app.ParseConfig(argv[1]))
+		if(!app.LoadConfig(argv[1]))
 		{
 			std::cerr << "Unable to load config file " << argv[1] << ". Shutting down." << std::endl;
 			return 1;

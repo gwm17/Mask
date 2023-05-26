@@ -15,7 +15,7 @@ DetectorApp::~DetectorApp()
         delete m_detectorList[i];
 }
 
-bool DetectorApp::ParseConfig(const std::string& filename)
+bool DetectorApp::LoadConfig(const std::string& filename)
 {
     std::cout<<"----------Detector Efficiency Calculation----------"<<std::endl;
     YAML::Node data;
@@ -35,18 +35,14 @@ bool DetectorApp::ParseConfig(const std::string& filename)
     m_nthreads = data["NumberOfThreads"].as<uint64_t>();
     ArrayType type = StringToArrayType(data["ArrayType"].as<std::string>());
 
-    std::cout << "Creating " << m_nthreads << " detector arrays..." << std::endl;
     for(uint64_t i=0; i<m_nthreads; i++)
     {
         m_detectorList.push_back(CreateDetectorArray(type));
         if(m_deadChannelFileName != "None")
             m_detectorList.back()->SetDeadChannelMap(m_deadChannelFileName);
     }
-
-    std::cout << "Allocating " << m_nthreads << " threads..." << std::endl;
     m_resources = std::make_unique<Mask::ThreadPool<DetectorArray*, uint64_t>>(m_nthreads);
 
-    std::cout << "Opening input data file " << m_inputFileName << "..." << std::endl;
     m_fileReader.Open(m_inputFileName, "SimTree");
     if(!m_fileReader.IsOpen() || !m_fileReader.IsTree())
     {
@@ -54,7 +50,6 @@ bool DetectorApp::ParseConfig(const std::string& filename)
         return false;
     }
     m_nentries = m_fileReader.GetSize();
-    std::cout << "Detected " << m_nentries << " events in the file..." << std::endl;
 
     //Little bit of integer division mangling to make sure we read every event in file
     uint64_t quotient = m_nentries / m_nthreads;
@@ -63,79 +58,17 @@ bool DetectorApp::ParseConfig(const std::string& filename)
     for(uint64_t i=1; i<m_nthreads; i++)
         m_chunkSamples.push_back(quotient);
 
-    std::cout << "Opening output data file " << m_outputFileName << std::endl;
     m_fileWriter.Open(m_outputFileName, "SimTree");
     if(!m_fileWriter.IsOpen() || !m_fileWriter.IsTree())
     {
         std::cerr << "Unable to open output data file " << m_outputFileName << std::endl;
         return false;
     }
-
-    return true;
-}
-
-bool DetectorApp::LoadConfig(const std::string& filename)
-{
-    std::cout<<"----------Detector Efficiency Calculation----------"<<std::endl;
-    std::ifstream input(filename);
-    if(!input.is_open())
-    {
-        std::cerr<<"Unable to open input config file "<<filename<<std::endl;
-        return false;
-    }
-
-    std::string junk;
-    std::string typeName;
-
-    input >> junk >> m_inputFileName;
-    input >> junk >> m_outputFileName;
-    input >> junk >> m_deadChannelFileName;
-
-    input >> junk >> m_nthreads;
-    input >> junk >> typeName;
-
-    std::cout << "Creating " << m_nthreads << " detector arrays..." << std::endl;
-    ArrayType type = StringToArrayType(typeName);
-    for(uint64_t i=0; i<m_nthreads; i++)
-    {
-        m_detectorList.push_back(CreateDetectorArray(type));
-        if(m_deadChannelFileName != "None")
-            m_detectorList.back()->SetDeadChannelMap(m_deadChannelFileName);
-    }
-    std::cout << "Done" << std::endl;
 
     std::cout << "Allocating " << m_nthreads << " threads..." << std::endl;
-    m_resources = std::make_unique<Mask::ThreadPool<DetectorArray*, uint64_t>>(m_nthreads);
-    std::cout << "Done" << std::endl;
-
-    std::cout << "Opening input data file " << m_inputFileName << "..." << std::endl;
-    m_fileReader.Open(m_inputFileName, "SimTree");
-    if(!m_fileReader.IsOpen() || !m_fileReader.IsTree())
-    {
-        std::cerr << "Unable to open input data file " << m_inputFileName << std::endl;
-        return false;
-    }
-    m_nentries = m_fileReader.GetSize();
-    std::cout << "Done. Detected " << m_nentries << " events in the file." << std::endl;
-
-    //Little bit of integer division mangling to make sure we read every event in file
-    uint64_t quotient = m_nentries / m_nthreads;
-    uint64_t remainder = m_nentries % m_nthreads;
-    m_chunkSamples.push_back(quotient + remainder);
-    for(uint64_t i=1; i<m_nthreads; i++)
-        m_chunkSamples.push_back(quotient);
-
-    std::cout << "Opening output data file " << m_outputFileName << std::endl;
-    m_fileWriter.Open(m_outputFileName, "SimTree");
-    if(!m_fileWriter.IsOpen() || !m_fileWriter.IsTree())
-    {
-        std::cerr << "Unable to open output data file " << m_outputFileName << std::endl;
-        return false;
-    }
-    std::cout << "Done" << std::endl;
-
-    std::cout << "Ready to launch!" << std::endl;
-
+    std::cout << "Input data file " << m_inputFileName << "..." << std::endl;
+    std::cout << "With " << m_nentries << " events in the file..." << std::endl;
+    std::cout << "Output data file " << m_outputFileName << "..." << std::endl;
     return true;
 }
 
