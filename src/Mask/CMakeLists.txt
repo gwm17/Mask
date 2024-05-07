@@ -1,6 +1,7 @@
 add_library(MaskDict SHARED)
 target_include_directories(MaskDict
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/yaml-cpp/include/
     SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS}
 )
 
@@ -55,10 +56,14 @@ target_sources(Mask PRIVATE
     FileWriter.cpp
     FileReader.h
     FileReader.cpp
+    CoupledThreeStepSystem.h
+    CoupledThreeStepSystem.cpp
+    ConfigSerializer.h
+    ConfigSerializer.cpp
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG On)
 find_package(Threads REQUIRED)
-
-target_link_libraries(Mask catima MaskDict ${ROOT_LIBRARIES} Threads::Threads)
+target_compile_definitions(Mask PRIVATE YAML_CPP_STATIC_DEFINE)
+target_link_libraries(Mask catima yaml-cpp MaskDict ${ROOT_LIBRARIES} Threads::Threads)
 set_target_properties(Mask PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${MASK_LIBRARY_DIR})

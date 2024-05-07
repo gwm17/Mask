@@ -31,12 +31,12 @@ namespace Mask {
 	 	double GetReverseEnergyLossTotal(int zp, int ap, double finalEnergy, double angle);
 	 	double GetEnergyLossFractionalDepth(int zp, int ap, double startEnergy, double angle, double percent_depth);
 	 	double GetReverseEnergyLossFractionalDepth(int zp, int ap, double finalEnergy, double angle, double percent_depth);
-	 	inline const double& GetThickness() { return m_thickness; }
-	 	inline int GetNumberOfElements() { return m_Z.size(); }
-	 	inline int GetElementZ(int index) { return m_Z[index]; }
-	 	inline int GetElementA(int index) { return m_A[index]; }
-	 	inline int GetElementStoich(int index) { return m_stoich[index]; }
-	
+	 	const double& GetThickness() const { return m_thickness; }
+	 	int GetNumberOfElements() const { return m_Z.size(); }
+	 	int GetElementZ(int index) const { return m_Z[index]; }
+	 	int GetElementA(int index) const { return m_A[index]; }
+	 	int GetElementStoich(int index) const { return m_stoich[index]; }
+
 	private:
 	 	void Init(const std::vector<int>& z, const std::vector<int>& a, const std::vector<int>& stoich);
 		

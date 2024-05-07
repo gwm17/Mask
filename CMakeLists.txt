@@ -19,6 +19,8 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(ROOT REQUIRED COMPONENTS GenVector)
 
 add_subdirectory(src/vendor/catima)
+set(YAML_CPP_BUILD_TOOLS Off CACHE BOOL "Enable parse tools")
+add_subdirectory(src/vendor/yaml-cpp)
 add_subdirectory(src/Mask)
 add_subdirectory(src/Kinematics)
 add_subdirectory(src/Detectors)

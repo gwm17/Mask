@@ -18,6 +18,8 @@ Makefile
 build/
 lib/
 bin/
+scripts/
+*.yaml
 
 
 ###Keep this file###

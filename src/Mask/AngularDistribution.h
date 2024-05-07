@@ -17,6 +17,7 @@ namespace Mask {
 		double GetRandomCosTheta();
 		int GetL() { return m_L; }
 		double GetBranchingRatio() { return m_branchingRatio; }
+		double GetProbability(double cosTheta);
 	
 	private:
 		bool IsIsotropic() { return m_isIsotropic; }

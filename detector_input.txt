@@ -1,5 +1,0 @@
-InputDataFile: /media/data/gwm17/mask_tests/10B3Hea_16800keV_5Lia_74B.root
-OutputDataFile: /media/data/gwm17/mask_tests/10B3Hea_16800keV_5Lia_74B_Sabre.root
-DeadChannelFile: etc/sabreDeadChannels_May2022.txt
-NumberOfThreads: 5
-ArrayType: Sabre

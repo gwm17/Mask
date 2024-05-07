@@ -1,24 +1,22 @@
-#include "ThreeStepSystem.h"
-#include "RandomGenerator.h"
-#include "KinematicsExceptions.h"
+#include "CoupledThreeStepSystem.h"
 
 #include "Math/Boost.h"
 #include "Math/Vector3D.h"
-#include "Math/RotationZ.h"
 #include "Math/RotationY.h"
+#include "Math/RotationZ.h"
 
 namespace Mask {
-	
-	ThreeStepSystem::ThreeStepSystem(const std::vector<StepParameters>& params) :
+
+    CoupledThreeStepSystem::CoupledThreeStepSystem(const std::vector<StepParameters>& params) :
 		ReactionSystem()
 	{
 		m_nuclei.resize(8);
 		Init(params);
 	}
 	
-	ThreeStepSystem::~ThreeStepSystem() {}
+	CoupledThreeStepSystem::~CoupledThreeStepSystem() {}
 	
-	void ThreeStepSystem::Init(const std::vector<StepParameters>& params)
+	void CoupledThreeStepSystem::Init(const std::vector<StepParameters>& params)
 	{
 		if(params.size() != 3 || params[0].rxnType != RxnType::Reaction || params[1].rxnType != RxnType::Decay ||
 		  params[2].rxnType != RxnType::Decay || params[0].Z.size() != 3 || params[0].A.size() != 3 || params[1].Z.size() != 2 ||
@@ -88,7 +86,7 @@ namespace Mask {
 		AddExcitationDistribution(step3Params.meanResidualEx, step3Params.sigmaResidualEx);
 	}
 
-	void ThreeStepSystem::SetLayeredTarget(const LayeredTarget& target)
+	void CoupledThreeStepSystem::SetLayeredTarget(const LayeredTarget& target)
 	{
 		m_target = target;
 		m_rxnLayer = m_target.FindLayerContaining(m_nuclei[0].Z, m_nuclei[0].A);
@@ -106,7 +104,7 @@ namespace Mask {
 			throw ReactionLayerException();
 	}
 	
-	void ThreeStepSystem::SetSystemEquation()
+	void CoupledThreeStepSystem::SetSystemEquation()
 	{
 		std::stringstream stream;
 		stream << m_nuclei[0].isotopicSymbol << "("
@@ -120,29 +118,52 @@ namespace Mask {
 		m_sysEquation = stream.str();
 	}
 
-	ThreeStepParameters ThreeStepSystem::SampleParameters()
+	CoupledThreeStepParameters CoupledThreeStepSystem::SampleParameters()
 	{
-		ThreeStepParameters params;
+		CoupledThreeStepParameters params;
 		std::mt19937& gen = RandomGenerator::GetInstance().GetGenerator();
 		params.beamEnergy = m_beamDistributions[0](gen);
 		params.rxnTheta = std::acos((m_thetaRanges[0])(gen));
 		params.rxnPhi = m_phiRanges[0](gen);
 		params.cosdecay1Theta = m_decayAngularDistributions[0].GetRandomCosTheta();
+        params.cosRelativeAngle = m_decayAngularDistributions[1].GetRandomCosTheta();
 		params.decay1Theta = std::acos(params.cosdecay1Theta);
 		params.decay1Phi = m_phiRanges[1](gen);
-		params.cosdecay2Theta = m_decayAngularDistributions[1].GetRandomCosTheta();
-		params.decay2Theta = std::acos(params.cosdecay2Theta);
-		params.decay2Phi = m_phiRanges[1](gen);
 		params.residEx = m_exDistributions[0](gen);
 		params.decay1Ex = m_exDistributions[1](gen);
 		params.decay2Ex = m_exDistributions[2](gen);
 		params.rxnDepth = (m_rxnDepthDist(gen));
 		return params;
 	}
+
+    //Called after running step2
+    void CoupledThreeStepSystem::SampleCoupling(CoupledThreeStepParameters& params)
+    {
+        ROOT::Math::Boost boost(m_nuclei[5].vec4.BoostToCM());
+		ROOT::Math::PxPyPzEVector a1Vec = (boost * m_nuclei[4].vec4);
+		ROOT::Math::XYZVector a1PVec(a1Vec.Px(), a1Vec.Py(), a1Vec.Pz());
+        ROOT::Math::PxPyPzEVector a2Vec;
+		ROOT::Math::XYZVector a2PVec;
+		ROOT::Math::RotationZ zRot;
+		ROOT::Math::RotationY yRot;
+		a1PVec *= 1.0/a1Vec.P();
+        zRot.SetAngle(a1PVec.Phi());
+		yRot.SetAngle(a1PVec.Theta());
+		double relAngle = std::acos(params.cosRelativeAngle);
+		ROOT::Math::XYZVector a1PVecAligned = yRot.Inverse() * (zRot.Inverse() * a1PVec);
+		a2PVec.SetXYZ(
+			std::sin(relAngle),
+			0.0,
+			std::cos(relAngle)
+		);
+		a2PVec = zRot * (yRot * a2PVec);
+		params.decay2Theta = a2PVec.Theta();
+		params.decay2Phi = a2PVec.Phi();
+    }
 	
-	void ThreeStepSystem::RunSystem()
+	void CoupledThreeStepSystem::RunSystem()
 	{
-		ThreeStepParameters params;
+		CoupledThreeStepParameters params;
 		do
 		{
 			params = SampleParameters();
@@ -163,9 +184,7 @@ namespace Mask {
 		m_step2.SetExcitation(params.decay1Ex);
 	
 		m_step3.SetReactionDepth(params.rxnDepth);
-		m_step3.SetPolarRxnAngle(params.decay2Theta);
-		m_step3.SetAzimRxnAngle(params.decay2Phi);
-		m_step3.SetResidualEnergyLoss(true);
+		
 		m_step3.SetExcitation(params.decay2Ex);
 	
 		m_step1.Calculate();
@@ -180,13 +199,12 @@ namespace Mask {
 		}
 		m_step2.Calculate();
 	
-		if(params.cosdecay2Theta == -10)
-		{
-			m_nuclei[6].vec4.SetPxPyPzE(0., 0., 0., m_nuclei[6].groundStateMass);
-			m_nuclei[7].vec4.SetPxPyPzE(0., 0., 0., m_nuclei[7].groundStateMass);
-			return;
-		}
+		m_step3.SetResidualEnergyLoss(true);
+
+		SampleCoupling(params); //must be called here as frame needs to be set
+
+		m_step3.SetPolarRxnAngle(params.decay2Theta);
+		m_step3.SetAzimRxnAngle(params.decay2Phi);
 		m_step3.Calculate();
 	}
-
 }
