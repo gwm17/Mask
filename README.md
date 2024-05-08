@@ -18,20 +18,23 @@ By default Mask builds for release. To build for debug replace `cmake ..` with `
 
 ## Using the kinematics simulation
 
-By default Mask is capable of simulating reactions of up to three steps. Here is a brief outline of each type:
-
-0. A pure decay involves a "target" decaying into an ejectile and residual. It is assumed isotropic by default; any other case will require the modification of the code.
-1. A single step reaction involves a target being hit by a projectile and emitting an ejectile and a residual. It can incorporate all of the input file sampling parameters.
-2. A two step reaction is a single step reaction where the residual subsequently decays into two daughters (called breakups). Again, all sampling is allowed.
-3. A three step reaction is a two step reaction where one of the breakup particles subsequently decays into two more breakup particles. Again, all sampling is allowed
-
-For decays, a specific angular distribution can be given as input as a text file with values of coefficiencts of a Legendre polynomial series. Examples can be found in the `./etc` directory, including an isotropic case. It is assumed that the decays in the center-of-mass frame are isotropic in phi (i.e. m=0). Decay1 corresponds to the first decay, if there are multiple steps, Decay2 to the second. If there are no decays, these parameters are not used (or if only one decay, Decay2_AngularMomentum is not used). The input file requires that the user include target information, which will be used to calculate energy loss for all of the reactants and reaction products. The energy loss through materials is calculated using the `catima` library (found in `src/vendor`), which is a C/C++ interface to the `atima` library (the same energy loss methods used by LISE). The target can contain layers, and each layer can be composed of a compound of elements with a given stoichiometry. If the user wishes to not include energy loss in the kinematics, simply give all target layers a thickness of 0. Note that more layers and more thickness = more time spent calculating energy loss. These energy loss methods are only applicable for solid targets, and should not be applied to gas or liquid targets. Energy loss calculations have a stated uncertainty of approximately five percent.
-
-To run Mask simply do the following from the Mask repository:
+By default Mask is capable of simulating reactions of up to three steps. In the configuration file, the reaction is specified by the `ReactionChain`, which is a list of reaction specifications. Each reaction specification has a `Type` which is either Reaction or Decay, and a list of `Reactants` and sampling parameters. To run Mask simply do the following from the Mask repository:
 
 `./bin/Kinematics <your_config>.yaml`
 
 `<your_config.yaml>` is a YAML configuration file. An example is given in the repository named `kinematics.yaml` and can be replaced by any yaml file with the correct format.
+
+### Reaction
+
+To specify a reaction you need 3 reactants, each specified by a `Z` (proton number) and `A` (mass number). The first reactant is the target, the second the projectile (beam), and the third is the ejectile. The residual is calculated for you assuming conservation of proton and mass number (no weak decays). Reactions require a `ThetaType` which is either Lab or CenterOfMass. This tells the simulation to sample the reaction angle in the Lab (useful for detector constraints) or CenterOfMass (useful for the correct distribution in open systems). `ThetaMin`, `ThetaMax`, `PhiMin`, `PhiMax` all specify the limits in angles for the simulation (here Theta is the polar (reaction) angle, and Phi is the azimuthal angle). `BeamEnergyMean` and `BeamEnergySigma` specify the beam energy distribution to be used, assuming the energy is a gaussian distribution. `ResidualExcitationMean` and `ResidualExcitationSigma` specify the excited state energy of the residual nucleus assuming a gaussian distribution.
+
+### Decay
+
+To specify a decay you need 2 reactants, each specified by a `Z` (proton number) and `A` (mass number). The first is the parent nucleus, and the second is one of the decay products. The other product will be calculated for you assuming conservation of proton and mass number (no weak decays). Decays only have a phi limit for sampling, and are only sampled in the CenterOfMass frame. The calculated decay product (residual) can still have an excitation distribution specified. Additionally, Decays can have an angular distribution file specified. The file contains the weights for a Legendre Polynomial series description of an angular distribution. An example file of an isotropic distribution is included with the repository in the `etc` directory.
+
+### Limitations
+
+Mask can only accept certain types of chains. That is, a Decay only chain is allowed, and the a Reaction + up to 2 subsequent Decays are allowed. Any other types of chains are not supported at this time. Mask will check your chain to make sure it complies with these requirements.
 
 ## Using the detector geometry simulation
 
